@@ -35,6 +35,7 @@ export interface PhysiologicalEntry {
   date: string; // YYYY-MM-DD
   weight: number;
   igc?: number;
+  measuredBy?: string; // 'coach' | 'student'
 }
 
 export interface StudentPhoto {

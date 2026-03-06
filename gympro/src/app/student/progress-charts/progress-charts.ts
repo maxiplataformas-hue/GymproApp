@@ -12,6 +12,7 @@ import { ThemeService } from '../../services/theme';
   standalone: true,
   imports: [RouterLink, BaseChartDirective, FormsModule],
   templateUrl: './progress-charts.html',
+  styleUrls: ['./progress-charts.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProgressCharts {
@@ -41,7 +42,8 @@ export class ProgressCharts {
       this.data.addPhysioEntry({
         studentEmail: this.user()!.email,
         date: this.newDate,
-        weight: this.newWeight
+        weight: this.newWeight,
+        measuredBy: 'student'
       });
     }
   }
@@ -51,9 +53,13 @@ export class ProgressCharts {
     const l1 = list.map(item => item.date);
     const d1 = list.map(item => item.weight);
 
+    // We store the measuredBy array to use it in our custom plugin
+    const roles = list.map(item => item.measuredBy === 'coach' ? 'C' : 'A');
+
     if (list.length === 0 && this.user()?.initialWeight) {
       l1.push('Inicio');
       d1.push(this.user()!.initialWeight!);
+      roles.push('A'); // initial weight is usually added by student during onboarding
     }
 
     return {
@@ -67,14 +73,31 @@ export class ProgressCharts {
         backgroundColor: 'rgba(59, 130, 246, 0.2)',
         pointBackgroundColor: '#ec4899',
         pointBorderColor: '#fff',
-      }]
+        pointRadius: 6, // Make point larger to fit the letter
+        pointHoverRadius: 8,
+        // Custom attribute for our plugin
+        authorLabels: roles
+      } as any] // Using any to bypass strict ChartJS dataset types for custom properties
     };
   });
 
   public lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          afterLabel: function (context) {
+            const roles = (context.dataset as any).authorLabels;
+            if (roles && roles[context.dataIndex]) {
+              return roles[context.dataIndex] === 'C' ? 'Medido por Coach' : 'Medido por Alumno';
+            }
+            return '';
+          }
+        }
+      }
+    },
     scales: {
       y: { beginAtZero: false, grid: { color: 'rgba(100, 116, 139, 0.2)' } },
       x: { grid: { display: false } }
@@ -93,6 +116,8 @@ export class ProgressCharts {
 
   public igcChartData = computed<ChartConfiguration<'bar'>['data']>(() => {
     const list = this.history().filter(h => h.igc !== undefined);
+    const roles = list.map(item => item.measuredBy === 'coach' ? 'C' : 'A');
+
     return {
       labels: list.map(item => item.date),
       datasets: [{
@@ -100,7 +125,39 @@ export class ProgressCharts {
         label: 'Grasa Corporal (%)',
         backgroundColor: '#10b981',
         borderRadius: 8,
-      }]
+        authorLabels: roles
+      } as any]
     };
   });
+
+  // Custom ChartJS Plugin to draw 'C' or 'A' on the points
+  public customChartPlugins = [{
+    id: 'authorIconPlugin',
+    afterDatasetsDraw(chart: any, args: any, options: any) {
+      const { ctx } = chart;
+
+      chart.data.datasets.forEach((dataset: any, i: number) => {
+        const meta = chart.getDatasetMeta(i);
+        if (!meta.hidden && dataset.authorLabels) {
+          meta.data.forEach((element: any, index: number) => {
+            const letter = dataset.authorLabels[index];
+            if (!letter) return;
+
+            ctx.save();
+            ctx.fillStyle = '#ffffff'; // White text
+            ctx.font = 'bold 9px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Adjust position slightly based on chart type
+            const isBar = chart.config.type === 'bar';
+            const yOffset = isBar ? 15 : 0; // For bars, put the letter slightly below the top of the bar inside it
+
+            ctx.fillText(letter, element.x, element.y + yOffset);
+            ctx.restore();
+          });
+        }
+      });
+    }
+  }];
 }

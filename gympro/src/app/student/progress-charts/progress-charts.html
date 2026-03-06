@@ -23,7 +23,7 @@
         </div>
 
         <div class="w-full h-64 bg-background rounded-xl p-2 border border-border">
-            <canvas baseChart [data]="lineChartData()" [options]="lineChartOptions" [type]="'line'">
+            <canvas baseChart [data]="lineChartData()" [options]="lineChartOptions" [type]="'line'" [plugins]="customChartPlugins">
             </canvas>
         </div>
     </section>
@@ -68,7 +68,7 @@
         <div
             class="w-full h-64 bg-background rounded-xl p-2 border border-border flex items-center justify-center relative">
             @if (igcChartData().labels && igcChartData().labels!.length > 0) {
-            <canvas baseChart class="w-full h-full" [data]="igcChartData()" [options]="barChartOptions" [type]="'bar'">
+            <canvas baseChart class="w-full h-full" [data]="igcChartData()" [options]="barChartOptions" [type]="'bar'" [plugins]="customChartPlugins">
             </canvas>
             } @else {
             <div class="text-center">

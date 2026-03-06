@@ -11,13 +11,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Document(collection = "physio")
 public class PhysioEntry {
-    
+
     @Id
     private String id;
-    
+
     private String studentEmail;
     private String date; // YYYY-MM-DD
-    
+
     private Double weight; // kg
     private Double igc; // % Body Fat
+    private String measuredBy; // "coach" or "student"
 }

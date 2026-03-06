@@ -83,7 +83,8 @@ export class RoutineAssignment {
         studentEmail: this.student().email,
         date: this.assignmentDate(),
         weight: this.student().initialWeight || 0, // Fallback if no history exists
-        igc: igc
+        igc: igc,
+        measuredBy: 'coach'
       });
       this.newIgc.set(null);
     }
