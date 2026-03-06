@@ -2,6 +2,9 @@
 
 Aplicativo web completo para gimnasios y entrenadores personales (Coach) para gestionar el progreso físico de sus alumnos (Students), rutinas de ejercicio y comunicación mediante un chat con Inteligencia Artificial.
 
+
+prueba
+
 ## Tecnologías Utilizadas 💻
 
 Este repositorio es un **Monorepo** que contiene tanto el Frontend como el Backend de la aplicación.
