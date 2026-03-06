@@ -1,0 +1,214 @@
+<div class="h-full flex flex-col pt-0 animate-fade-in-up">
+
+    <!-- Header: Student Info & Date Picker -->
+    <header class="bg-gradient-to-br from-surface to-background border-b border-border p-6 shrink-0">
+        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center text-xl font-black shadow-lg">
+                    {{ (student().name || 'A')[0].toUpperCase() }}
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-text tracking-tight">{{ student().name || student().email }}
+                    </h2>
+                    <p class="text-text-muted font-medium text-sm flex items-center gap-3 mt-0.5">
+                        <span>{{ student().age || '?' }} años</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-border"></span>
+                        <span>{{ student().height || '?' }} cm</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-border"></span>
+                        <span>{{ student().initialWeight || '?' }} kg iniciales</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1 items-start md:items-end">
+                <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Fecha de Asignación</label>
+                <input type="date" [ngModel]="assignmentDate()" (ngModelChange)="selectDate($event)"
+                    class="px-4 py-2 bg-surface border border-border rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm">
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-8">
+
+        <!-- Top Row: IGC & Existing Routine -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+            <!-- IGC Registration Form -->
+            <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+                <div>
+                    <h3 class="font-bold text-text text-lg flex items-center gap-2">
+                        <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5">
+                            </path>
+                        </svg>
+                        Registrar IGC (Caliper)
+                    </h3>
+                    <p class="text-xs text-text-muted mt-1">Ingresa el % de grasa calculado por pliegues.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 items-start">
+                    <div class="flex-1 relative w-full">
+                        <input type="number" step="0.1" [(ngModel)]="newIgc" placeholder="Ej: 15.4"
+                            class="w-full pl-5 pr-10 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-secondary outline-none transition-all">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">%</span>
+                    </div>
+                    <button (click)="saveIgc()" [disabled]="!newIgc()"
+                        class="w-full sm:w-auto bg-secondary text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transition-transform disabled:opacity-50 cursor-pointer h-[50px]">
+                        Guardar
+                    </button>
+                </div>
+            </section>
+
+            <!-- Assigned Routines Preview -->
+            <section class="bg-surface border border-border border-dashed rounded-3xl p-6 shadow-sm flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-text text-lg">Ejercicios Programados</h3>
+                    <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">{{
+                        currentRoutineJoined().length }} items</span>
+                </div>
+
+                <div
+                    class="flex-1 bg-background rounded-2xl border border-border overflow-y-auto max-h-[160px] p-2 space-y-2">
+                    @if (currentRoutineJoined().length === 0) {
+                    <p class="text-text-muted text-sm text-center p-4">No hay ejercicios para esta fecha.</p>
+                    }
+                    @for (item of currentRoutineJoined(); track item.id) {
+                    <div class="flex items-center justify-between p-3 bg-surface border border-border rounded-xl">
+                        <div>
+                            <p class="font-bold text-sm text-text">{{ item.name }}</p>
+                            <p class="text-xs text-text-muted">{{ item.sets }}x{{ item.reps }} @ {{ item.weight }}kg</p>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <hr class="border-border">
+
+        <!-- Routine Assigner Tool -->
+        <section>
+            <div class="mb-6">
+                <h3 class="font-black text-2xl text-text">Diseñador de Rutina</h3>
+                <p class="text-sm text-text-muted mt-1">Busca ejercicios y configura las series para este día.</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <label class="flex flex-col gap-1.5">
+                    <span class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Grupo Muscular</span>
+                    <select [(ngModel)]="selectedMuscle"
+                        class="px-4 py-3 bg-background border border-border rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                        <option value="">Todos</option>
+                        @for (m of muscleGroups; track m) {
+                        <option [value]="m">{{ m }}</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="flex flex-col gap-1.5">
+                    <span class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Equipamiento</span>
+                    <select [(ngModel)]="selectedEquipment"
+                        class="px-4 py-3 bg-background border border-border rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                        <option value="">Todos</option>
+                        @for (e of equipmentTypes; track e) {
+                        <option [value]="e">{{ e }}</option>
+                        }
+                    </select>
+                </label>
+            </div>
+
+            <!-- Exercise Picker & Stats -->
+            <div class="bg-surface border border-border p-6 rounded-3xl shadow-sm">
+                <div class="flex flex-col xl:flex-row gap-6">
+
+                    <!-- Exercise List -->
+                    <div class="flex-1">
+                        <label
+                            class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1 mb-2 block">Selecciona
+                            Ejercicio ({{ filteredExercises().length }})</label>
+                        <div
+                            class="h-64 overflow-y-auto bg-background rounded-2xl border border-border p-2 space-y-1 hide-scrollbar">
+                            @if (filteredExercises().length === 0) {
+                            <p class="text-xs text-text-muted text-center p-4">No hay resultados para estos filtros.</p>
+                            }
+                            @for (ex of filteredExercises(); track ex.id) {
+                            <button (click)="selectedExercise.set(ex)"
+                                class="w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex justify-between items-center"
+                                [class.bg-primary/10]="selectedExercise()?.id === ex.id"
+                                [class.border-primary]="selectedExercise()?.id === ex.id"
+                                [class.border-transparent]="selectedExercise()?.id !== ex.id"
+                                [class.hover:bg-border/50]="selectedExercise()?.id !== ex.id">
+                                <span class="font-bold text-sm" [class.text-primary]="selectedExercise()?.id === ex.id"
+                                    [class.text-text]="selectedExercise()?.id !== ex.id">
+                                    {{ ex.name }}
+                                </span>
+                                <span
+                                    class="text-[10px] uppercase font-bold text-text-muted border border-border rounded-md px-1.5 py-0.5 mt-0.5">{{
+                                    ex.equipment }}</span>
+                            </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Stats Form -->
+                    <div
+                        class="xl:w-80 flex flex-col gap-5 border-t xl:border-t-0 xl:border-l border-border pt-6 xl:pt-0 xl:pl-6 relative">
+
+                        <!-- Overlay disabled state if no exercise selected -->
+                        @if (!selectedExercise()) {
+                        <div
+                            class="absolute inset-x-0 bottom-0 top-0 xl:-left-6 xl:top-0 bg-surface/50 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-4 rounded-3xl xl:rounded-r-3xl xl:rounded-l-none">
+                            <svg class="w-8 h-8 text-text-muted mb-2 opacity-50" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
+                                </path>
+                            </svg>
+                            <p class="text-sm font-bold text-text-muted">Selecciona un ejercicio primero</p>
+                        </div>
+                        }
+
+                        <div>
+                            <h4 class="font-bold text-text text-lg mb-1">{{ selectedExercise()?.name || '---' }}</h4>
+                            <p class="text-[11px] font-bold text-text-muted uppercase tracking-widest">{{
+                                selectedExercise()?.muscleGroup || '---' }}</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="flex flex-col gap-1">
+                                <span class="text-xs font-bold text-text-muted">Series</span>
+                                <input type="number" [(ngModel)]="assignmentSets" min="1"
+                                    class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-xs font-bold text-text-muted">Reps</span>
+                                <input type="number" [(ngModel)]="assignmentReps" min="1"
+                                    class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
+                            </label>
+                        </div>
+
+                        <label class="flex flex-col gap-1">
+                            <span class="text-xs font-bold text-text-muted">Peso (Kg) - Opcional</span>
+                            <input type="number" [(ngModel)]="assignmentWeight" step="0.5"
+                                class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
+                        </label>
+
+                        <button (click)="addExercise()"
+                            [disabled]="!selectedExercise() || !assignmentSets() || !assignmentReps()"
+                            class="w-full mt-auto bg-primary text-white font-bold py-3.5 px-4 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-50 disabled:shadow-none cursor-pointer flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Asignar Ejercicio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>

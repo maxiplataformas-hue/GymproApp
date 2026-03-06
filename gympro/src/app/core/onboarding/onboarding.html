@@ -1,0 +1,46 @@
+<div class="min-h-screen w-full flex flex-col items-center justify-center p-4">
+    <div
+        class="w-full max-w-lg bg-surface border border-border rounded-3xl shadow-2xl overflow-hidden p-8 animate-fade-in-up">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold mb-2 text-text">¡Bienvenido a <span
+                    class="text-primary tracking-tighter">GYMPRO</span>!</h2>
+            <p class="text-text-muted">Necesitamos algunos datos para calcular tus métricas y adaptar tu rutina.</p>
+        </div>
+
+        <form [formGroup]="onboardingForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+
+            <div class="flex flex-col gap-1">
+                <label for="name" class="text-sm font-semibold text-text">Nombre Completo</label>
+                <input id="name" type="text" formControlName="name" placeholder="Juan Pérez"
+                    class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary outline-none transition-all placeholder-text-muted">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-1">
+                    <label for="age" class="text-sm font-semibold text-text">Edad (años)</label>
+                    <input id="age" type="number" formControlName="age" placeholder="25"
+                        class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary outline-none transition-all placeholder-text-muted">
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label for="height" class="text-sm font-semibold text-text">Altura (cm)</label>
+                    <input id="height" type="number" formControlName="height" placeholder="175"
+                        class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary outline-none transition-all placeholder-text-muted">
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <label for="initialWeight" class="text-sm font-semibold text-text">Peso Inicial (kg)</label>
+                <input id="initialWeight" type="number" step="0.1" formControlName="initialWeight" placeholder="70.5"
+                    class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary outline-none transition-all placeholder-text-muted">
+            </div>
+
+            <div class="pt-4 border-t border-border mt-2">
+                <button type="submit"
+                    class="w-full bg-primary text-white font-bold py-4 px-4 rounded-xl shadow-lg shadow-primary/40 hover:-translate-y-1 transition-transform cursor-pointer text-lg">
+                    Comenzar mi transformación
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

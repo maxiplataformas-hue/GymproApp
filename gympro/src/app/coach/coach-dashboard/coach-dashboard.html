@@ -1,0 +1,87 @@
+<div
+    class="h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] flex flex-col md:flex-row gap-6 animate-fade-in-up pb-[80px] md:pb-0 overflow-hidden">
+
+    <!-- Left Panel: Student List -->
+    <aside
+        class="w-full md:w-80 flex flex-col bg-surface border border-border rounded-3xl shadow-sm overflow-hidden shrink-0 transition-opacity"
+        [class.hidden]="selectedStudent() !== null" [class.md:flex]="true">
+        <div class="p-5 border-b border-border bg-gradient-to-r from-background to-surface">
+            <h2 class="text-xl font-bold text-text flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+                Mis Alumnos
+            </h2>
+            <p class="text-xs text-text-muted mt-1">{{ students().length }} alumnos registrados</p>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-3 space-y-2">
+            @if (students().length === 0) {
+            <div class="p-4 text-center text-text-muted text-sm mt-10">
+                Aún no hay alumnos registrados en la plataforma.
+            </div>
+            }
+            @for (student of students(); track student.email) {
+            <button (click)="selectStudent(student)"
+                class="w-full text-left p-3 rounded-2xl flex items-center gap-3 transition-all cursor-pointer border"
+                [class.bg-primary/10]="selectedStudent()?.email === student.email"
+                [class.border-primary/50]="selectedStudent()?.email === student.email"
+                [class.border-transparent]="selectedStudent()?.email !== student.email"
+                [class.hover:bg-border/50]="selectedStudent()?.email !== student.email">
+                <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center font-bold shadow-sm shrink-0">
+                    {{ (student.name || 'A')[0].toUpperCase() }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-text truncate">{{ student.name || student.email }}</h3>
+                    <p class="text-[10px] text-text-muted uppercase tracking-wider font-semibold truncate">{{
+                        student.age || '?' }} años • {{ student.initialWeight || '?' }}kg</p>
+                </div>
+                <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            }
+        </div>
+    </aside>
+
+    <!-- Right Panel: Actions for Selected Student -->
+    <main class="flex-1 h-full bg-surface border border-border rounded-3xl shadow-sm overflow-hidden flex flex-col"
+        [class.hidden]="selectedStudent() === null" [class.md:flex]="true">
+
+        @if (selectedStudent()) {
+        <!-- Mobile Back Button overlay -->
+        <div class="md:hidden p-3 border-b border-border flex items-center gap-2">
+            <button (click)="deselectStudent()"
+                class="p-2 bg-background border border-border rounded-full text-text hover:bg-border transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <span class="font-bold text-text truncate">Volver a alumnos</span>
+        </div>
+
+        <!-- Routine Assignment Editor Component -->
+        <div class="flex-1 overflow-y-auto">
+            <app-routine-assignment [student]="selectedStudent()!"></app-routine-assignment>
+        </div>
+        } @else {
+        <!-- Empty State Desktop -->
+        <div class="hidden md:flex flex-col items-center justify-center h-full text-center p-8">
+            <div
+                class="w-20 h-20 bg-background rounded-full border-2 border-dashed border-border flex items-center justify-center text-text-muted mb-4 opacity-50">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-text mb-2">Selecciona un Alumno</h3>
+            <p class="text-text-muted max-w-sm">Elige un alumno de la lista para ver sus detalles, registrar su IGC o
+                asignarle una nueva rutina de entrenamiento.</p>
+        </div>
+        }
+    </main>
+</div>

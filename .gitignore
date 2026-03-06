@@ -1,0 +1,18 @@
+# Node.js
+gympro/node_modules/
+gympro/dist/
+gympro/.angular/
+
+# Maven/Java
+gympro-API/target/
+gympro-API/.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

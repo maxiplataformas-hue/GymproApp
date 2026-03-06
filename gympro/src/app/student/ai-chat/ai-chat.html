@@ -1,0 +1,65 @@
+<div class="space-y-4 h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] flex flex-col animate-fade-in-up pb-[80px] md:pb-0">
+    <header class="flex items-center gap-4 shrink-0">
+        <a routerLink="/app/student"
+            class="p-2 bg-surface text-text border border-border rounded-full hover:bg-border transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+        </a>
+        <h1 class="text-2xl font-bold text-text flex items-center gap-2">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+                </path>
+            </svg>
+            Coach IA
+        </h1>
+    </header>
+
+    <!-- Chat Messages Area -->
+    <section
+        class="flex-1 bg-surface border border-border rounded-3xl p-4 md:p-6 shadow-sm overflow-y-auto flex flex-col gap-4 hide-scrollbar">
+        @for (msg of messages(); track msg.time) {
+        <div class="flex flex-col max-w-[85%] animate-fade-in-up" [class.self-end]="msg.sender === 'user'"
+            [class.self-start]="msg.sender === 'ia'">
+
+            <div class="px-5 py-3 rounded-2xl shadow-sm text-[15px] leading-relaxed relative"
+                [class.bg-primary]="msg.sender === 'user'" [class.text-white]="msg.sender === 'user'"
+                [class.rounded-tr-sm]="msg.sender === 'user'" [class.bg-background]="msg.sender === 'ia'"
+                [class.text-text]="msg.sender === 'ia'" [class.border]="msg.sender === 'ia'"
+                [class.border-border]="msg.sender === 'ia'" [class.rounded-tl-sm]="msg.sender === 'ia'">
+                {{ msg.text }}
+            </div>
+            <span class="text-[10px] text-text-muted mt-1 font-medium px-1" [class.text-right]="msg.sender === 'user'">
+                {{ msg.time | date:'shortTime' }}
+            </span>
+        </div>
+        }
+
+        @if (isTyping()) {
+        <div class="self-start flex flex-col max-w-[85%] animate-fade-in-up">
+            <div class="px-5 py-4 rounded-2xl rounded-tl-sm bg-background border border-border shadow-sm flex gap-1">
+                <div class="w-2 h-2 rounded-full bg-primary animate-bounce"></div>
+                <div class="w-2 h-2 rounded-full bg-primary animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 rounded-full bg-primary animate-bounce" style="animation-delay: 0.4s"></div>
+            </div>
+        </div>
+        }
+    </section>
+
+    <!-- Chat Input Area -->
+    <section class="shrink-0 pt-2">
+        <form (ngSubmit)="sendMessage()" class="flex gap-2 relative">
+            <input type="text" name="newMessage" [(ngModel)]="newMessage" placeholder="Escribe tu consulta aquí..."
+                class="flex-1 px-5 py-4 rounded-full border border-border bg-surface text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all shadow-sm pr-14"
+                autocomplete="off">
+            <button type="submit" [disabled]="!newMessage.trim() || isTyping()"
+                class="absolute right-2 top-2 bottom-2 aspect-square bg-primary text-white rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 cursor-pointer shadow-md">
+                <svg class="w-5 h-5 -ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+            </button>
+        </form>
+    </section>
+</div>

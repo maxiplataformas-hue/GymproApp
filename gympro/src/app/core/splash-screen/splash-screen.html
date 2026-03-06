@@ -1,0 +1,22 @@
+<div class="relative flex flex-col items-center justify-center min-h-screen w-full bg-black overflow-hidden cursor-pointer"
+    (click)="skip()">
+
+    <img ngSrc="splash-bg.png" alt="Sports Background" fill priority class="object-cover opacity-60 z-0">
+
+    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10"></div>
+
+    <div class="z-20 flex flex-col items-center text-center px-6 transition-all duration-1000 ease-in-out">
+        <h1 class="text-6xl md:text-8xl font-black text-white mb-2 tracking-tighter drop-shadow-lg">
+            GYM<span class="text-primary">PRO</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 max-w-md font-light tracking-wide mb-12">
+            Domina tu entrenamiento.
+        </p>
+
+        <div class="relative flex justify-center items-center w-16 h-16">
+            <div class="absolute w-full h-full rounded-full border-4 border-white/20"></div>
+            <div class="absolute w-full h-full rounded-full border-4 border-primary border-t-transparent animate-spin">
+            </div>
+        </div>
+    </div>
+</div>

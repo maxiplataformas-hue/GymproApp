@@ -1,0 +1,81 @@
+<div class="space-y-6 animate-fade-in-up pb-10">
+    <header class="flex items-center gap-4 mb-4">
+        <a routerLink="/app/student"
+            class="p-2 bg-surface text-text border border-border rounded-full hover:bg-border transition-colors cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+        </a>
+        <h1 class="text-2xl font-bold text-text">Evolución</h1>
+    </header>
+
+    <!-- Weight Chart section -->
+    <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-bold text-text flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                </svg>
+                Progreso de Peso (Kg)
+            </h3>
+        </div>
+
+        <div class="w-full h-64 bg-background rounded-xl p-2 border border-border">
+            <canvas baseChart [data]="lineChartData()" [options]="lineChartOptions" [type]="'line'">
+            </canvas>
+        </div>
+    </section>
+
+    <!-- Add Weight Form -->
+    <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-text mb-4">Registrar Seguimiento</h3>
+        <form (ngSubmit)="saveEntry()" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col gap-1">
+                <label for="regDate" class="text-sm font-semibold text-text">Fecha</label>
+                <input id="regDate" type="date" name="newDate" [(ngModel)]="newDate" required
+                    class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="regWeight" class="text-sm font-semibold text-text">Peso (Kg)</label>
+                <input id="regWeight" type="number" step="0.1" name="newWeight" [(ngModel)]="newWeight" required
+                    placeholder="70.5"
+                    class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+            <div class="flex items-end">
+                <button type="submit"
+                    class="w-full bg-primary text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-primary/30 hover:-translate-y-0.5 transition-transform cursor-pointer">
+                    Guardar Registro
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- IGC Chart section -->
+    <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-bold text-text flex items-center gap-2">
+                <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
+                Progreso IGC (%)
+            </h3>
+        </div>
+
+        <div
+            class="w-full h-64 bg-background rounded-xl p-2 border border-border flex items-center justify-center relative">
+            @if (igcChartData().labels && igcChartData().labels!.length > 0) {
+            <canvas baseChart class="w-full h-full" [data]="igcChartData()" [options]="barChartOptions" [type]="'bar'">
+            </canvas>
+            } @else {
+            <div class="text-center">
+                <p class="text-text-muted text-sm px-4">El Coach revisará tus 5 pliegues y registrará tu IGC aquí
+                    pronto.</p>
+            </div>
+            }
+        </div>
+    </section>
+</div>

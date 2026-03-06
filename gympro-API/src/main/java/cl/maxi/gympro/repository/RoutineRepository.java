@@ -1,0 +1,14 @@
+package cl.maxi.gympro.repository;
+
+import cl.maxi.gympro.model.Routine;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface RoutineRepository extends MongoRepository<Routine, String> {
+    List<Routine> findByStudentEmail(String studentEmail);
+    Optional<Routine> findByStudentEmailAndDate(String studentEmail, String date);
+}
