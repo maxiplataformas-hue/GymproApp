@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe, NgClass } from '@angular/common';
 import { AuthService } from '../../services/auth';
@@ -8,8 +8,7 @@ import { DataService } from '../../services/data';
   selector: 'app-routine-calendar',
   standalone: true,
   imports: [RouterLink, DatePipe, NgClass],
-  templateUrl: './routine-calendar.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './routine-calendar.html'
 })
 export class RoutineCalendar {
   auth = inject(AuthService);
@@ -36,7 +35,7 @@ export class RoutineCalendar {
   });
 
   // Current Routine
-  routine = computed(() => this.data.getRoutinesForStudent(this.user()?.email || '', this.selectedDate())());
+  routine = computed(() => this.data.getRoutinesForStudent(this.user()?.email || '', this.selectedDate()));
   exercises = computed(() => this.data.exercises());
 
   // Compute joined items for view

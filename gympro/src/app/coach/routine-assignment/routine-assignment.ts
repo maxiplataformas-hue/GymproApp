@@ -42,7 +42,7 @@ export class RoutineAssignment {
   newIgc = signal<number | null>(null);
 
   // Existing routines for this student/date
-  currentRoutine = computed(() => this.data.getRoutinesForStudent(this.student().email, this.assignmentDate())());
+  currentRoutine = computed(() => this.data.getRoutinesForStudent(this.student().email, this.assignmentDate()));
 
   currentRoutineJoined = computed(() => {
     const r = this.currentRoutine();
@@ -113,6 +113,13 @@ export class RoutineAssignment {
       this.assignmentSets.set(null);
       this.assignmentReps.set(null);
       this.assignmentWeight.set(null);
+    }
+  }
+
+  deleteItem(itemId: string) {
+    const r = this.currentRoutine();
+    if (r && r.id) {
+      this.data.deleteRoutineItem(r.id, itemId);
     }
   }
 }

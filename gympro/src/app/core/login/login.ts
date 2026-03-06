@@ -14,6 +14,8 @@ export class Login {
   auth = inject(AuthService);
   themeService = inject(ThemeService);
 
+  loginError = this.auth.loginError;
+
   onSubmit() {
     if (this.emailControl.valid && this.emailControl.value) {
       this.auth.login(this.emailControl.value.trim());

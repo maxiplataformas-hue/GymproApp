@@ -4,11 +4,13 @@ import { DatePipe } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import { DataService } from '../../services/data';
 
+
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
   imports: [RouterLink, DatePipe],
   templateUrl: './student-dashboard.html'
+  // using default change detection to prevent missing data on SPA navigation
 })
 export class StudentDashboard {
   auth = inject(AuthService);
@@ -21,7 +23,7 @@ export class StudentDashboard {
   today = new Date().toISOString().split('T')[0];
 
   // Get today's routine assignment
-  todayRoutine = this.data.getRoutinesForStudent(this.user()?.email || '', this.today);
+  todayRoutine = computed(() => this.data.getRoutinesForStudent(this.user()?.email || '', this.today));
 
   // Compute stats
   completedItemsCount = computed(() => {

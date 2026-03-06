@@ -26,14 +26,15 @@ public class RoutineController {
     public ResponseEntity<Routine> getRoutineByDate(@PathVariable String studentEmail, @PathVariable String date) {
         Optional<Routine> routine = routineRepository.findByStudentEmailAndDate(studentEmail, date);
         return routine.map(ResponseEntity::ok)
-                      .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public Routine saveRoutine(@RequestBody Routine routine) {
         // Find existing routine for this user and date
-        Optional<Routine> existing = routineRepository.findByStudentEmailAndDate(routine.getStudentEmail(), routine.getDate());
-        
+        Optional<Routine> existing = routineRepository.findByStudentEmailAndDate(routine.getStudentEmail(),
+                routine.getDate());
+
         if (existing.isPresent()) {
             Routine toUpdate = existing.get();
             // Just append new items or replace completely. Let's replace for simplicity
@@ -42,5 +43,31 @@ public class RoutineController {
         } else {
             return routineRepository.save(routine);
         }
+    }
+
+    @DeleteMapping("/{studentEmail}/{date}/{itemId}")
+    public ResponseEntity<Routine> deleteRoutineItem(
+            @PathVariable String studentEmail,
+            @PathVariable String date,
+            @PathVariable String itemId) {
+
+        Optional<Routine> existing = routineRepository.findByStudentEmailAndDate(studentEmail, date);
+
+        if (existing.isPresent()) {
+            Routine routine = existing.get();
+            List<cl.maxi.gympro.model.RoutineItem> items = routine.getItems();
+            boolean removed = items.removeIf(item -> item.getId().equals(itemId));
+
+            if (removed) {
+                if (items.isEmpty()) {
+                    routineRepository.delete(routine);
+                    return ResponseEntity.ok().build();
+                } else {
+                    routine.setItems(items);
+                    return ResponseEntity.ok(routineRepository.save(routine));
+                }
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 }

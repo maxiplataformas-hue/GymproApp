@@ -26,27 +26,34 @@ public class UserController {
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         Optional<User> user = userRepository.findByEmail(email);
         return user.map(ResponseEntity::ok)
-                   .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public User createUser(@RequestBody User user) {
         return userRepository.save(user);
     }
-    
+
     @PutMapping("/{email}")
     public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody User userDetails) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
-        
+
         if (optionalUser.isPresent()) {
             User existingUser = optionalUser.get();
             // Update fields
-            if (userDetails.getName() != null) existingUser.setName(userDetails.getName());
-            if (userDetails.getAge() != null) existingUser.setAge(userDetails.getAge());
-            if (userDetails.getHeight() != null) existingUser.setHeight(userDetails.getHeight());
-            if (userDetails.getInitialWeight() != null) existingUser.setInitialWeight(userDetails.getInitialWeight());
-            if (userDetails.getIsOnboarded() != null) existingUser.setIsOnboarded(userDetails.getIsOnboarded());
-            
+            if (userDetails.getName() != null)
+                existingUser.setName(userDetails.getName());
+            if (userDetails.getAge() != null)
+                existingUser.setAge(userDetails.getAge());
+            if (userDetails.getHeight() != null)
+                existingUser.setHeight(userDetails.getHeight());
+            if (userDetails.getInitialWeight() != null)
+                existingUser.setInitialWeight(userDetails.getInitialWeight());
+            if (userDetails.getIsOnboarded() != null)
+                existingUser.setIsOnboarded(userDetails.getIsOnboarded());
+            if (userDetails.getIsActive() != null)
+                existingUser.setIsActive(userDetails.getIsActive());
+
             User updatedUser = userRepository.save(existingUser);
             return ResponseEntity.ok(updatedUser);
         } else {

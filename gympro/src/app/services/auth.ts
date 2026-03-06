@@ -14,6 +14,7 @@ export interface User {
   initialWeight?: number;
   height?: number;
   isOnboarded?: boolean;
+  isActive?: boolean;
 }
 
 @Injectable({
@@ -23,6 +24,7 @@ export class AuthService {
   currentUser = signal<User | null>(null);
   isLoggedIn = computed(() => this.currentUser() !== null);
   isCoach = computed(() => this.currentUser()?.role === 'coach');
+  loginError = signal<string | null>(null);
 
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -37,6 +39,7 @@ export class AuthService {
   }
 
   login(email: string) {
+    this.loginError.set(null); // Reset error
     const isCoach = email.toLowerCase() === 'maxiplataformas@gmail.com';
     const role: Role = isCoach ? 'coach' : 'student';
 
@@ -48,40 +51,34 @@ export class AuthService {
     ).subscribe(user => {
       if (user) {
         // User exists in BD
+        if (!user.isOnboarded && !isCoach) {
+          this.loginError.set('Tu cuenta aún no ha sido configurada por tu Coach.');
+          return;
+        }
+        if (user.role === 'student' && user.isActive === false) {
+          this.loginError.set('Tu cuenta ha sido desactivada. Por favor, ponte en contacto con tu Coach.');
+          return;
+        }
         this.currentUser.set(user);
         localStorage.setItem('gympro-user', JSON.stringify(user));
         this.router.navigate(['/app', user.role]);
       } else {
         // New user
-        const newUser: User = { email, role, isOnboarded: false };
         if (isCoach) {
-          newUser.isOnboarded = true;
+          const newUser: User = { email, role, isOnboarded: true, isActive: true };
           this.http.post<User>(this.apiUrl, newUser).subscribe(created => {
             this.currentUser.set(created);
             localStorage.setItem('gympro-user', JSON.stringify(created));
             this.router.navigate(['/app/coach']);
           });
         } else {
-          // Temporary local state before the student completes onboarding POST
-          this.currentUser.set(newUser);
-          this.router.navigate(['/onboarding']);
+          // Block student login
+          this.loginError.set('Tu cuenta aún no ha sido configurada por tu Coach.');
         }
       }
     });
   }
 
-  completeOnboarding(data: Partial<User>) {
-    const current = this.currentUser();
-    if (current) {
-      const newUser: User = { ...current, ...data, isOnboarded: true };
-      // Save to MongoDB
-      this.http.post<User>(this.apiUrl, newUser).subscribe(created => {
-        this.currentUser.set(created);
-        localStorage.setItem('gympro-user', JSON.stringify(created));
-        this.router.navigate(['/app', created.role]);
-      });
-    }
-  }
 
   logout() {
     this.currentUser.set(null);

@@ -4,15 +4,24 @@
     <!-- Left Panel: Student List -->
     <aside
         class="w-full md:w-80 flex flex-col bg-surface border border-border rounded-3xl shadow-sm overflow-hidden shrink-0 transition-opacity"
-        [class.hidden]="selectedStudent() !== null" [class.md:flex]="true">
+        [class.hidden]="selectedStudent() !== null || isCreatingStudent()" [class.md:flex]="true">
         <div class="p-5 border-b border-border bg-gradient-to-r from-background to-surface">
-            <h2 class="text-xl font-bold text-text flex items-center gap-2">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                    </path>
-                </svg>
-                Mis Alumnos
+            <h2 class="text-xl font-bold text-text flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    Mis Alumnos
+                </span>
+                <button (click)="startCreatingStudent()"
+                    class="p-1.5 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors cursor-pointer"
+                    title="Nuevo Alumno">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </button>
             </h2>
             <p class="text-xs text-text-muted mt-1">{{ students().length }} alumnos registrados</p>
         </div>
@@ -30,9 +39,17 @@
                 [class.border-primary/50]="selectedStudent()?.email === student.email"
                 [class.border-transparent]="selectedStudent()?.email !== student.email"
                 [class.hover:bg-border/50]="selectedStudent()?.email !== student.email">
-                <div
-                    class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center font-bold shadow-sm shrink-0">
-                    {{ (student.name || 'A')[0].toUpperCase() }}
+                <div class="relative shrink-0">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center font-bold shadow-sm">
+                        {{ (student.name || 'A')[0].toUpperCase() }}
+                    </div>
+                    <!-- Status Indicator -->
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-surface"
+                        [class.bg-green-500]="student.isActive !== false"
+                        [class.bg-red-500]="student.isActive === false"
+                        [title]="student.isActive !== false ? 'Activo' : 'Desactivado'">
+                    </div>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-text truncate">{{ student.name || student.email }}</h3>
@@ -49,23 +66,150 @@
 
     <!-- Right Panel: Actions for Selected Student -->
     <main class="flex-1 h-full bg-surface border border-border rounded-3xl shadow-sm overflow-hidden flex flex-col"
-        [class.hidden]="selectedStudent() === null" [class.md:flex]="true">
+        [class.hidden]="selectedStudent() === null && !isCreatingStudent()" [class.md:flex]="true">
 
-        @if (selectedStudent()) {
-        <!-- Mobile Back Button overlay -->
+        @if (isCreatingStudent()) {
+        <!-- Create Student Form -->
         <div class="md:hidden p-3 border-b border-border flex items-center gap-2">
-            <button (click)="deselectStudent()"
-                class="p-2 bg-background border border-border rounded-full text-text hover:bg-border transition-colors">
+            <button (click)="cancelCreatingStudent()"
+                class="p-2 bg-background border border-border rounded-full text-text hover:bg-border transition-colors cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
             <span class="font-bold text-text truncate">Volver a alumnos</span>
         </div>
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 hide-scrollbar flex justify-center items-start">
+            <div
+                class="w-full max-w-xl bg-background border border-border rounded-2xl shadow-sm p-6 md:p-8 animate-fade-in-up mt-2 md:mt-10">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-text">Nuevo Alumno</h2>
+                        <p class="text-text-muted mt-1">Registra los datos iniciales de tu nuevo alumno.</p>
+                    </div>
+                    <button
+                        class="hidden md:block p-2 text-text-muted hover:text-text hover:bg-surface rounded-full transition-colors cursor-pointer"
+                        (click)="cancelCreatingStudent()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <form [formGroup]="newStudentForm" (ngSubmit)="saveNewStudent()" class="space-y-6">
+                    <div class="space-y-4 shadow-sm border border-border rounded-xl p-5 bg-surface">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-sm font-semibold text-text">Correo Electrónico (Login)</label>
+                            <input type="email" formControlName="email" placeholder="alumno@gympro.cl"
+                                class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-sm font-semibold text-text">Nombre Completo</label>
+                            <input type="text" formControlName="name" placeholder="Ej. Juan Pérez"
+                                class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-3 gap-4 shadow-sm border border-border rounded-xl p-5 bg-surface">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-sm font-semibold text-text">Edad</label>
+                            <input type="number" formControlName="age" placeholder="Años"
+                                class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-sm font-semibold text-text">Peso (kg)</label>
+                            <input type="number" formControlName="initialWeight" placeholder="0.0" step="0.1"
+                                class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-sm font-semibold text-text">Estatura (cm)</label>
+                            <input type="number" formControlName="height" placeholder="0"
+                                class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-border">
+                        <button type="button" (click)="cancelCreatingStudent()"
+                            class="px-6 py-3 rounded-xl font-bold bg-surface border border-border text-text hover:bg-border transition-colors cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button type="submit" [disabled]="newStudentForm.invalid"
+                            class="px-6 py-3 rounded-xl font-bold bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer">
+                            Registrar Alumno
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        } @else if (selectedStudent()) {
+        <!-- Mobile Back Button overlay -->
+        <div class="p-3 border-b border-border flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <button (click)="deselectStudent()"
+                    class="md:hidden p-2 bg-background border border-border rounded-full text-text hover:bg-border transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                </button>
+                <div class="flex items-center justify-between gap-3 px-3">
+                    <span class="font-bold text-text truncate md:hidden">Volver a alumnos</span>
+                    <h2 class="hidden md:block text-lg font-bold text-text truncate">{{ selectedStudent()!.name ||
+                        selectedStudent()!.email }}</h2>
+                    <span
+                        class="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+                        [class.bg-green-500/10]="selectedStudent()!.isActive !== false"
+                        [class.text-green-500]="selectedStudent()!.isActive !== false"
+                        [class.border-green-500/20]="selectedStudent()!.isActive !== false"
+                        [class.bg-red-500/10]="selectedStudent()!.isActive === false"
+                        [class.text-red-500]="selectedStudent()!.isActive === false"
+                        [class.border-red-500/20]="selectedStudent()!.isActive === false">
+                        <span class="w-1.5 h-1.5 rounded-full"
+                            [class.bg-green-500]="selectedStudent()!.isActive !== false"
+                            [class.bg-red-500]="selectedStudent()!.isActive === false"></span>
+                        {{ selectedStudent()!.isActive !== false ? 'Activo' : 'Desactivado' }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Toggle Status Button -->
+            <button (click)="toggleStudentStatus(selectedStudent()!)"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer"
+                [class.bg-red-500/10]="selectedStudent()!.isActive !== false"
+                [class.text-red-500]="selectedStudent()!.isActive !== false"
+                [class.border-red-500/30]="selectedStudent()!.isActive !== false"
+                [class.hover:bg-red-500/20]="selectedStudent()!.isActive !== false"
+                [class.bg-green-500/10]="selectedStudent()!.isActive === false"
+                [class.text-green-500]="selectedStudent()!.isActive === false"
+                [class.border-green-500/30]="selectedStudent()!.isActive === false"
+                [class.hover:bg-green-500/20]="selectedStudent()!.isActive === false">
+                @if (selectedStudent()!.isActive !== false) {
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636">
+                    </path>
+                </svg>
+                Desactivar Usuario
+                } @else {
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Activar Usuario
+                }
+            </button>
+        </div>
 
         <!-- Routine Assignment Editor Component -->
-        <div class="flex-1 overflow-y-auto">
-            <app-routine-assignment [student]="selectedStudent()!"></app-routine-assignment>
+        <div class="flex-1 overflow-y-auto w-full flex flex-col xl:flex-row gap-6 p-6 hide-scrollbar">
+            <div class="flex-1 xl:w-2/3">
+                <app-routine-assignment [student]="selectedStudent()!"></app-routine-assignment>
+            </div>
+            <div class="flex-1 xl:w-1/3">
+                <app-progress-gallery [studentEmail]="selectedStudent()!.email" [isCoach]="true"></app-progress-gallery>
+            </div>
         </div>
         } @else {
         <!-- Empty State Desktop -->
