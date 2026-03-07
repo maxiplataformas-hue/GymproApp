@@ -203,11 +203,11 @@
         </div>
 
         <!-- Routine Assignment Editor Component -->
-        <div class="flex-1 overflow-y-auto w-full flex flex-col xl:flex-row gap-6 p-6 hide-scrollbar">
-            <div class="flex-1 xl:w-2/3">
+        <div class="flex-1 overflow-y-auto w-full p-6 hide-scrollbar flex flex-col xl:grid xl:grid-cols-3 gap-6">
+            <div class="xl:col-span-2 flex flex-col">
                 <app-routine-assignment [student]="selectedStudent()!"></app-routine-assignment>
             </div>
-            <div class="flex-1 xl:w-1/3">
+            <div class="xl:col-span-1 flex flex-col">
                 <app-progress-gallery [studentEmail]="selectedStudent()!.email" [isCoach]="true"></app-progress-gallery>
             </div>
         </div>
