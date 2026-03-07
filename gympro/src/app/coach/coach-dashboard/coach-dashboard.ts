@@ -1,5 +1,5 @@
 import { Component, inject, computed, ChangeDetectionStrategy, signal } from '@angular/core';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data';
 import { AuthService, User } from '../../services/auth';
@@ -10,7 +10,7 @@ import { ProgressGallery } from '../../shared/progress-gallery/progress-gallery'
 @Component({
   selector: 'app-coach-dashboard',
   standalone: true,
-  imports: [RoutineAssignment, ProgressGallery, ReactiveFormsModule],
+  imports: [RoutineAssignment, ProgressGallery, ReactiveFormsModule, FormsModule],
   templateUrl: './coach-dashboard.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -18,7 +18,26 @@ export class CoachDashboard {
   data = inject(DataService);
   auth = inject(AuthService);
 
-  students = computed(() => this.data.allStudents());
+  searchQuery = signal('');
+  hideInactive = signal(false);
+
+  students = computed(() => {
+    let list = this.data.allStudents();
+
+    if (this.hideInactive()) {
+      list = list.filter(s => s.isActive !== false);
+    }
+
+    const q = this.searchQuery().toLowerCase().trim();
+    if (q) {
+      list = list.filter(s =>
+        (s.name && s.name.toLowerCase().includes(q)) ||
+        s.email.toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  });
 
   selectedStudent = signal<User | null>(null);
   isCreatingStudent = signal(false);
