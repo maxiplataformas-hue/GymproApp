@@ -1,0 +1,72 @@
+<div class="space-y-6 animate-fade-in-up pb-[80px] md:pb-10 h-full flex flex-col">
+    <header class="flex items-center gap-4 mb-2 shrink-0">
+        <!-- Back button (browser history or specific route) -->
+        <button (click)="authService.currentUser()?.role === 'coach' ? null : null" onclick="history.back()"
+            class="p-2 bg-surface text-text border border-border rounded-full hover:bg-border transition-colors cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+        </button>
+        <h1 class="text-2xl font-bold text-text">Configuración</h1>
+    </header>
+
+    <section class="flex-1 overflow-y-auto space-y-8">
+        <!-- Theme Selection -->
+        <div class="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+            <div class="mb-6">
+                <h3 class="font-bold text-text text-lg flex items-center gap-2">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01">
+                        </path>
+                    </svg>
+                    Apariencia del App
+                </h3>
+                <p class="text-sm text-text-muted mt-1">Elige el tema de colores que prefieras. Tu selección se guardará
+                    en tu cuenta.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                @for (theme of themes; track theme.id) {
+                <button (click)="selectTheme(theme.id)"
+                    class="relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all cursor-pointer overflow-hidden group"
+                    [class.border-primary]="themeService.currentTheme() === theme.id"
+                    [class.border-border]="themeService.currentTheme() !== theme.id"
+                    [class.bg-primary]="themeService.currentTheme() === theme.id"
+                    [class.bg-surface]="themeService.currentTheme() !== theme.id"
+                    [class.shadow-lg]="themeService.currentTheme() === theme.id"
+                    [class.shadow-primary/30]="themeService.currentTheme() === theme.id"
+                    [class.hover:border-primary/50]="themeService.currentTheme() !== theme.id">
+
+                    <!-- Content -->
+                    <div class="relative z-10 flex flex-col items-center gap-3">
+                        <div
+                            class="w-12 h-12 rounded-full flex items-center justify-center border {{ theme.colorClass }} transition-transform group-hover:scale-110">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    [attr.d]="theme.icon"></path>
+                            </svg>
+                        </div>
+                        <span class="font-bold" [class.text-white]="themeService.currentTheme() === theme.id"
+                            [class.text-text]="themeService.currentTheme() !== theme.id">
+                            {{ theme.name }}
+                        </span>
+                    </div>
+
+                    <!-- Selected Indicator -->
+                    @if (themeService.currentTheme() === theme.id) {
+                    <div class="absolute top-3 right-3 text-white">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    }
+                </button>
+                }
+            </div>
+        </div>
+    </section>
+</div>

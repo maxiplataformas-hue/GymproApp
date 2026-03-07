@@ -53,6 +53,8 @@ public class UserController {
                 existingUser.setIsOnboarded(userDetails.getIsOnboarded());
             if (userDetails.getIsActive() != null)
                 existingUser.setIsActive(userDetails.getIsActive());
+            if (userDetails.getTheme() != null)
+                existingUser.setTheme(userDetails.getTheme());
 
             User updatedUser = userRepository.save(existingUser);
             return ResponseEntity.ok(updatedUser);

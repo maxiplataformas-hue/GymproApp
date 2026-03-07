@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe, NgClass } from '@angular/common';
 import { AuthService } from '../../services/auth';
@@ -10,7 +10,7 @@ import { DataService } from '../../services/data';
   imports: [RouterLink, DatePipe, NgClass],
   templateUrl: './routine-calendar.html'
 })
-export class RoutineCalendar {
+export class RoutineCalendar implements OnInit {
   auth = inject(AuthService);
   data = inject(DataService);
 
@@ -18,6 +18,13 @@ export class RoutineCalendar {
 
   // Selected Date state YYYY-MM-DD
   selectedDate = signal<string>(new Date().toISOString().split('T')[0]);
+
+  ngOnInit() {
+    const user = this.auth.currentUser();
+    if (user && user.email) {
+      this.data.loadRoutines(user.email);
+    }
+  }
 
   // Generate an array of dates around the selected date (e.g. 3 days before, 3 days after)
   weekDays = computed(() => {

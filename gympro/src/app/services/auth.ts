@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
+import { ThemeService, AppTheme } from './theme';
 
 export type Role = 'coach' | 'student';
 
@@ -15,6 +16,7 @@ export interface User {
   height?: number;
   isOnboarded?: boolean;
   isActive?: boolean;
+  theme?: string;
 }
 
 @Injectable({
@@ -29,6 +31,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private apiUrl = 'http://localhost:8080/api/users';
+  private themeService = inject(ThemeService);
 
   constructor() {
     // We still keep the current session in localStorage so F5 refresh doesn't log them out
@@ -59,6 +62,9 @@ export class AuthService {
           this.loginError.set('Tu cuenta ha sido desactivada. Por favor, ponte en contacto con tu Coach.');
           return;
         }
+        if (user.theme) {
+          this.themeService.setTheme(user.theme as AppTheme);
+        }
         this.currentUser.set(user);
         localStorage.setItem('gympro-user', JSON.stringify(user));
         this.router.navigate(['/app', user.role]);
@@ -79,6 +85,16 @@ export class AuthService {
     });
   }
 
+
+  updateThemePreference(theme: string) {
+    const user = this.currentUser();
+    if (user && user.email) {
+      this.http.put<User>(`${this.apiUrl}/${user.email}`, { theme }).subscribe(updated => {
+        this.currentUser.set(updated);
+        localStorage.setItem('gympro-user', JSON.stringify(updated));
+      });
+    }
+  }
 
   logout() {
     this.currentUser.set(null);
