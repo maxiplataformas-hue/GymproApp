@@ -27,14 +27,11 @@ export class AuthService {
   isLoggedIn = computed(() => this.currentUser() !== null);
   isCoach = computed(() => this.currentUser()?.role === 'coach');
   loginError = signal<string | null>(null);
-  otpSent = signal(false);
-  pendingEmail = signal<string | null>(null);
   isLoading = signal(false);
 
   private http = inject(HttpClient);
   private router = inject(Router);
   private usersUrl = 'https://gymproapp.onrender.com/api/users';
-  private otpUrl = 'https://gymproapp.onrender.com/api/otp';
   private themeService = inject(ThemeService);
 
   constructor() {
@@ -44,12 +41,10 @@ export class AuthService {
     }
   }
 
-  /** Step 1: request OTP to be sent to the email */
-  requestOtp(email: string) {
+  login(email: string) {
     this.loginError.set(null);
     this.isLoading.set(true);
 
-    // First check if user exists in DB
     this.http.get<User>(`${this.usersUrl}/${email}`).pipe(
       catchError(() => of(null))
     ).subscribe(user => {
@@ -69,46 +64,12 @@ export class AuthService {
         return;
       }
 
-      // Send OTP
-      this.http.post(`${this.otpUrl}/send`, { email }).subscribe({
-        next: () => {
-          this.pendingEmail.set(email);
-          this.otpSent.set(true);
-          this.isLoading.set(false);
-        },
-        error: () => {
-          this.loginError.set('Error al enviar el código. Intenta nuevamente.');
-          this.isLoading.set(false);
-        }
-      });
-    });
-  }
-
-  /** Step 2: verify OTP code and log in */
-  verifyOtp(code: string) {
-    const email = this.pendingEmail();
-    if (!email) return;
-
-    this.loginError.set(null);
-    this.isLoading.set(true);
-
-    this.http.post<User>(`${this.otpUrl}/verify`, { email, code }).pipe(
-      catchError(err => {
-        const msg = err.error?.error || 'Código incorrecto o expirado.';
-        this.loginError.set(msg);
-        this.isLoading.set(false);
-        return of(null);
-      })
-    ).subscribe(user => {
-      if (!user) return;
       if (user.theme) {
         this.themeService.setTheme(user.theme as AppTheme);
       }
       this.currentUser.set(user);
       localStorage.setItem('gympro-user', JSON.stringify(user));
       this.isLoading.set(false);
-      this.otpSent.set(false);
-      this.pendingEmail.set(null);
       this.router.navigate(['/app', user.role]);
     });
   }
@@ -126,8 +87,6 @@ export class AuthService {
   logout() {
     this.currentUser.set(null);
     localStorage.removeItem('gympro-user');
-    this.otpSent.set(false);
-    this.pendingEmail.set(null);
     this.router.navigate(['/login']);
   }
 }

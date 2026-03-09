@@ -5,15 +5,9 @@
             <h1 class="text-4xl font-extrabold mb-2 text-text">
                 COACH<span class="text-primary">PRO</span>
             </h1>
-            @if (!otpSent()) {
             <p class="text-text-muted">Ingresa tu correo para continuar</p>
-            } @else {
-            <p class="text-text-muted">Revisa tu bandeja de entrada</p>
-            }
         </div>
 
-        @if (!otpSent()) {
-        <!-- Step 1: Email -->
         <form (submit)="$event.preventDefault(); onSubmitEmail()" class="flex flex-col gap-5">
             <div class="flex flex-col gap-1">
                 <label for="email" class="text-sm font-semibold text-text">Correo Electrónico</label>
@@ -41,65 +35,12 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                 </svg>
-                Enviando...
+                Ingresando...
                 } @else {
-                Enviar código
+                Ingresar
                 }
             </button>
         </form>
-        } @else {
-        <!-- Step 2: OTP Code -->
-        <div class="flex flex-col gap-6">
-            <div class="text-center">
-                <div class="text-4xl mb-3">📧</div>
-                <p class="text-sm text-text-muted">
-                    Enviamos un código de 6 dígitos a<br>
-                    <span class="font-bold text-text">{{ auth.pendingEmail() }}</span>
-                </p>
-            </div>
-
-            <!-- 6 digit inputs -->
-            <div class="flex gap-2 justify-center" (paste)="onOtpPaste($event)">
-                @for (digit of otpDigits(); track $index; let i = $index) {
-                <input type="text" inputmode="numeric" maxlength="1" [value]="digit" (input)="onOtpInput($event, i)"
-                    (keydown)="onOtpKeydown($event, i)"
-                    class="w-11 h-14 text-center text-2xl font-black rounded-xl border-2 border-border bg-background text-text focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
-                    [attr.aria-label]="'Dígito ' + (i + 1)">
-                }
-            </div>
-
-            @if (loginError()) {
-            <div
-                class="p-3 bg-secondary/10 border border-secondary/20 rounded-xl text-secondary text-sm font-medium text-center animate-fade-in-up">
-                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {{ loginError() }}
-            </div>
-            }
-
-            @if (isLoading()) {
-            <div class="flex justify-center">
-                <svg class="w-6 h-6 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                </svg>
-            </div>
-            }
-
-            <div class="flex flex-col gap-2">
-                <button type="button" (click)="resendCode()" [disabled]="isLoading()"
-                    class="text-sm text-primary font-semibold hover:underline disabled:opacity-50 cursor-pointer">
-                    ¿No llegó el código? Reenviar
-                </button>
-                <button type="button" (click)="auth.otpSent.set(false); auth.loginError.set(null)"
-                    class="text-sm text-text-muted hover:text-text cursor-pointer">
-                    ← Cambiar correo
-                </button>
-            </div>
-        </div>
-        }
 
         <div class="mt-8">
             <p class="text-sm text-center text-text-muted mb-4">Elige tu tema favorito</p>
