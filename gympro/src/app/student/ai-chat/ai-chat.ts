@@ -19,7 +19,7 @@ interface ChatMessage {
 export class AiChat {
   messages = signal<ChatMessage[]>([
     {
-      text: '¡Hola! Soy tu asistente de GymPro. ¿En qué te puedo ayudar sobre tus rutinas, dietas o técnica?',
+      text: '¡Hola! Soy tu asistente de CoachPro. ¿En qué te puedo ayudar sobre tus rutinas, dietas o técnica?',
       sender: 'ia',
       time: new Date()
     }
