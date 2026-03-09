@@ -1,4 +1,4 @@
-<div class="bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-sm h-full flex flex-col hide-scrollbar">
+<div class="bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-sm flex flex-col">
 
     <div class="mb-6">
         <h3 class="font-black text-2xl text-text">Ficha Técnica & Clínica</h3>
@@ -67,8 +67,7 @@
     </div>
     }
 
-    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()"
-        class="flex-1 overflow-y-auto space-y-8 pr-2 hide-scrollbar">
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-8">
 
         <!-- 1. Perfil Base -->
         <section class="space-y-4">
