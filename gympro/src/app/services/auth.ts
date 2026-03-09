@@ -30,7 +30,7 @@ export class AuthService {
 
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = 'http://localhost:8080/api/users';
+  private apiUrl = 'https://gymproapp.onrender.com/api/users';
   private themeService = inject(ThemeService);
 
   constructor() {
