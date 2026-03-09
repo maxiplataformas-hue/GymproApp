@@ -6,6 +6,54 @@
         </p>
     </div>
 
+    <!-- Timeline Selector -->
+    <div class="mb-6 flex gap-2 overflow-x-auto pb-4 scrollbar-hide items-center">
+        @for (profile of data.currentProfiles(); track profile.id; let i = $index) {
+        <button type="button" (click)="selectProfile(profile)"
+            class="px-5 py-2 whitespace-nowrap rounded-full font-semibold transition-all border-2 text-sm" [ngClass]="selectedProfile() === profile 
+                    ? 'border-primary bg-primary/10 text-primary' 
+                    : 'border-border bg-surface text-secondary hover:border-primary/50'">
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                    </path>
+                </svg>
+                {{ profile.recordName || 'Evaluación' }}
+            </span>
+            <span class="block text-xs font-normal opacity-70 mt-0.5">
+                {{ profile.recordDate | date:'mediumDate' }}
+            </span>
+        </button>
+        }
+
+        <!-- Add New Button -->
+        <button type="button" (click)="startNewProfile(selectedProfile())"
+            class="px-5 py-3 whitespace-nowrap rounded-full font-bold transition-all border-2 border-dashed border-primary text-primary hover:bg-primary hover:text-white flex items-center gap-2 text-sm ml-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Nueva Evaluación
+        </button>
+    </div>
+
+    <!-- Readonly Warning Alert -->
+    @if(!isCreatingNew() && data.currentProfiles().length > 0) {
+    <div
+        class="mb-6 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-start gap-3">
+        <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div class="text-sm">
+            <p class="font-bold">Modo de Sólo Lectura (Histórico)</p>
+            <p class="opacity-80">Estás visualizando una ficha antigua que no puede ser modificada. Para registrar una
+                nueva lectura, presiona <strong>+ Nueva Evaluación</strong> arriba. Automáticamente copiaremos todos los
+                parámetros clínicos de esta ficha a tu nueva evaluación para ahorrarte tiempo.</p>
+        </div>
+    </div>
+    }
+
     <form [formGroup]="profileForm" (ngSubmit)="saveProfile()"
         class="flex-1 overflow-y-auto space-y-8 pr-2 hide-scrollbar">
 
@@ -131,6 +179,7 @@
                     </svg>
                     Descargar Ficha en PDF
                 </button>
+                @if(isCreatingNew()) {
                 <button type="submit"
                     class="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30 flex justify-center items-center gap-2 cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,8 +187,9 @@
                             d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
                         </path>
                     </svg>
-                    Guardar Ficha del Alumno
+                    Guardar Nueva Evaluación
                 </button>
+                }
             </div>
         </div>
 

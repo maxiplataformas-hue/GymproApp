@@ -14,6 +14,10 @@ export class StudentProfileTab {
     studentEmail = input.required<string>();
     data = inject(DataService);
 
+    // UI State for Timeline
+    selectedProfile = signal<StudentProfile | null>(null);
+    isCreatingNew = signal<boolean>(false);
+
     profileForm = new FormGroup({
         objective: new FormControl(''),
         biotype: new FormControl(''),
@@ -26,7 +30,7 @@ export class StudentProfileTab {
     });
 
     constructor() {
-        // Whenever the selected studentEmail changes, load their profile.
+        // Whenever the selected studentEmail changes, load their profile history.
         effect(() => {
             const email = this.studentEmail();
             if (email) {
@@ -35,10 +39,24 @@ export class StudentProfileTab {
             }
         }, { allowSignalWrites: true });
 
-        // Whenever currentProfile finishes loading from API, patch the form
+        // Whenever the profiles finish loading from API, auto-select the latest one
         effect(() => {
-            const profile = this.data.currentProfile();
-            if (profile && profile.studentEmail === this.studentEmail()) {
+            const profiles = this.data.currentProfiles();
+            if (profiles && profiles.length > 0 && profiles[0].studentEmail === this.studentEmail()) {
+                // Ignore if we are already in creation mode manually
+                if (!this.isCreatingNew()) {
+                    this.selectProfile(profiles[0]); // Zero is newest due to DESC sort
+                }
+            } else if (profiles && profiles.length === 0) {
+                // No history found, open creation mode automatically
+                this.startNewProfile(null);
+            }
+        }, { allowSignalWrites: true });
+
+        // When the selected profile changes, patch the form
+        effect(() => {
+            const profile = this.selectedProfile();
+            if (profile) {
                 this.profileForm.patchValue({
                     objective: profile.objective || '',
                     biotype: profile.biotype || '',
@@ -49,8 +67,35 @@ export class StudentProfileTab {
                     supplements: profile.supplements || '',
                     adjuncts: profile.adjuncts || ''
                 });
+
+                if (!this.isCreatingNew()) {
+                    this.profileForm.disable(); // Read-only for history
+                } else {
+                    this.profileForm.enable(); // Editable for clones
+                }
+            } else if (this.isCreatingNew()) {
+                // Empty Form
+                this.profileForm.enable();
             }
-        });
+        }, { allowSignalWrites: true });
+    }
+
+    selectProfile(profile: StudentProfile) {
+        this.isCreatingNew.set(false);
+        this.selectedProfile.set(profile);
+    }
+
+    startNewProfile(cloneFrom: StudentProfile | null) {
+        this.isCreatingNew.set(true);
+        if (cloneFrom) {
+            // Clone the old data into a new editable state
+            this.selectedProfile.set({ ...cloneFrom, id: undefined, recordDate: undefined, recordName: undefined });
+        } else {
+            // Fresh blank form
+            this.selectedProfile.set(null);
+            this.profileForm.reset();
+            this.profileForm.enable();
+        }
     }
 
     saveProfile() {
@@ -68,6 +113,8 @@ export class StudentProfileTab {
         };
 
         this.data.saveProfile(this.studentEmail(), payload);
+        // Turn off creation mode so it falls back to the newly added profile as readonly
+        this.isCreatingNew.set(false);
     }
 
     generatePDF() {

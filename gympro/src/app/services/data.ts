@@ -49,6 +49,8 @@ export interface StudentPhoto {
 export interface StudentProfile {
   id?: string;
   studentEmail?: string;
+  recordDate?: string;
+  recordName?: string;
   objective?: string;
   biotype?: string;
   anthropometry?: string;
@@ -159,7 +161,7 @@ export class DataService {
   physioEntries = signal<PhysiologicalEntry[]>([]);
   allStudents = signal<User[]>([]);
   studentPhotos = signal<Map<string, StudentPhoto[]>>(new Map());
-  currentProfile = signal<StudentProfile | null>(null);
+  currentProfiles = signal<StudentProfile[]>([]);
 
   private http = inject(HttpClient);
   private apiBase = 'http://localhost:8080/api';
@@ -275,29 +277,30 @@ export class DataService {
     });
   }
 
-  // Profile (Technical/Clinical)
+  // Profile (Technical/Clinical) History
   loadProfile(studentEmail: string) {
-    this.currentProfile.set(null); // Clear previous
-    this.http.get<StudentProfile>(`${this.apiBase}/profiles/${studentEmail}`).subscribe({
-      next: (profile) => {
-        if (profile) {
-          this.currentProfile.set(profile);
+    this.currentProfiles.set([]); // Clear previous array
+    this.http.get<StudentProfile[]>(`${this.apiBase}/profiles/${studentEmail}`).subscribe({
+      next: (profiles) => {
+        if (profiles && profiles.length > 0) {
+          this.currentProfiles.set(profiles);
         }
       },
       error: () => {
-        // Assume empty/no profile
-        this.currentProfile.set(null);
+        // Assume empty/no profile history
+        this.currentProfiles.set([]);
       }
     });
   }
 
   saveProfile(studentEmail: string, profile: StudentProfile) {
-    this.http.put<StudentProfile>(`${this.apiBase}/profiles/${studentEmail}`, profile).subscribe({
+    this.http.post<StudentProfile>(`${this.apiBase}/profiles/${studentEmail}`, profile).subscribe({
       next: (saved) => {
-        this.currentProfile.set(saved);
-        alert('Ficha Técnica guardada exitosamente.');
+        // Reload the full history to show the new snapshot
+        this.loadProfile(studentEmail);
+        alert('Nueva Evaluación guardada exitosamente en el historial.');
       },
-      error: () => alert('Error al guardar Ficha Técnica.')
+      error: () => alert('Error al guardar Evaluación Clínica.')
     });
   }
 }

@@ -9,6 +9,10 @@ public class StudentProfile {
     private String id;
     private String studentEmail;
 
+    // Evaluacion (Timestamps)
+    private String recordDate;
+    private String recordName;
+
     private String objective;
     private String biotype;
 
@@ -43,6 +47,22 @@ public class StudentProfile {
 
     public void setStudentEmail(String studentEmail) {
         this.studentEmail = studentEmail;
+    }
+
+    public String getRecordDate() {
+        return recordDate;
+    }
+
+    public void setRecordDate(String recordDate) {
+        this.recordDate = recordDate;
+    }
+
+    public String getRecordName() {
+        return recordName;
+    }
+
+    public void setRecordName(String recordName) {
+        this.recordName = recordName;
     }
 
     public String getObjective() {

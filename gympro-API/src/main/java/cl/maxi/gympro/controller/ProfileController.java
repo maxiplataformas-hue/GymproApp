@@ -3,8 +3,11 @@ package cl.maxi.gympro.controller;
 import cl.maxi.gympro.model.StudentProfile;
 import cl.maxi.gympro.repository.StudentProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/profiles")
@@ -15,30 +18,25 @@ public class ProfileController {
     private StudentProfileRepository repository;
 
     @GetMapping("/{email}")
-    public ResponseEntity<StudentProfile> getProfileByEmail(@PathVariable String email) {
-        return repository.findByStudentEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build());
+    public ResponseEntity<List<StudentProfile>> getProfileHistoryByEmail(@PathVariable String email) {
+        // Orden descendente por ID o Fecha para traer el más nuevo primero
+        List<StudentProfile> history = repository.findByStudentEmail(email, Sort.by(Sort.Direction.DESC, "recordDate"));
+        return ResponseEntity.ok(history);
     }
 
-    @PutMapping("/{email}")
-    public ResponseEntity<StudentProfile> saveOrUpdateProfile(@PathVariable String email,
+    @PostMapping("/{email}")
+    public ResponseEntity<StudentProfile> createNewProfileSnapshot(@PathVariable String email,
             @RequestBody StudentProfile dto) {
-        StudentProfile existing = repository.findByStudentEmail(email).orElse(null);
+        dto.setStudentEmail(email);
 
-        if (existing != null) {
-            existing.setObjective(dto.getObjective());
-            existing.setBiotype(dto.getBiotype());
-            existing.setAnthropometry(dto.getAnthropometry());
-            existing.setBioimpedanceData(dto.getBioimpedanceData());
-            existing.setMobilityAnalysis(dto.getMobilityAnalysis());
-            existing.setDietPlan(dto.getDietPlan());
-            existing.setSupplements(dto.getSupplements());
-            existing.setAdjuncts(dto.getAdjuncts());
-            return ResponseEntity.ok(repository.save(existing));
-        } else {
-            dto.setStudentEmail(email);
-            return ResponseEntity.ok(repository.save(dto));
+        // Si no viene con fecha o nombre, asignamos el de hoy
+        if (dto.getRecordDate() == null || dto.getRecordDate().isEmpty()) {
+            dto.setRecordDate(LocalDate.now().toString());
         }
+        if (dto.getRecordName() == null || dto.getRecordName().isEmpty()) {
+            dto.setRecordName("Evaluación " + LocalDate.now().toString());
+        }
+
+        return ResponseEntity.ok(repository.save(dto));
     }
 }
