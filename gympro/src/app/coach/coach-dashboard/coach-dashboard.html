@@ -1,9 +1,9 @@
 <div
-    class="h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] flex flex-col md:flex-row gap-6 animate-fade-in-up pb-[80px] md:pb-0 overflow-hidden">
+    class="h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] flex flex-col md:flex-row md:gap-6 animate-fade-in-up pb-[80px] md:pb-0 overflow-hidden">
 
     <!-- Left Panel: Student List -->
     <aside
-        class="w-full md:w-80 flex flex-col bg-surface border border-border rounded-3xl shadow-sm overflow-hidden shrink-0 transition-opacity"
+        class="w-full md:w-80 flex flex-col bg-surface md:border md:border-border md:rounded-3xl md:shadow-sm overflow-hidden shrink-0 transition-opacity"
         [class.hidden]="selectedStudent() !== null || isCreatingStudent()" [class.md:flex]="true">
         <div class="p-5 border-b border-border bg-gradient-to-r from-background to-surface">
             <h2 class="text-xl font-bold text-text flex items-center justify-between">
@@ -90,7 +90,8 @@
     </aside>
 
     <!-- Right Panel: Actions for Selected Student -->
-    <main class="flex-1 h-full bg-surface border border-border rounded-3xl shadow-sm overflow-hidden flex flex-col"
+    <main
+        class="flex-1 h-full bg-surface md:border md:border-border md:rounded-3xl md:shadow-sm overflow-hidden flex flex-col"
         [class.hidden]="selectedStudent() === null && !isCreatingStudent()" [class.md:flex]="true">
 
         @if (isCreatingStudent()) {
