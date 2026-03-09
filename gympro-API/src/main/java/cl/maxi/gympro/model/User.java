@@ -25,4 +25,6 @@ public class User {
     private Boolean isOnboarded;
     private Boolean isActive; // null/true = active, false = disabled
     private String theme; // "light", "dark", or "pink"
+
+    private String password;
 }

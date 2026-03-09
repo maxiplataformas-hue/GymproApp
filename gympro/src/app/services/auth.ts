@@ -27,69 +27,96 @@ export class AuthService {
   isLoggedIn = computed(() => this.currentUser() !== null);
   isCoach = computed(() => this.currentUser()?.role === 'coach');
   loginError = signal<string | null>(null);
+  otpSent = signal(false);
+  pendingEmail = signal<string | null>(null);
+  isLoading = signal(false);
 
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = 'https://gymproapp.onrender.com/api/users';
+  private usersUrl = 'https://gymproapp.onrender.com/api/users';
+  private otpUrl = 'https://gymproapp.onrender.com/api/otp';
   private themeService = inject(ThemeService);
 
   constructor() {
-    // We still keep the current session in localStorage so F5 refresh doesn't log them out
     const saved = localStorage.getItem('gympro-user');
     if (saved) {
       this.currentUser.set(JSON.parse(saved));
     }
   }
 
-  login(email: string) {
-    this.loginError.set(null); // Reset error
-    const isCoach = email.toLowerCase() === 'maxiplataformas@gmail.com';
-    const role: Role = isCoach ? 'coach' : 'student';
+  /** Step 1: request OTP to be sent to the email */
+  requestOtp(email: string) {
+    this.loginError.set(null);
+    this.isLoading.set(true);
 
-    this.http.get<User>(`${this.apiUrl}/${email}`).pipe(
-      catchError(err => {
-        // User not found in MongoDB
-        return of(null);
-      })
+    // First check if user exists in DB
+    this.http.get<User>(`${this.usersUrl}/${email}`).pipe(
+      catchError(() => of(null))
     ).subscribe(user => {
-      if (user) {
-        // User exists in BD
-        if (!user.isOnboarded && !isCoach) {
-          this.loginError.set('Tu cuenta aún no ha sido configurada por tu Coach.');
-          return;
-        }
-        if (user.role === 'student' && user.isActive === false) {
-          this.loginError.set('Tu cuenta ha sido desactivada. Por favor, ponte en contacto con tu Coach.');
-          return;
-        }
-        if (user.theme) {
-          this.themeService.setTheme(user.theme as AppTheme);
-        }
-        this.currentUser.set(user);
-        localStorage.setItem('gympro-user', JSON.stringify(user));
-        this.router.navigate(['/app', user.role]);
-      } else {
-        // New user
-        if (isCoach) {
-          const newUser: User = { email, role, isOnboarded: true, isActive: true };
-          this.http.post<User>(this.apiUrl, newUser).subscribe(created => {
-            this.currentUser.set(created);
-            localStorage.setItem('gympro-user', JSON.stringify(created));
-            this.router.navigate(['/app/coach']);
-          });
-        } else {
-          // Block student login
-          this.loginError.set('Tu cuenta aún no ha sido configurada por tu Coach.');
-        }
+      if (!user) {
+        this.loginError.set('Este correo no está registrado. Contacta a tu Coach.');
+        this.isLoading.set(false);
+        return;
       }
+      if (user.role === 'student' && user.isActive === false) {
+        this.loginError.set('Tu cuenta ha sido desactivada. Contacta a tu Coach.');
+        this.isLoading.set(false);
+        return;
+      }
+      if (!user.isOnboarded && user.role === 'student') {
+        this.loginError.set('Tu cuenta aún no ha sido configurada por tu Coach.');
+        this.isLoading.set(false);
+        return;
+      }
+
+      // Send OTP
+      this.http.post(`${this.otpUrl}/send`, { email }).subscribe({
+        next: () => {
+          this.pendingEmail.set(email);
+          this.otpSent.set(true);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.loginError.set('Error al enviar el código. Intenta nuevamente.');
+          this.isLoading.set(false);
+        }
+      });
     });
   }
 
+  /** Step 2: verify OTP code and log in */
+  verifyOtp(code: string) {
+    const email = this.pendingEmail();
+    if (!email) return;
+
+    this.loginError.set(null);
+    this.isLoading.set(true);
+
+    this.http.post<User>(`${this.otpUrl}/verify`, { email, code }).pipe(
+      catchError(err => {
+        const msg = err.error?.error || 'Código incorrecto o expirado.';
+        this.loginError.set(msg);
+        this.isLoading.set(false);
+        return of(null);
+      })
+    ).subscribe(user => {
+      if (!user) return;
+      if (user.theme) {
+        this.themeService.setTheme(user.theme as AppTheme);
+      }
+      this.currentUser.set(user);
+      localStorage.setItem('gympro-user', JSON.stringify(user));
+      this.isLoading.set(false);
+      this.otpSent.set(false);
+      this.pendingEmail.set(null);
+      this.router.navigate(['/app', user.role]);
+    });
+  }
 
   updateThemePreference(theme: string) {
     const user = this.currentUser();
-    if (user && user.email) {
-      this.http.put<User>(`${this.apiUrl}/${user.email}`, { theme }).subscribe(updated => {
+    if (user?.email) {
+      this.http.put<User>(`${this.usersUrl}/${user.email}`, { theme }).subscribe(updated => {
         this.currentUser.set(updated);
         localStorage.setItem('gympro-user', JSON.stringify(updated));
       });
@@ -99,6 +126,8 @@ export class AuthService {
   logout() {
     this.currentUser.set(null);
     localStorage.removeItem('gympro-user');
+    this.otpSent.set(false);
+    this.pendingEmail.set(null);
     this.router.navigate(['/login']);
   }
 }
