@@ -53,8 +53,22 @@ export interface StudentProfile {
   recordName?: string;
   objective?: string;
   biotype?: string;
-  anthropometry?: string;
-  bioimpedanceData?: string;
+
+  // Advanced Bioimpedance
+  bodyFatPercentage?: number;
+  muscleMassPercentage?: number;
+  visceralFat?: number;
+  bioimpedanceData?: string; // Original field, kept for completeness
+
+  // Advanced Anthropometry
+  chestCircumference?: number;
+  waistCircumference?: number;
+  leftArmCircumference?: number;
+  rightArmCircumference?: number;
+  leftLegCircumference?: number;
+  rightLegCircumference?: number;
+  anthropometry?: string; // Original field, kept for completeness
+
   mobilityAnalysis?: string;
   dietPlan?: string;
   supplements?: string;

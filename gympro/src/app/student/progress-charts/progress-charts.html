@@ -23,7 +23,8 @@
         </div>
 
         <div class="w-full h-64 bg-background rounded-xl p-2 border border-border">
-            <canvas baseChart [data]="lineChartData()" [options]="lineChartOptions" [type]="'line'" [plugins]="customChartPlugins">
+            <canvas baseChart [data]="lineChartData()" [options]="lineChartOptions" [type]="'line'"
+                [plugins]="customChartPlugins">
             </canvas>
         </div>
     </section>
@@ -68,12 +69,39 @@
         <div
             class="w-full h-64 bg-background rounded-xl p-2 border border-border flex items-center justify-center relative">
             @if (igcChartData().labels && igcChartData().labels!.length > 0) {
-            <canvas baseChart class="w-full h-full" [data]="igcChartData()" [options]="barChartOptions" [type]="'bar'" [plugins]="customChartPlugins">
+            <canvas baseChart class="w-full h-full" [data]="igcChartData()" [options]="barChartOptions" [type]="'bar'"
+                [plugins]="customChartPlugins">
             </canvas>
             } @else {
             <div class="text-center">
                 <p class="text-text-muted text-sm px-4">El Coach revisará tus 5 pliegues y registrará tu IGC aquí
                     pronto.</p>
+            </div>
+            }
+        </div>
+    </section>
+    <!-- Hypertrophy Radar Chart section -->
+    <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-bold text-text flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                    </path>
+                </svg>
+                Radar de Hipertrofia (Antropometría)
+            </h3>
+        </div>
+
+        <div
+            class="w-full h-80 bg-background rounded-xl p-4 border border-border flex items-center justify-center relative">
+            @if (hypertrophyRadarData()) {
+            <canvas baseChart class="w-full h-full" [data]="hypertrophyRadarData()!" [options]="radarChartOptions"
+                [type]="'radar'"></canvas>
+            } @else {
+            <div class="text-center">
+                <p class="text-text-muted text-sm px-4">El Coach registrará tus perímetros en tu Ficha Técnica y
+                    verás tu evolución aquí.</p>
             </div>
             }
         </div>

@@ -115,18 +115,98 @@ export class ProgressCharts {
   };
 
   public igcChartData = computed<ChartConfiguration<'bar'>['data']>(() => {
-    const list = this.history().filter(h => h.igc !== undefined);
-    const roles = list.map(item => item.measuredBy === 'coach' ? 'C' : 'A');
+    // Merge basic old PhysioEntry IG with new Student Profile IG just in case
+    // We prefer the StudentProfile Timeline Data
+    const profiles = this.data.getStudentHistory(this.user()!.email)(); // Old physio
+    const clinica = this.data.currentProfiles(); // The Timeline
 
+    // Sort ascending for charts
+    const timeClinica = [...clinica].reverse();
+
+    // Prioritize Clinical timeline
+    if (timeClinica.length > 0) {
+      return {
+        labels: timeClinica.map(item => item.recordDate ? new Date(item.recordDate).toLocaleDateString() : 'N/A'),
+        datasets: [{
+          data: timeClinica.map(item => item.bodyFatPercentage || 0),
+          label: 'Grasa Corporal (%)',
+          backgroundColor: '#10b981',
+          borderRadius: 8
+        }]
+      };
+    }
+
+    const validPhysio = profiles.filter(h => h.igc !== undefined);
     return {
-      labels: list.map(item => item.date),
+      labels: validPhysio.map(item => item.date),
       datasets: [{
-        data: list.map(item => item.igc!),
+        data: validPhysio.map(item => item.igc!),
         label: 'Grasa Corporal (%)',
         backgroundColor: '#10b981',
-        borderRadius: 8,
-        authorLabels: roles
-      } as any]
+        borderRadius: 8
+      }]
+    };
+  });
+
+  public radarChartOptions: ChartOptions<'radar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { color: localStorage.getItem('theme') === 'dark' ? '#94a3b8' : '#475569' } }
+    },
+    scales: {
+      r: {
+        angleLines: { color: 'rgba(100, 116, 139, 0.2)' },
+        grid: { color: 'rgba(100, 116, 139, 0.2)' },
+        pointLabels: { color: localStorage.getItem('theme') === 'dark' ? '#f8fafc' : '#0f172a', font: { size: 12 } },
+        ticks: { display: false } // Hide inner numbers to make it cleaner
+      }
+    }
+  };
+
+  public hypertrophyRadarData = computed<ChartConfiguration<'radar'>['data'] | null>(() => {
+    const clinica = this.data.currentProfiles();
+    if (!clinica || clinica.length === 0) return null;
+
+    const latest = clinica[0]; // First is newest
+    const oldest = clinica[clinica.length - 1]; // Last is oldest
+
+    // If there's only 1 record, we only show 1 polygon
+    const datasets = [{
+      label: 'Métricas Actuales',
+      data: [
+        latest.chestCircumference || 0,
+        latest.rightArmCircumference || 0,
+        latest.waistCircumference || 0,
+        latest.rightLegCircumference || 0,
+        latest.leftLegCircumference || 0,
+        latest.leftArmCircumference || 0
+      ],
+      backgroundColor: 'rgba(59, 130, 246, 0.5)',
+      borderColor: '#3b82f6',
+      pointBackgroundColor: '#2563eb',
+    }];
+
+    if (clinica.length > 1) {
+      datasets.unshift({
+        label: 'Métricas Iniciales',
+        data: [
+          oldest.chestCircumference || 0,
+          oldest.rightArmCircumference || 0,
+          oldest.waistCircumference || 0,
+          oldest.rightLegCircumference || 0,
+          oldest.leftLegCircumference || 0,
+          oldest.leftArmCircumference || 0
+        ],
+        backgroundColor: 'rgba(239, 68, 68, 0.3)',
+        borderColor: '#ef4444',
+        pointBackgroundColor: '#dc2626',
+      });
+    }
+
+    return {
+      labels: ['Pecho', 'Brazo Der.', 'Cintura', 'Pierna Der.', 'Pierna Izq.', 'Brazo Izq.'],
+      datasets: datasets
     };
   });
 
