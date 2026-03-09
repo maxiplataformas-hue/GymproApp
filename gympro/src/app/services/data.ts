@@ -178,7 +178,7 @@ export class DataService {
   currentProfiles = signal<StudentProfile[]>([]);
 
   private http = inject(HttpClient);
-  private apiBase = 'http://localhost:8080/api';
+  private apiBase = 'https://gymproapp.onrender.com/api';
 
   constructor() {
     this.loadAllStudents();
