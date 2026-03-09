@@ -46,6 +46,19 @@ export interface StudentPhoto {
   photoBase64: string;
 }
 
+export interface StudentProfile {
+  id?: string;
+  studentEmail?: string;
+  objective?: string;
+  biotype?: string;
+  anthropometry?: string;
+  bioimpedanceData?: string;
+  mobilityAnalysis?: string;
+  dietPlan?: string;
+  supplements?: string;
+  adjuncts?: string;
+}
+
 // Initial Mock Exercises
 const MOCK_EXERCISES: Exercise[] = [
   // Pecho
@@ -146,6 +159,7 @@ export class DataService {
   physioEntries = signal<PhysiologicalEntry[]>([]);
   allStudents = signal<User[]>([]);
   studentPhotos = signal<Map<string, StudentPhoto[]>>(new Map());
+  currentProfile = signal<StudentProfile | null>(null);
 
   private http = inject(HttpClient);
   private apiBase = 'http://localhost:8080/api';
@@ -258,6 +272,32 @@ export class DataService {
   deletePhoto(id: string, studentEmail: string) {
     this.http.delete(`${this.apiBase}/photos/${id}`).subscribe(() => {
       this.loadPhotos(studentEmail);
+    });
+  }
+
+  // Profile (Technical/Clinical)
+  loadProfile(studentEmail: string) {
+    this.currentProfile.set(null); // Clear previous
+    this.http.get<StudentProfile>(`${this.apiBase}/profiles/${studentEmail}`).subscribe({
+      next: (profile) => {
+        if (profile) {
+          this.currentProfile.set(profile);
+        }
+      },
+      error: () => {
+        // Assume empty/no profile
+        this.currentProfile.set(null);
+      }
+    });
+  }
+
+  saveProfile(studentEmail: string, profile: StudentProfile) {
+    this.http.put<StudentProfile>(`${this.apiBase}/profiles/${studentEmail}`, profile).subscribe({
+      next: (saved) => {
+        this.currentProfile.set(saved);
+        alert('Ficha Técnica guardada exitosamente.');
+      },
+      error: () => alert('Error al guardar Ficha Técnica.')
     });
   }
 }

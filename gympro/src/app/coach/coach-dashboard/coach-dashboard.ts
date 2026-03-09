@@ -4,13 +4,13 @@ import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data';
 import { AuthService, User } from '../../services/auth';
 import { RoutineAssignment } from '../routine-assignment/routine-assignment';
-
 import { ProgressGallery } from '../../shared/progress-gallery/progress-gallery';
+import { StudentProfileTab } from '../student-profile-tab/student-profile-tab';
 
 @Component({
   selector: 'app-coach-dashboard',
   standalone: true,
-  imports: [RoutineAssignment, ProgressGallery, ReactiveFormsModule, FormsModule],
+  imports: [RoutineAssignment, ProgressGallery, StudentProfileTab, ReactiveFormsModule, FormsModule],
   templateUrl: './coach-dashboard.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -41,6 +41,7 @@ export class CoachDashboard {
 
   selectedStudent = signal<User | null>(null);
   isCreatingStudent = signal(false);
+  activeTab = signal<'routine' | 'profile' | 'gallery'>('routine');
 
   newStudentForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -58,6 +59,7 @@ export class CoachDashboard {
   deselectStudent() {
     this.selectedStudent.set(null);
     this.isCreatingStudent.set(false);
+    this.activeTab.set('routine');
   }
 
   startCreatingStudent() {

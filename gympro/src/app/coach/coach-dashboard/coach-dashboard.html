@@ -227,14 +227,53 @@
             </button>
         </div>
 
-        <!-- Routine Assignment Editor Component -->
-        <div class="flex-1 overflow-y-auto w-full p-6 hide-scrollbar flex flex-col xl:grid xl:grid-cols-3 gap-6">
-            <div class="xl:col-span-2 flex flex-col">
+        <!-- Coach Dashboard Tabs Navigation -->
+        <div class="px-6 pt-4 border-b border-border flex gap-6 overflow-x-auto hide-scrollbar">
+            <button (click)="activeTab.set('routine')"
+                class="pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap"
+                [class.text-primary]="activeTab() === 'routine'" [class.border-primary]="activeTab() === 'routine'"
+                [class.text-text-muted]="activeTab() !== 'routine'"
+                [class.border-transparent]="activeTab() !== 'routine'"
+                [class.hover:text-text]="activeTab() !== 'routine'">
+                Asignador de Rutinas
+            </button>
+            <button (click)="activeTab.set('profile')"
+                class="pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap"
+                [class.text-primary]="activeTab() === 'profile'" [class.border-primary]="activeTab() === 'profile'"
+                [class.text-text-muted]="activeTab() !== 'profile'"
+                [class.border-transparent]="activeTab() !== 'profile'"
+                [class.hover:text-text]="activeTab() !== 'profile'">
+                Ficha Técnica Integral
+            </button>
+            <button (click)="activeTab.set('gallery')"
+                class="pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap"
+                [class.text-primary]="activeTab() === 'gallery'" [class.border-primary]="activeTab() === 'gallery'"
+                [class.text-text-muted]="activeTab() !== 'gallery'"
+                [class.border-transparent]="activeTab() !== 'gallery'"
+                [class.hover:text-text]="activeTab() !== 'gallery'">
+                Galería de Progreso
+            </button>
+        </div>
+
+        <!-- Tab Content Display -->
+        <div class="flex-1 overflow-hidden w-full p-0 flex flex-col hide-scrollbar relative bg-background/50">
+            @if (activeTab() === 'routine') {
+            <div class="absolute inset-0 overflow-y-auto p-6 md:p-8">
+                <!-- Standard Routine Editor & Right Panel layout returned slightly for routine tab only if needed -->
                 <app-routine-assignment [student]="selectedStudent()!"></app-routine-assignment>
             </div>
-            <div class="xl:col-span-1 flex flex-col">
+            }
+            @if (activeTab() === 'profile') {
+            <div class="absolute inset-0 overflow-y-auto">
+                <!-- The new full width technical layout -->
+                <app-student-profile-tab [studentEmail]="selectedStudent()!.email"></app-student-profile-tab>
+            </div>
+            }
+            @if (activeTab() === 'gallery') {
+            <div class="absolute inset-0 overflow-y-auto w-full max-w-5xl mx-auto p-6 md:p-8">
                 <app-progress-gallery [studentEmail]="selectedStudent()!.email" [isCoach]="true"></app-progress-gallery>
             </div>
+            }
         </div>
         } @else {
         <!-- Empty State Desktop -->
