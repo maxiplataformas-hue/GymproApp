@@ -30,10 +30,10 @@
                     <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Biotipo</label>
                     <select formControlName="biotype"
                         class="w-full bg-transparent text-text font-bold text-lg focus:outline-none cursor-pointer">
-                        <option value="">Selecciona Biotipo...</option>
-                        <option value="Ectomorfo">Ectomorfo</option>
-                        <option value="Mesomorfo">Mesomorfo</option>
-                        <option value="Endomorfo">Endomorfo</option>
+                        <option value="" class="bg-background text-text">Selecciona Biotipo...</option>
+                        <option value="Ectomorfo" class="bg-background text-text">Ectomorfo</option>
+                        <option value="Mesomorfo" class="bg-background text-text">Mesomorfo</option>
+                        <option value="Endomorfo" class="bg-background text-text">Endomorfo</option>
                     </select>
                 </div>
             </div>
@@ -122,15 +122,25 @@
 
         <!-- Submit Button -->
         <div class="pt-6 sticky bottom-0 bg-gradient-to-t from-surface pb-2">
-            <button type="submit"
-                class="w-full bg-primary text-white font-bold py-4 rounded-2xl hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30 flex justify-center items-center gap-2 cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
-                    </path>
-                </svg>
-                Guardar Ficha del Alumno
-            </button>
+            <div class="flex flex-col md:flex-row gap-4 mb-2">
+                <button type="button" (click)="generatePDF()"
+                    class="flex-1 bg-surface border border-border text-text font-bold py-4 rounded-2xl hover:bg-background transition-colors flex justify-center items-center gap-2 cursor-pointer">
+                    <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Descargar Ficha en PDF
+                </button>
+                <button type="submit"
+                    class="flex-[2] bg-primary text-white font-bold py-4 rounded-2xl hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30 flex justify-center items-center gap-2 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
+                        </path>
+                    </svg>
+                    Guardar Ficha del Alumno
+                </button>
+            </div>
         </div>
 
     </form>

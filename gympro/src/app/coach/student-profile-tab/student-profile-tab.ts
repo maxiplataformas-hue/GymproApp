@@ -2,6 +2,7 @@ import { Component, inject, input, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { DataService, StudentProfile } from '../../services/data';
+import { jsPDF } from 'jspdf';
 
 @Component({
     selector: 'app-student-profile-tab',
@@ -67,5 +68,63 @@ export class StudentProfileTab {
         };
 
         this.data.saveProfile(this.studentEmail(), payload);
+    }
+
+    generatePDF() {
+        const email = this.studentEmail();
+        const student = this.data.allStudents().find(s => s.email === email);
+        const studentName = student?.name || email || 'Atleta_Generico';
+        const formVals = this.profileForm.getRawValue();
+
+        const doc = new jsPDF();
+        let y = 20;
+
+        // Header
+        doc.setFontSize(22);
+        doc.setTextColor(33, 37, 41);
+        doc.text('Ficha Clínica y Deportiva', 105, y, { align: 'center' });
+        y += 15;
+
+        doc.setFontSize(14);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Atleta: ${studentName}`, 20, y);
+        y += 10;
+        doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 20, y);
+        y += 15;
+
+        // Helper for sections
+        const addSection = (title: string, content: string | null) => {
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+
+            doc.setFontSize(14);
+            doc.setTextColor(41, 128, 185);
+            doc.setFont('helvetica', 'bold');
+            doc.text(title, 20, y);
+            y += 8;
+
+            doc.setFontSize(11);
+            doc.setTextColor(50, 50, 50);
+            doc.setFont('helvetica', 'normal');
+
+            const text = content ? content.trim() : 'No registrado.';
+            const lines = doc.splitTextToSize(text, 170);
+            doc.text(lines, 20, y);
+
+            y += (lines.length * 6) + 10;
+        };
+
+        addSection('Objetivo Declarado', formVals.objective);
+        addSection('Biotipo', formVals.biotype);
+        addSection('Antropometría', formVals.anthropometry);
+        addSection('Bioimpedancia', formVals.bioimpedanceData);
+        addSection('Análisis Biomecánico', formVals.mobilityAnalysis);
+        addSection('Plan de Nutrición', formVals.dietPlan);
+        addSection('Suplementación Regular', formVals.supplements);
+        addSection('Coadyuvantes Suplementarios', formVals.adjuncts);
+
+        doc.save(`Ficha_Clinica_${studentName.replace(/\s+/g, '_')}.pdf`);
     }
 }
