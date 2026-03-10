@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { User } from './auth';
+import { PushNotificationService } from './push-notification';
 
 export type MuscleGroup = 'Pecho' | 'Espalda' | 'Pierna' | 'Hombro' | 'Brazo' | 'Core';
 export type Equipment = 'Barra' | 'Mancuerna' | 'Máquina' | 'Libre';
@@ -191,6 +192,7 @@ export class DataService {
   unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
 
   private http = inject(HttpClient);
+  private push = inject(PushNotificationService);
   private apiBase = 'https://gymproapp.onrender.com/api';
 
   constructor() { }
@@ -358,6 +360,16 @@ export class DataService {
 
   loadNotifications(email: string) {
     this.http.get<Notification[]>(`${this.apiBase}/notifications/${email}`).subscribe(data => {
+      const currentUnread = this.notifications().filter(n => !n.isRead).length;
+      const newUnread = data.filter(n => !n.isRead).length;
+
+      if (newUnread > currentUnread) {
+        // Enviar notificación nativa para el mensaje más reciente si es nuevo
+        const latest = data.find(n => !n.isRead);
+        if (latest) {
+          this.push.sendLocalNotification('Gympro - Nueva Rutina', latest.message);
+        }
+      }
       this.notifications.set(data);
     });
   }

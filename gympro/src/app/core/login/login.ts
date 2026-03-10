@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService, User } from '../../services/auth';
 import { ThemeService, AppTheme } from '../../services/theme';
 import { BiometricService } from '../../services/biometric';
+import { PushNotificationService } from '../../services/push-notification';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +18,7 @@ export class Login {
   auth = inject(AuthService);
   themeService = inject(ThemeService);
   biometric = inject(BiometricService);
+  push = inject(PushNotificationService);
   router = inject(Router);
 
   loginError = this.auth.loginError;
@@ -69,6 +71,7 @@ export class Login {
       this.pendingUser.set(user);
       this.showBiometricSetup.set(true);
     } else {
+      if (user.role === 'student') this.push.requestPermission();
       this.router.navigate(['/app', user.role]);
     }
   }
@@ -91,12 +94,16 @@ export class Login {
     this.isBiometricLoading.set(true);
     await this.biometric.register(user.email);
     this.isBiometricLoading.set(false);
+    if (user.role === 'student') this.push.requestPermission();
     this.router.navigate(['/app', user.role]);
   }
 
   skipBiometrics() {
     const user = this.pendingUser();
-    if (user) this.router.navigate(['/app', user.role]);
+    if (user) {
+      if (user.role === 'student') this.push.requestPermission();
+      this.router.navigate(['/app', user.role]);
+    }
   }
 
   setTheme(theme: AppTheme) {

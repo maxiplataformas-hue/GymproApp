@@ -25,7 +25,15 @@ export class Layout {
         this.data.loadRoutines(u.email);
         this.data.loadPhysio(u.email);
         this.data.loadNotifications(u.email);
+
+        // Poll for notifications every 30 seconds
+        const interval = setInterval(() => {
+          this.data.loadNotifications(u.email);
+        }, 30000);
+
+        return () => clearInterval(interval);
       }
+      return;
     });
   }
 
