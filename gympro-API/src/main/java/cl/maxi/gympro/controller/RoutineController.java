@@ -1,6 +1,9 @@
 package cl.maxi.gympro.controller;
 
+import cl.maxi.gympro.model.Notification;
 import cl.maxi.gympro.model.Routine;
+import cl.maxi.gympro.model.RoutineItem;
+import cl.maxi.gympro.repository.NotificationRepository;
 import cl.maxi.gympro.repository.RoutineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +21,7 @@ public class RoutineController {
     private RoutineRepository routineRepository;
 
     @Autowired
-    private cl.maxi.gympro.repository.NotificationRepository notificationRepository;
+    private NotificationRepository notificationRepository;
 
     @GetMapping("/{studentEmail}")
     public List<Routine> getRoutinesByStudent(@PathVariable String studentEmail) {
@@ -53,7 +56,7 @@ public class RoutineController {
 
     private void createRoutineNotification(Routine routine) {
         String msg = "Tu coach te ha asignado una rutina para el " + routine.getDate();
-        cl.maxi.gympro.model.Notification notif = new cl.maxi.gympro.model.Notification(
+        Notification notif = new Notification(
                 routine.getStudentEmail(),
                 "", // Podemos dejarlo vacío o buscar el coachEmail en el futuro
                 msg,
@@ -71,7 +74,7 @@ public class RoutineController {
 
         if (existing.isPresent()) {
             Routine routine = existing.get();
-            List<cl.maxi.gympro.model.RoutineItem> items = routine.getItems();
+            List<RoutineItem> items = routine.getItems();
             boolean removed = items.removeIf(item -> item.getId().equals(itemId));
 
             if (removed) {
