@@ -94,8 +94,8 @@
         class="flex-1 h-full bg-surface md:border md:border-border md:rounded-3xl md:shadow-sm overflow-hidden flex flex-col"
         [class.hidden]="selectedStudent() === null && !isCreatingStudent()" [class.md:flex]="true">
 
-        @if (isCreatingStudent()) {
-        <!-- Create Student Form -->
+        @if (isCreatingStudent() || isEditingStudent()) {
+        <!-- Create/Edit Student Form -->
         <div class="md:hidden p-3 border-b border-border flex items-center gap-2">
             <button (click)="cancelCreatingStudent()"
                 class="p-2 bg-background border border-border rounded-full text-text hover:bg-border transition-colors cursor-pointer">
