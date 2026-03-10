@@ -23,7 +23,7 @@ public class GeminiService {
             +
             "solo estás capacitado para asesorar en temas de fitness. Responde siempre en español, de forma motivadora pero técnica.";
 
-    public String getResponse(String userMessage) {
+    public String getResponse(String userMessage, String studentContext) {
         if (apiKey == null || apiKey.isEmpty()) {
             return "Lo siento, la API Key de Gemini no está configurada. Por favor, contacta al administrador.";
         }
@@ -39,8 +39,12 @@ public class GeminiService {
         Map<String, Object> contents = new HashMap<>();
         Map<String, Object> parts = new HashMap<>();
 
-        // Combine system prompt and user message
-        parts.put("text", SYSTEM_PROMPT + "\n\nUsuario dice: " + userMessage);
+        // Combine system prompt, student context and user message
+        String fullPrompt = SYSTEM_PROMPT + "\n\n" +
+                (studentContext != null && !studentContext.isEmpty() ? studentContext + "\n\n" : "") +
+                "Usuario dice: " + userMessage;
+
+        parts.put("text", fullPrompt);
         contents.put("parts", Collections.singletonList(parts));
         requestBody.put("contents", Collections.singletonList(contents));
 
