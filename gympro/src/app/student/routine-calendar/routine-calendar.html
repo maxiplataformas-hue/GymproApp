@@ -1,4 +1,4 @@
-<div class="space-y-6 animate-fade-in-up pb-[80px] md:pb-10 h-full flex flex-col">
+<div class="space-y-6 animate-fade-in-up pb-4 h-full flex flex-col">
     <header class="flex items-center gap-4 mb-2 shrink-0">
         <a routerLink="/app/student"
             class="p-2 bg-surface text-text border border-border rounded-full hover:bg-border transition-colors">
@@ -60,7 +60,7 @@
                         <h4 class="font-bold text-text text-lg" [class.line-through]="item.completed">{{
                             item.exerciseName }}</h4>
                         <span class="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide"
-                            [ngClass]="getMuscleGroupColor(item.muscleGroup)">
+                            [class]="getMuscleGroupColor(item.muscleGroup)">
                             {{ item.muscleGroup }}
                         </span>
                     </div>

@@ -1,4 +1,4 @@
-import { Component, inject, effect } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, effect } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { DataService } from '../../services/data';
@@ -7,11 +7,14 @@ import { DataService } from '../../services/data';
   selector: 'app-layout',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './layout.html',
-  styleUrl: './layout.css'
+  styleUrl: './layout.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Layout {
   auth = inject(AuthService);
   data = inject(DataService);
+
+  drawerOpen = signal(false);
 
   constructor() {
     effect(() => {
@@ -23,7 +26,16 @@ export class Layout {
     });
   }
 
+  toggleDrawer() {
+    this.drawerOpen.update(v => !v);
+  }
+
+  closeDrawer() {
+    this.drawerOpen.set(false);
+  }
+
   logout() {
+    this.closeDrawer();
     this.auth.logout();
   }
 }

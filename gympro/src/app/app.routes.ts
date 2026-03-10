@@ -28,7 +28,7 @@ export const routes: Routes = [
             { path: 'student/progress', component: StudentProgress },
             { path: 'student/config', component: AppConfig },
             { path: 'coach', component: CoachDashboard },
-            { path: '', redirectTo: 'student', pathMatch: 'full' }
+            { path: '', redirectTo: 'student/calendar', pathMatch: 'full' }
         ]
     },
     { path: '**', redirectTo: '' }
