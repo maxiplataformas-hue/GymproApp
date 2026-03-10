@@ -49,12 +49,14 @@ public class GeminiService {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                List candidates = (List) response.getBody().get("candidates");
-                if (!candidates.isEmpty()) {
-                    Map firstCandidate = (Map) candidates.get(0);
-                    Map content = (Map) firstCandidate.get("content");
-                    List responseParts = (List) content.get("parts");
-                    Map firstPart = (Map) responseParts.get(0);
+                Map<String, Object> body = (Map<String, Object>) response.getBody();
+                List<Map<String, Object>> candidates = (List<Map<String, Object>>) body.get("candidates");
+
+                if (candidates != null && !candidates.isEmpty()) {
+                    Map<String, Object> firstCandidate = candidates.get(0);
+                    Map<String, Object> content = (Map<String, Object>) firstCandidate.get("content");
+                    List<Map<String, Object>> responseParts = (List<Map<String, Object>>) content.get("parts");
+                    Map<String, Object> firstPart = responseParts.get(0);
                     return (String) firstPart.get("text");
                 }
             }
