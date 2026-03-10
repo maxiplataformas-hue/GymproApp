@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { DataService } from '../../services/data';
 
 interface ChatMessage {
   text: string;
@@ -17,6 +18,8 @@ interface ChatMessage {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AiChat {
+  private dataService = inject(DataService);
+
   messages = signal<ChatMessage[]>([
     {
       text: '¡Hola! Soy tu asistente de CoachPro. ¿En qué te puedo ayudar sobre tus rutinas, dietas o técnica?',
@@ -36,22 +39,33 @@ export class AiChat {
     this.newMessage = '';
     this.isTyping.set(true);
 
-    // Mock IA response after 1.5s
-    setTimeout(() => {
-      this.isTyping.set(false);
-
-      let reply = 'Interesante. Asegúrate de siempre mantener una buena hidratación.';
-      const lower = userText.toLowerCase();
-
-      if (lower.includes('pecho') || lower.includes('banca')) {
-        reply = 'Para ejercicios de pecho como el Press de Banca, recuerda retraer las escápulas y mantener los pies firmes en el suelo para mayor estabilidad.';
-      } else if (lower.includes('dieta') || lower.includes('comida')) {
-        reply = 'Recuerda que para ganar masa muscular debes estar en superávit calórico y consumir al menos 1.8g de proteína por kg de peso corporal.';
-      } else if (lower.includes('dolor')) {
-        reply = 'Si experimentas dolor agudo durante un ejercicio, detente inmediatamente. Podría ser recomendable consultar a tu coach o un fisioterapeuta.';
+    this.dataService.askCoachIA(userText).subscribe({
+      next: (res) => {
+        this.isTyping.set(false);
+        this.messages.update(msgs => [...msgs, {
+          text: res.response,
+          sender: 'ia',
+          time: new Date()
+        }]);
+        this.scrollToBottom();
+      },
+      error: (err) => {
+        this.isTyping.set(false);
+        this.messages.update(msgs => [...msgs, {
+          text: 'Lo siento, no pude contactar con el Coach IA en este momento.',
+          sender: 'ia',
+          time: new Date()
+        }]);
       }
+    });
+  }
 
-      this.messages.update(msgs => [...msgs, { text: reply, sender: 'ia', time: new Date() }]);
-    }, 1500);
+  private scrollToBottom() {
+    setTimeout(() => {
+      const container = document.querySelector('.chat-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 100);
   }
 }

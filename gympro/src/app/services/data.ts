@@ -385,4 +385,8 @@ export class DataService {
       this.loadNotifications(email);
     });
   }
+
+  askCoachIA(message: string) {
+    return this.http.post<{ response: string }>(`${this.apiBase}/chat`, { message });
+  }
 }
