@@ -114,9 +114,16 @@ export class CoachDashboard {
       };
 
       if (this.isEditingStudent()) {
-        this.data.updateUser(studentData.email, studentData, this.coachEmail()).subscribe(() => {
+        const updateData: Partial<User> = {
+          name: formValue.name!,
+          nickname: formValue.nickname || undefined,
+          age: formValue.age!,
+          initialWeight: formValue.initialWeight!,
+          height: formValue.height!
+        };
+        this.data.updateUser(formValue.email!, updateData, this.coachEmail()).subscribe(() => {
           this.isEditingStudent.set(false);
-          this.selectedStudent.set(studentData);
+          this.selectedStudent.set({ ...this.selectedStudent()!, ...updateData });
         });
       } else {
         this.data.createStudent(studentData, this.coachEmail()).subscribe(() => {
