@@ -18,7 +18,7 @@ export class Layout {
   notificationsOpen = signal(false);
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       const u = this.auth.currentUser();
       if (!u) return;
       if (u.role === 'student') {
@@ -31,9 +31,8 @@ export class Layout {
           this.data.loadNotifications(u.email);
         }, 30000);
 
-        return () => clearInterval(interval);
+        onCleanup(() => clearInterval(interval));
       }
-      return;
     });
   }
 
