@@ -22,16 +22,20 @@ export class AiChat {
   private dataService = inject(DataService);
   private auth = inject(AuthService);
 
-  messages = signal<ChatMessage[]>([
-    {
-      text: '¡Hola! Soy tu asistente de CoachPro. ¿En qué te puedo ayudar sobre tus rutinas, dietas o técnica?',
-      sender: 'ia',
-      time: new Date()
-    }
-  ]);
-
+  messages = signal<ChatMessage[]>([]);
   newMessage = '';
   isTyping = signal(false);
+
+  constructor() {
+    const userName = this.auth.currentUser()?.name || 'Alumno';
+    this.messages.set([
+      {
+        text: `¡Hola ${userName}! Soy tu asistente de CoachPro. ¿En qué te puedo ayudar hoy con tus rutinas o progreso físico?`,
+        sender: 'ia',
+        time: new Date()
+      }
+    ]);
+  }
 
   sendMessage() {
     if (!this.newMessage.trim()) return;
