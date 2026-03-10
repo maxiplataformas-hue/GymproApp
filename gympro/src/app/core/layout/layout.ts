@@ -1,11 +1,12 @@
 import { Component, inject, signal, ChangeDetectionStrategy, effect } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import { DataService } from '../../services/data';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, DatePipe],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
   changeDetection: ChangeDetectionStrategy.OnPush
