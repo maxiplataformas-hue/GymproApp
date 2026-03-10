@@ -244,6 +244,12 @@ export class DataService {
     );
   }
 
+  updateUser(email: string, userData: Partial<User>, coachEmail?: string) {
+    return this.http.put<User>(`${this.apiBase}/users/${email}`, userData).pipe(
+      tap(() => this.loadAllStudents(coachEmail))
+    );
+  }
+
   loadRoutines(email: string) {
     this.http.get<RoutineAssignment[]>(`${this.apiBase}/routines/${email}`).subscribe(data => {
       this.routines.set(data);

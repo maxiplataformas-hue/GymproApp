@@ -47,10 +47,13 @@ export class CoachDashboard {
   newStudentForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
     name: new FormControl('', Validators.required),
+    nickname: new FormControl(''),
     age: new FormControl<number | null>(null, [Validators.required, Validators.min(10)]),
     initialWeight: new FormControl<number | null>(null, [Validators.required, Validators.min(30)]),
     height: new FormControl<number | null>(null, [Validators.required, Validators.min(100)])
   });
+
+  isEditingStudent = signal(false);
 
   constructor() {
     effect(() => {
@@ -61,12 +64,14 @@ export class CoachDashboard {
 
   selectStudent(student: User) {
     this.isCreatingStudent.set(false);
+    this.isEditingStudent.set(false);
     this.selectedStudent.set(student);
   }
 
   deselectStudent() {
     this.selectedStudent.set(null);
     this.isCreatingStudent.set(false);
+    this.isEditingStudent.set(false);
     this.activeTab.set('routine');
   }
 
@@ -78,23 +83,46 @@ export class CoachDashboard {
 
   cancelCreatingStudent() {
     this.isCreatingStudent.set(false);
+    this.isEditingStudent.set(false);
+  }
+
+  editStudent(student: User) {
+    this.isEditingStudent.set(true);
+    this.isCreatingStudent.set(false);
+    this.newStudentForm.patchValue({
+      email: student.email,
+      name: student.name,
+      nickname: student.nickname,
+      age: student.age,
+      initialWeight: student.initialWeight,
+      height: student.height
+    });
   }
 
   saveNewStudent() {
     if (this.newStudentForm.valid) {
       const formValue = this.newStudentForm.value;
-      const newUser: User = {
+      const studentData: User = {
         email: formValue.email!,
         name: formValue.name!,
+        nickname: formValue.nickname || undefined,
         age: formValue.age!,
         initialWeight: formValue.initialWeight!,
         height: formValue.height!,
         role: 'student',
         isOnboarded: true
       };
-      this.data.createStudent(newUser, this.coachEmail()).subscribe(() => {
-        this.isCreatingStudent.set(false);
-      });
+
+      if (this.isEditingStudent()) {
+        this.data.updateUser(studentData.email, studentData, this.coachEmail()).subscribe(() => {
+          this.isEditingStudent.set(false);
+          this.selectedStudent.set(studentData);
+        });
+      } else {
+        this.data.createStudent(studentData, this.coachEmail()).subscribe(() => {
+          this.isCreatingStudent.set(false);
+        });
+      }
     } else {
       this.newStudentForm.markAllAsTouched();
     }

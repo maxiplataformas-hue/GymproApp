@@ -27,10 +27,11 @@ export class AiChat {
   isTyping = signal(false);
 
   constructor() {
-    const userName = this.auth.currentUser()?.name || 'Alumno';
+    const user = this.auth.currentUser();
+    const displayName = user?.nickname || user?.name || 'Alumno';
     this.messages.set([
       {
-        text: `¡Hola ${userName}! Soy tu asistente de CoachPro. ¿En qué te puedo ayudar hoy con tus rutinas o progreso físico?`,
+        text: `¡Hola ${displayName}! Soy tu asistente de CoachPro. ¿En qué te puedo ayudar hoy con tus rutinas o progreso físico?`,
         sender: 'ia',
         time: new Date()
       }

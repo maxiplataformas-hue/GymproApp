@@ -11,6 +11,7 @@ export interface User {
   email: string;
   role: Role;
   name?: string;
+  nickname?: string;
   age?: number;
   initialWeight?: number;
   height?: number;
