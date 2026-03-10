@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { DataService } from '../../services/data';
+import { AuthService } from '../../services/auth';
 
 interface ChatMessage {
   text: string;
@@ -19,6 +20,7 @@ interface ChatMessage {
 })
 export class AiChat {
   private dataService = inject(DataService);
+  private auth = inject(AuthService);
 
   messages = signal<ChatMessage[]>([
     {
@@ -39,7 +41,9 @@ export class AiChat {
     this.newMessage = '';
     this.isTyping.set(true);
 
-    this.dataService.askCoachIA(userText).subscribe({
+    const userEmail = this.auth.currentUser()?.email;
+
+    this.dataService.askCoachIA(userText, userEmail).subscribe({
       next: (res) => {
         this.isTyping.set(false);
         this.messages.update(msgs => [...msgs, {

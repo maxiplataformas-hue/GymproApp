@@ -386,7 +386,7 @@ export class DataService {
     });
   }
 
-  askCoachIA(message: string) {
-    return this.http.post<{ response: string }>(`${this.apiBase}/chat`, { message });
+  askCoachIA(message: string, email?: string) {
+    return this.http.post<{ response: string }>(`${this.apiBase}/chat`, { message, email });
   }
 }
