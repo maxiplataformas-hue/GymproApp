@@ -19,7 +19,8 @@ export class Layout {
   constructor() {
     effect(() => {
       const u = this.auth.currentUser();
-      if (u && u.role === 'student') {
+      if (!u) return;
+      if (u.role === 'student') {
         this.data.loadRoutines(u.email);
         this.data.loadPhysio(u.email);
       }

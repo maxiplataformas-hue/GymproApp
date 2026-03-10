@@ -1,6 +1,5 @@
-import { Component, inject, computed, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy, signal, effect } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { DataService } from '../../services/data';
 import { AuthService, User } from '../../services/auth';
 import { RoutineAssignment } from '../routine-assignment/routine-assignment';
@@ -20,6 +19,8 @@ export class CoachDashboard {
 
   searchQuery = signal('');
   hideInactive = signal(false);
+
+  coachEmail = computed(() => this.auth.currentUser()?.email);
 
   students = computed(() => {
     let list = this.data.allStudents();
@@ -50,6 +51,13 @@ export class CoachDashboard {
     initialWeight: new FormControl<number | null>(null, [Validators.required, Validators.min(30)]),
     height: new FormControl<number | null>(null, [Validators.required, Validators.min(100)])
   });
+
+  constructor() {
+    effect(() => {
+      const email = this.coachEmail();
+      if (email) this.data.loadAllStudents(email);
+    });
+  }
 
   selectStudent(student: User) {
     this.isCreatingStudent.set(false);
@@ -84,7 +92,7 @@ export class CoachDashboard {
         role: 'student',
         isOnboarded: true
       };
-      this.data.createStudent(newUser).subscribe(() => {
+      this.data.createStudent(newUser, this.coachEmail()).subscribe(() => {
         this.isCreatingStudent.set(false);
       });
     } else {
@@ -94,15 +102,22 @@ export class CoachDashboard {
 
   toggleStudentStatus(student: User) {
     const isCurrentlyActive = student.isActive !== false;
-    const confirmMessage = isCurrentlyActive ?
-      `¿Estás seguro que deseas desactivar a ${student.name || student.email}? No podrá acceder a la plataforma.` :
-      `¿Deseas volver a activar a ${student.name || student.email}? Podrá reiniciar su progreso.`;
+    const msg = isCurrentlyActive
+      ? `¿Desactivar a ${student.name || student.email}? No podrá acceder a la plataforma.`
+      : `¿Reactivar a ${student.name || student.email}?`;
 
-    if (confirm(confirmMessage)) {
-      this.data.toggleStudentStatus(student.email, !isCurrentlyActive).subscribe(() => {
-        // Update selected student local ref so UI reflects the change immediately
-        // The updated user will come down from the signal reload soon but this helps optimism
+    if (confirm(msg)) {
+      this.data.toggleStudentStatus(student.email, !isCurrentlyActive, this.coachEmail()).subscribe(() => {
         this.selectedStudent.set({ ...student, isActive: !isCurrentlyActive });
+      });
+    }
+  }
+
+  deleteStudent(student: User) {
+    const msg = `¿Eliminar definitivamente a ${student.name || student.email}?\n\nEsta acción no se puede deshacer. El alumno y sus datos de rutina quedarán archivados pero no podrá iniciar sesión.`;
+    if (confirm(msg)) {
+      this.data.deleteStudent(student.email, this.coachEmail()).subscribe(() => {
+        this.deselectStudent();
       });
     }
   }

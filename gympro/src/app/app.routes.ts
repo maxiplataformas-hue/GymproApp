@@ -11,6 +11,7 @@ import { AiChat } from './student/ai-chat/ai-chat';
 import { StudentProgress } from './student/student-progress/student-progress';
 import { AppConfig } from './student/app-config/app-config';
 import { CoachDashboard } from './coach/coach-dashboard/coach-dashboard';
+import { AdminDashboard } from './admin/admin-dashboard/admin-dashboard';
 
 export const routes: Routes = [
     { path: '', component: SplashScreen },
@@ -20,6 +21,7 @@ export const routes: Routes = [
         path: 'app',
         component: Layout,
         children: [
+            { path: 'admin', component: AdminDashboard },
             { path: 'student', component: StudentDashboard },
             { path: 'student/physio', component: PhysiologicData },
             { path: 'student/charts', component: ProgressCharts },

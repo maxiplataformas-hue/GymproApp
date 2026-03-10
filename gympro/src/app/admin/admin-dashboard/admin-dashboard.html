@@ -1,0 +1,109 @@
+<div class="space-y-6 animate-fade-in-up p-4 md:p-0">
+    <!-- Header -->
+    <header class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-text">Panel de Administración</h1>
+            <p class="text-text-muted text-sm mt-1">{{ coaches().length }} coaches registrados</p>
+        </div>
+        <button (click)="startCreating()"
+            class="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all cursor-pointer text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Nuevo Coach
+        </button>
+    </header>
+
+    <!-- Create Coach Form -->
+    @if (isCreating()) {
+    <div class="bg-surface border border-border rounded-2xl p-6 shadow-sm animate-fade-in-up">
+        <h2 class="text-lg font-bold text-text mb-4">Registrar nuevo Coach</h2>
+        <form [formGroup]="newCoachForm" (ngSubmit)="saveCoach()" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-semibold text-text">Correo (Login)</label>
+                    <input type="email" formControlName="email" placeholder="coach@ejemplo.com"
+                        class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                    @if (newCoachForm.get('email')?.touched && newCoachForm.get('email')?.invalid) {
+                    <span class="text-secondary text-xs">Correo inválido.</span>
+                    }
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-semibold text-text">Nombre Completo</label>
+                    <input type="text" formControlName="name" placeholder="Ej. Carlos López"
+                        class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                    @if (newCoachForm.get('name')?.touched && newCoachForm.get('name')?.invalid) {
+                    <span class="text-secondary text-xs">Nombre requerido.</span>
+                    }
+                </div>
+            </div>
+
+            @if (saveError()) {
+            <p class="text-secondary text-sm">{{ saveError() }}</p>
+            }
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" (click)="cancelCreating()"
+                    class="px-5 py-2.5 rounded-xl font-bold bg-surface border border-border text-text hover:bg-border transition-colors cursor-pointer text-sm">
+                    Cancelar
+                </button>
+                <button type="submit"
+                    class="px-5 py-2.5 rounded-xl font-bold bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all cursor-pointer text-sm">
+                    Registrar Coach
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- Coaches Grid -->
+    @if (coaches().length === 0 && !isCreating()) {
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+        <div class="w-20 h-20 rounded-full bg-border/30 flex items-center justify-center mb-4">
+            <svg class="w-10 h-10 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                </path>
+            </svg>
+        </div>
+        <h3 class="font-bold text-text mb-1">No hay coaches registrados</h3>
+        <p class="text-text-muted text-sm">Crea el primer coach con el botón de arriba.</p>
+    </div>
+    } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (coach of coaches(); track coach.email) {
+        <div
+            class="bg-surface border border-border rounded-2xl p-5 shadow-sm flex flex-col gap-4 hover:border-primary/30 transition-colors">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center font-bold text-lg shrink-0">
+                    {{ (coach.name || 'C')[0].toUpperCase() }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-text truncate">{{ coach.name || coach.email }}</h3>
+                    <p class="text-xs text-text-muted truncate">{{ coach.email }}</p>
+                </div>
+                <!-- Status dot -->
+                <div class="w-3 h-3 rounded-full shrink-0" [class.bg-green-500]="coach.isActive !== false"
+                    [class.bg-red-500]="coach.isActive === false"
+                    [title]="coach.isActive !== false ? 'Activo' : 'Desactivado'">
+                </div>
+            </div>
+
+            <div class="border-t border-border pt-3 flex justify-end">
+                <button (click)="toggleCoach(coach)"
+                    class="text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors cursor-pointer"
+                    [class.bg-red-500/10]="coach.isActive !== false" [class.text-red-500]="coach.isActive !== false"
+                    [class.border-red-500/30]="coach.isActive !== false"
+                    [class.hover:bg-red-500/20]="coach.isActive !== false"
+                    [class.bg-green-500/10]="coach.isActive === false" [class.text-green-500]="coach.isActive === false"
+                    [class.border-green-500/30]="coach.isActive === false"
+                    [class.hover:bg-green-500/20]="coach.isActive === false">
+                    {{ coach.isActive !== false ? 'Desactivar' : 'Activar' }}
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>

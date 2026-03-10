@@ -174,33 +174,59 @@ export class DataService {
   routines = signal<RoutineAssignment[]>([]);
   physioEntries = signal<PhysiologicalEntry[]>([]);
   allStudents = signal<User[]>([]);
+  allCoaches = signal<User[]>([]);
   studentPhotos = signal<Map<string, StudentPhoto[]>>(new Map());
   currentProfiles = signal<StudentProfile[]>([]);
 
   private http = inject(HttpClient);
   private apiBase = 'https://gymproapp.onrender.com/api';
 
-  constructor() {
-    this.loadAllStudents();
-  }
+  constructor() { }
 
-  loadAllStudents() {
-    this.http.get<User[]>(`${this.apiBase}/users`).subscribe(users => {
+  loadAllStudents(coachEmail?: string) {
+    const url = coachEmail
+      ? `${this.apiBase}/users?coachEmail=${encodeURIComponent(coachEmail)}`
+      : `${this.apiBase}/users`;
+    this.http.get<User[]>(url).subscribe(users => {
       const students = users.filter((u: User) => u.role === 'student' && u.isOnboarded);
       this.allStudents.set(students);
     });
   }
 
-  createStudent(user: User) {
-    const newUser = { ...user, isActive: true };
+  loadCoaches() {
+    this.http.get<User[]>(`${this.apiBase}/users/coaches`).subscribe(coaches => {
+      this.allCoaches.set(coaches);
+    });
+  }
+
+  createStudent(user: User, coachEmail?: string) {
+    const newUser = { ...user, isActive: true, coachEmail: coachEmail ?? null };
     return this.http.post<User>(`${this.apiBase}/users`, newUser).pipe(
-      tap(() => this.loadAllStudents())
+      tap(() => this.loadAllStudents(coachEmail))
     );
   }
 
-  toggleStudentStatus(email: string, isActive: boolean) {
+  createCoach(user: User) {
+    return this.http.post<User>(`${this.apiBase}/users`, { ...user, role: 'coach', isActive: true }).pipe(
+      tap(() => this.loadCoaches())
+    );
+  }
+
+  toggleStudentStatus(email: string, isActive: boolean, coachEmail?: string) {
     return this.http.put<User>(`${this.apiBase}/users/${email}`, { isActive }).pipe(
-      tap(() => this.loadAllStudents())
+      tap(() => this.loadAllStudents(coachEmail))
+    );
+  }
+
+  deleteStudent(email: string, coachEmail?: string) {
+    return this.http.delete(`${this.apiBase}/users/${email}`).pipe(
+      tap(() => this.loadAllStudents(coachEmail))
+    );
+  }
+
+  toggleCoachStatus(email: string, isActive: boolean) {
+    return this.http.put<User>(`${this.apiBase}/users/${email}`, { isActive }).pipe(
+      tap(() => this.loadCoaches())
     );
   }
 

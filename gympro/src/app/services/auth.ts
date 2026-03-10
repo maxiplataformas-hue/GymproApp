@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { ThemeService, AppTheme } from './theme';
 
-export type Role = 'coach' | 'student';
+export type Role = 'admin' | 'coach' | 'student';
 
 export interface User {
   id?: string;
@@ -16,6 +16,8 @@ export interface User {
   height?: number;
   isOnboarded?: boolean;
   isActive?: boolean;
+  isDeleted?: boolean;
+  coachEmail?: string;
   theme?: string;
 }
 
@@ -26,6 +28,7 @@ export class AuthService {
   currentUser = signal<User | null>(null);
   isLoggedIn = computed(() => this.currentUser() !== null);
   isCoach = computed(() => this.currentUser()?.role === 'coach');
+  isAdmin = computed(() => this.currentUser()?.role === 'admin');
   loginError = signal<string | null>(null);
   isLoading = signal(false);
 
