@@ -17,6 +17,9 @@ public class RoutineController {
     @Autowired
     private RoutineRepository routineRepository;
 
+    @Autowired
+    private cl.maxi.gympro.repository.NotificationRepository notificationRepository;
+
     @GetMapping("/{studentEmail}")
     public List<Routine> getRoutinesByStudent(@PathVariable String studentEmail) {
         return routineRepository.findByStudentEmail(studentEmail);
@@ -37,12 +40,25 @@ public class RoutineController {
 
         if (existing.isPresent()) {
             Routine toUpdate = existing.get();
-            // Just append new items or replace completely. Let's replace for simplicity
             toUpdate.setItems(routine.getItems());
-            return routineRepository.save(toUpdate);
+            Routine saved = routineRepository.save(toUpdate);
+            createRoutineNotification(saved);
+            return saved;
         } else {
-            return routineRepository.save(routine);
+            Routine saved = routineRepository.save(routine);
+            createRoutineNotification(saved);
+            return saved;
         }
+    }
+
+    private void createRoutineNotification(Routine routine) {
+        String msg = "Tu coach te ha asignado una rutina para el " + routine.getDate();
+        cl.maxi.gympro.model.Notification notif = new cl.maxi.gympro.model.Notification(
+                routine.getStudentEmail(),
+                "", // Podemos dejarlo vacío o buscar el coachEmail en el futuro
+                msg,
+                "ROUTINE_ASSIGNED");
+        notificationRepository.save(notif);
     }
 
     @DeleteMapping("/{studentEmail}/{date}/{itemId}")
