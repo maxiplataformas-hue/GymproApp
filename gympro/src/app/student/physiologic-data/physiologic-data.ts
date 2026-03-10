@@ -1,10 +1,12 @@
 import { Component, inject, computed } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { DataService } from '../../services/data';
 
 @Component({
   selector: 'app-physiologic-data',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './physiologic-data.html'
 })
 export class PhysiologicData {
