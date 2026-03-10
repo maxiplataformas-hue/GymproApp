@@ -31,7 +31,7 @@ export class AiChat {
     const displayName = user?.nickname || user?.name || 'Alumno';
     this.messages.set([
       {
-        text: `¡Hola ${displayName}! Soy tu asistente de CoachPro. ¿En qué te puedo ayudar hoy con tus rutinas o progreso físico?`,
+        text: `Asistente CoachPro activado. Envía tu consulta sobre rutinas o métricas.`,
         sender: 'ia',
         time: new Date()
       }
