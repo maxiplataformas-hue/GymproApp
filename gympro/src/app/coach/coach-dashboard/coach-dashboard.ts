@@ -128,6 +128,7 @@ export class CoachDashboard {
       } else {
         this.data.createStudent(studentData, this.coachEmail()).subscribe(() => {
           this.isCreatingStudent.set(false);
+          this.data.loadAllStudents(this.coachEmail());
         });
       }
     } else {
