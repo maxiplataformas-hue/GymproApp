@@ -121,9 +121,19 @@ export class CoachDashboard {
           initialWeight: formValue.initialWeight!,
           height: formValue.height!
         };
-        this.data.updateUser(formValue.email!, updateData, this.coachEmail()).subscribe(() => {
-          this.isEditingStudent.set(false);
-          this.selectedStudent.set({ ...this.selectedStudent()!, ...updateData });
+        this.data.updateUser(formValue.email!, updateData, this.coachEmail()).subscribe({
+          next: () => {
+            this.isEditingStudent.set(false);
+            const current = this.selectedStudent();
+            if (current) {
+              this.selectedStudent.set({ ...current, ...updateData });
+            }
+            this.data.loadAllStudents(this.coachEmail());
+          },
+          error: (err) => {
+            console.error('Error al actualizar alumno:', err);
+            alert('No se pudo guardar la edición. Revisa tu conexión o intenta más tarde.');
+          }
         });
       } else {
         this.data.createStudent(studentData, this.coachEmail()).subscribe(() => {

@@ -201,7 +201,14 @@ export class DataService {
     const url = coachEmail
       ? `${this.apiBase}/users?coachEmail=${encodeURIComponent(coachEmail)}`
       : `${this.apiBase}/users`;
-    this.http.get<User[]>(url).subscribe(users => {
+    // Forzamos fresh data con headers de no-cache
+    this.http.get<User[]>(url, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    }).subscribe(users => {
       const students = users.filter((u: User) => u.role === 'student' && u.isOnboarded);
       this.allStudents.set(students);
     });
