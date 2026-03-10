@@ -41,7 +41,7 @@ export class AuthService {
     }
   }
 
-  login(email: string) {
+  login(email: string, onSuccess?: (user: User) => void) {
     this.loginError.set(null);
     this.isLoading.set(true);
 
@@ -70,7 +70,12 @@ export class AuthService {
       this.currentUser.set(user);
       localStorage.setItem('gympro-user', JSON.stringify(user));
       this.isLoading.set(false);
-      this.router.navigate(['/app', user.role]);
+
+      if (onSuccess) {
+        onSuccess(user);
+      } else {
+        this.router.navigate(['/app', user.role]);
+      }
     });
   }
 

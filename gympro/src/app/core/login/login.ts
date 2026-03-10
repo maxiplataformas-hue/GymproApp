@@ -1,7 +1,9 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
-import { AuthService } from '../../services/auth';
+import { Router } from '@angular/router';
+import { AuthService, User } from '../../services/auth';
 import { ThemeService, AppTheme } from '../../services/theme';
+import { BiometricService } from '../../services/biometric';
 
 @Component({
   selector: 'app-login',
@@ -14,16 +16,65 @@ export class Login {
 
   auth = inject(AuthService);
   themeService = inject(ThemeService);
+  biometric = inject(BiometricService);
+  router = inject(Router);
 
   loginError = this.auth.loginError;
   isLoading = this.auth.isLoading;
 
+  // Post-login biometric setup
+  showBiometricSetup = signal(false);
+  pendingUser = signal<User | null>(null);
+
+  // Biometric login state
+  isBiometricLoading = signal(false);
+  biometricError = signal<string | null>(null);
+
   onSubmitEmail() {
     if (this.emailControl.valid && this.emailControl.value) {
-      this.auth.login(this.emailControl.value.trim().toLowerCase());
+      this.auth.login(
+        this.emailControl.value.trim().toLowerCase(),
+        (user) => this.handleLoginSuccess(user)
+      );
     } else {
       this.emailControl.markAsTouched();
     }
+  }
+
+  private handleLoginSuccess(user: User) {
+    // Offer biometric setup only if available and not already registered
+    if (this.biometric.isAvailable() && !this.biometric.hasSavedCredential()) {
+      this.pendingUser.set(user);
+      this.showBiometricSetup.set(true);
+    } else {
+      this.router.navigate(['/app', user.role]);
+    }
+  }
+
+  async attemptBiometricLogin() {
+    this.biometricError.set(null);
+    this.isBiometricLoading.set(true);
+    const email = await this.biometric.authenticate();
+    if (email) {
+      this.auth.login(email); // validates against API, navigates on success
+    } else {
+      this.biometricError.set('Verificación fallida. Usa tu correo.');
+    }
+    this.isBiometricLoading.set(false);
+  }
+
+  async enableBiometrics() {
+    const user = this.pendingUser();
+    if (!user) return;
+    this.isBiometricLoading.set(true);
+    await this.biometric.register(user.email);
+    this.isBiometricLoading.set(false);
+    this.router.navigate(['/app', user.role]);
+  }
+
+  skipBiometrics() {
+    const user = this.pendingUser();
+    if (user) this.router.navigate(['/app', user.role]);
   }
 
   setTheme(theme: AppTheme) {
