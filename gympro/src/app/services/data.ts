@@ -75,6 +75,16 @@ export interface StudentProfile {
   adjuncts?: string;
 }
 
+export interface Notification {
+  id: string;
+  studentEmail: string;
+  coachEmail: string;
+  message: string;
+  type: string;
+  createdAt: string;
+  isRead: boolean;
+}
+
 // Initial Mock Exercises
 const MOCK_EXERCISES: Exercise[] = [
   // Pecho
@@ -177,6 +187,8 @@ export class DataService {
   allCoaches = signal<User[]>([]);
   studentPhotos = signal<Map<string, StudentPhoto[]>>(new Map());
   currentProfiles = signal<StudentProfile[]>([]);
+  notifications = signal<Notification[]>([]);
+  unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
 
   private http = inject(HttpClient);
   private apiBase = 'https://gymproapp.onrender.com/api';
@@ -341,6 +353,24 @@ export class DataService {
         alert('Nueva Evaluación guardada exitosamente en el historial.');
       },
       error: () => alert('Error al guardar Evaluación Clínica.')
+    });
+  }
+
+  loadNotifications(email: string) {
+    this.http.get<Notification[]>(`${this.apiBase}/notifications/${email}`).subscribe(data => {
+      this.notifications.set(data);
+    });
+  }
+
+  markAsRead(id: string, email: string) {
+    this.http.put(`${this.apiBase}/notifications/${id}/read`, {}).subscribe(() => {
+      this.loadNotifications(email);
+    });
+  }
+
+  markAllAsRead(email: string) {
+    this.http.put(`${this.apiBase}/notifications/read-all/${email}`, {}).subscribe(() => {
+      this.loadNotifications(email);
     });
   }
 }

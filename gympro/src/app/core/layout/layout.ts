@@ -15,6 +15,7 @@ export class Layout {
   data = inject(DataService);
 
   drawerOpen = signal(false);
+  notificationsOpen = signal(false);
 
   constructor() {
     effect(() => {
@@ -23,8 +24,21 @@ export class Layout {
       if (u.role === 'student') {
         this.data.loadRoutines(u.email);
         this.data.loadPhysio(u.email);
+        this.data.loadNotifications(u.email);
       }
     });
+  }
+
+  toggleNotifications() {
+    this.notificationsOpen.update(v => !v);
+  }
+
+  markAllAsRead() {
+    const u = this.auth.currentUser();
+    if (u) {
+      this.data.markAllAsRead(u.email);
+      this.notificationsOpen.set(false);
+    }
   }
 
   toggleDrawer() {

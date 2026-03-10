@@ -130,15 +130,33 @@
         <header
             class="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-border shrink-0 z-30">
             <h1 class="text-xl font-black tracking-tighter">COACH<span class="text-primary">PRO</span></h1>
-            <button (click)="toggleDrawer()" aria-label="Abrir menú"
-                class="w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-border/50 transition-colors cursor-pointer">
-                <span class="block w-5 h-0.5 bg-text rounded-full transition-all" [class.rotate-45]="drawerOpen()"
-                    [class.translate-y-2]="drawerOpen()"></span>
-                <span class="block w-5 h-0.5 bg-text rounded-full transition-all"
-                    [class.opacity-0]="drawerOpen()"></span>
-                <span class="block w-5 h-0.5 bg-text rounded-full transition-all" [class.-rotate-45]="drawerOpen()"
-                    [class.-translate-y-2]="drawerOpen()"></span>
-            </button>
+            <div class="flex items-center gap-2">
+                @if (auth.currentUser()?.role === 'student') {
+                <button (click)="toggleNotifications()"
+                    class="relative w-10 h-10 flex items-center justify-center rounded-xl hover:bg-border/50 transition-colors cursor-pointer text-text-muted">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                        </path>
+                    </svg>
+                    @if (data.unreadCount() > 0) {
+                    <span
+                        class="absolute top-2 right-2 w-4 h-4 bg-secondary text-white text-[10px] flex items-center justify-center rounded-full font-bold border-2 border-surface animate-bounce-slow">
+                        {{ data.unreadCount() }}
+                    </span>
+                    }
+                </button>
+                }
+                <button (click)="toggleDrawer()" aria-label="Abrir menú"
+                    class="w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-border/50 transition-colors cursor-pointer">
+                    <span class="block w-5 h-0.5 bg-text rounded-full transition-all" [class.rotate-45]="drawerOpen()"
+                        [class.translate-y-2]="drawerOpen()"></span>
+                    <span class="block w-5 h-0.5 bg-text rounded-full transition-all"
+                        [class.opacity-0]="drawerOpen()"></span>
+                    <span class="block w-5 h-0.5 bg-text rounded-full transition-all" [class.-rotate-45]="drawerOpen()"
+                        [class.-translate-y-2]="drawerOpen()"></span>
+                </button>
+            </div>
         </header>
 
         <!-- Mobile Drawer Overlay -->
@@ -292,5 +310,48 @@
         <div class="flex-1 overflow-y-auto w-full p-0 md:p-8">
             <router-outlet></router-outlet>
         </div>
+
+        <!-- Notification Panel (Desktop/Mobile overlay) -->
+        @if (notificationsOpen()) {
+        <div class="fixed inset-0 z-50 flex items-start justify-end p-4 md:p-8 bg-black/20 backdrop-blur-sm animate-fade-in"
+            (click)="toggleNotifications()">
+            <div class="w-full max-w-sm bg-surface rounded-2xl shadow-2xl border border-border overflow-hidden animate-scale-in"
+                (click)="$event.stopPropagation()">
+                <div class="p-4 border-b border-border flex items-center justify-between bg-primary/5">
+                    <h3 class="font-bold text-text">Notificaciones</h3>
+                    <button (click)="markAllAsRead()"
+                        class="text-xs text-primary font-semibold hover:underline cursor-pointer">
+                        Marcar todo como leído
+                    </button>
+                </div>
+                <div class="max-h-[70vh] overflow-y-auto">
+                    @for (n of data.notifications(); track n.id) {
+                    <div class="p-4 border-b border-border transition-colors hover:bg-border/20 cursor-pointer"
+                        [class.bg-primary/5]="!n.isRead" (click)="data.markAsRead(n.id, n.studentEmail)">
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 rounded-full mt-1.5 shrink-0" [class.bg-primary]="!n.isRead"
+                                [class.bg-transparent]="n.isRead"></div>
+                            <div>
+                                <p class="text-sm font-medium text-text leading-tight">{{ n.message }}</p>
+                                <p class="text-[10px] text-text-muted mt-1 uppercase font-semibold">{{ n.createdAt |
+                                    date:'short' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    } @empty {
+                    <div class="p-8 text-center">
+                        <svg class="w-12 h-12 text-text-muted/30 mx-auto mb-3" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                            </path>
+                        </svg>
+                        <p class="text-sm text-text-muted">No tienes notificaciones pendientes.</p>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+        }
     </main>
 </div>
