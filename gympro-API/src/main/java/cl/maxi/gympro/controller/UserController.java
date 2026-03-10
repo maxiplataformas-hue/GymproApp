@@ -80,6 +80,8 @@ public class UserController {
                 existing.setTheme(userDetails.getTheme());
             if (userDetails.getCoachEmail() != null)
                 existing.setCoachEmail(userDetails.getCoachEmail());
+            if (userDetails.getRole() != null)
+                existing.setRole(userDetails.getRole());
 
             return ResponseEntity.ok(userRepository.save(existing));
         }
