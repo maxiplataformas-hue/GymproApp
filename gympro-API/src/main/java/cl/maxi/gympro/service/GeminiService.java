@@ -46,10 +46,16 @@ public class GeminiService {
 
         try {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            // Usamos ParameterizedTypeReference para tipificar la respuesta correctamente
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {
+                    });
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                Map<String, Object> body = (Map<String, Object>) response.getBody();
+                Map<String, Object> body = response.getBody();
                 List<Map<String, Object>> candidates = (List<Map<String, Object>>) body.get("candidates");
 
                 if (candidates != null && !candidates.isEmpty()) {
@@ -61,7 +67,7 @@ public class GeminiService {
                 }
             }
         } catch (Exception e) {
-            return "Hubo un error al comunicar con el Coach IA: " + e.getMessage();
+            return "Hubo un error al comunicar con el Coach IA (v2.5-flash): " + e.getMessage();
         }
 
         return "No pude generar una respuesta en este momento.";
