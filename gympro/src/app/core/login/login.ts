@@ -30,6 +30,28 @@ export class Login {
   isBiometricLoading = signal(false);
   biometricError = signal<string | null>(null);
 
+  // PWA Install logic
+  deferredPrompt: any;
+  showInstallButton = signal(false);
+
+  constructor() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      this.showInstallButton.set(true);
+    });
+  }
+
+  async installApp() {
+    if (!this.deferredPrompt) return;
+    this.deferredPrompt.prompt();
+    const { outcome } = await this.deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      this.showInstallButton.set(false);
+    }
+    this.deferredPrompt = null;
+  }
+
   onSubmitEmail() {
     if (this.emailControl.valid && this.emailControl.value) {
       this.auth.login(
