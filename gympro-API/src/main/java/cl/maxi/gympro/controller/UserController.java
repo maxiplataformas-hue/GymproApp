@@ -8,20 +8,42 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*") // Allow Angular to connect
+@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * GET /api/users?coachEmail=xxx → students of that coach (not deleted)
+     * GET /api/users → all non-deleted users (admin use)
+     */
     @GetMapping
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<User> getUsers(@RequestParam(required = false) String coachEmail) {
+        if (coachEmail != null && !coachEmail.isBlank()) {
+            return userRepository.findByCoachEmailAndIsDeletedNot(coachEmail, true)
+                    .stream()
+                    .filter(u -> "student".equals(u.getRole()) && Boolean.TRUE.equals(u.getIsOnboarded()))
+                    .collect(Collectors.toList());
+        }
+        // Admin: return all non-deleted users
+        return userRepository.findAll()
+                .stream()
+                .filter(u -> !Boolean.TRUE.equals(u.getIsDeleted()))
+                .collect(Collectors.toList());
     }
 
+    /** GET /api/users/coaches → all active coach accounts */
+    @GetMapping("/coaches")
+    public List<User> getCoaches() {
+        return userRepository.findByRoleAndIsDeletedNot("coach", true);
+    }
+
+    /** GET /api/users/{email} */
     @GetMapping("/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         Optional<User> user = userRepository.findByEmail(email);
@@ -29,37 +51,52 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /** POST /api/users → create user */
     @PostMapping
     public User createUser(@RequestBody User user) {
         return userRepository.save(user);
     }
 
+    /** PUT /api/users/{email} → update fields */
     @PutMapping("/{email}")
     public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody User userDetails) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isPresent()) {
-            User existingUser = optionalUser.get();
-            // Update fields
+            User existing = optionalUser.get();
             if (userDetails.getName() != null)
-                existingUser.setName(userDetails.getName());
+                existing.setName(userDetails.getName());
             if (userDetails.getAge() != null)
-                existingUser.setAge(userDetails.getAge());
+                existing.setAge(userDetails.getAge());
             if (userDetails.getHeight() != null)
-                existingUser.setHeight(userDetails.getHeight());
+                existing.setHeight(userDetails.getHeight());
             if (userDetails.getInitialWeight() != null)
-                existingUser.setInitialWeight(userDetails.getInitialWeight());
+                existing.setInitialWeight(userDetails.getInitialWeight());
             if (userDetails.getIsOnboarded() != null)
-                existingUser.setIsOnboarded(userDetails.getIsOnboarded());
+                existing.setIsOnboarded(userDetails.getIsOnboarded());
             if (userDetails.getIsActive() != null)
-                existingUser.setIsActive(userDetails.getIsActive());
+                existing.setIsActive(userDetails.getIsActive());
             if (userDetails.getTheme() != null)
-                existingUser.setTheme(userDetails.getTheme());
+                existing.setTheme(userDetails.getTheme());
+            if (userDetails.getCoachEmail() != null)
+                existing.setCoachEmail(userDetails.getCoachEmail());
 
-            User updatedUser = userRepository.save(existingUser);
-            return ResponseEntity.ok(updatedUser);
-        } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(userRepository.save(existing));
         }
+        return ResponseEntity.notFound().build();
+    }
+
+    /** DELETE /api/users/{email} → soft delete (isDeleted = true) */
+    @DeleteMapping("/{email}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setIsDeleted(true);
+            user.setIsActive(false);
+            userRepository.save(user);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

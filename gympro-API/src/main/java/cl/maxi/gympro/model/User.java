@@ -17,14 +17,15 @@ public class User {
 
     private String email;
     private String name;
-    private String role; // "coach" o "student"
+    private String role; // "admin", "coach" o "student"
 
     private Integer age;
     private Double height; // cm
     private Double initialWeight; // kg
     private Boolean isOnboarded;
     private Boolean isActive; // null/true = active, false = disabled
+    private Boolean isDeleted; // soft delete flag
     private String theme; // "light", "dark", or "pink"
-
+    private String coachEmail; // email del coach al que pertenece el alumno
     private String password;
 }
