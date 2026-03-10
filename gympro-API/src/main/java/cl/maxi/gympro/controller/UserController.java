@@ -66,6 +66,8 @@ public class UserController {
             User existing = optionalUser.get();
             if (userDetails.getName() != null)
                 existing.setName(userDetails.getName());
+            if (userDetails.getNickname() != null)
+                existing.setNickname(userDetails.getNickname());
             if (userDetails.getAge() != null)
                 existing.setAge(userDetails.getAge());
             if (userDetails.getHeight() != null)

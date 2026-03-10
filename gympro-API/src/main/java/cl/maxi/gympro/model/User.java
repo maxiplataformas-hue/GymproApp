@@ -17,6 +17,7 @@ public class User {
 
     private String email;
     private String name;
+    private String nickname;
     private String role; // "admin", "coach" o "student"
 
     private Integer age;

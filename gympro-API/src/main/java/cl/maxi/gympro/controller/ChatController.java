@@ -46,6 +46,8 @@ public class ChatController {
         // 1. Datos personales
         userRepository.findByEmail(email).ifPresent(u -> {
             context.append("- Nombre: ").append(u.getName()).append("\n");
+            if (u.getNickname() != null)
+                context.append("- Apodo: ").append(u.getNickname()).append("\n");
             context.append("- Edad: ").append(u.getAge()).append("\n");
             context.append("- Altura: ").append(u.getHeight()).append(" cm\n");
             context.append("- Peso Inicial: ").append(u.getInitialWeight()).append(" kg\n");
