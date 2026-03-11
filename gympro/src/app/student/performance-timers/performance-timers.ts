@@ -51,17 +51,23 @@ export class PerformanceTimers implements OnDestroy {
       this.isFullscreen.set(!!document.fullscreenElement);
     };
 
-    // Auto-fullscreen on landscape
-    const query = window.matchMedia('(orientation: landscape)');
+    // Auto-fullscreen on landscape (Robust detection)
+    const orientationQuery = window.matchMedia('(orientation: landscape)');
     const handleOrientation = (e: MediaQueryListEvent | MediaQueryList) => {
-      if (e.matches && window.innerWidth < 1024) { // Only on mobile/tablet
+      // If running and rotated to landscape, force visual fullscreen
+      if (e.matches) {
         this.isFullscreen.set(true);
-      } else {
+      } else if (!document.fullscreenElement) {
+        // Only exit visual fullscreen if we are not in actual browser fullscreen
         this.isFullscreen.set(false);
       }
     };
-    query.addEventListener('change', handleOrientation);
-    handleOrientation(query);
+    
+    orientationQuery.addEventListener('change', handleOrientation);
+    // Also listen for resize as a backup for some mobile browsers
+    window.addEventListener('resize', () => handleOrientation(orientationQuery));
+    // Initial check
+    handleOrientation(orientationQuery);
 
     // Re-request wake lock if tab becomes visible again
     document.addEventListener('visibilitychange', async () => {
