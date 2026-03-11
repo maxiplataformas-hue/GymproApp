@@ -37,6 +37,8 @@ export class PerformanceTimers implements OnDestroy {
   private wakeLock: any = null;
   private authService = inject(AuthService);
   private silentAudio: HTMLAudioElement | null = null;
+  private phaseStartTime: number = 0;
+  private activeOscillators: any[] = [];
 
   constructor() {
     effect(() => {
@@ -55,19 +57,15 @@ export class PerformanceTimers implements OnDestroy {
     // Auto-fullscreen on landscape (Robust detection)
     const orientationQuery = window.matchMedia('(orientation: landscape)');
     const handleOrientation = (e: MediaQueryListEvent | MediaQueryList) => {
-      // If running and rotated to landscape, force visual fullscreen
       if (e.matches) {
         this.isFullscreen.set(true);
       } else if (!document.fullscreenElement) {
-        // Only exit visual fullscreen if we are not in actual browser fullscreen
         this.isFullscreen.set(false);
       }
     };
     
     orientationQuery.addEventListener('change', handleOrientation);
-    // Also listen for resize as a backup for some mobile browsers
     window.addEventListener('resize', () => handleOrientation(orientationQuery));
-    // Initial check
     handleOrientation(orientationQuery);
 
     // Re-request wake lock if tab becomes visible again
@@ -82,7 +80,6 @@ export class PerformanceTimers implements OnDestroy {
   }
 
   private setupSilentAudio() {
-    // 1 second of silence in a base64 encoded MP3
     const silentMp3 = 'data:audio/mp3;base64,SUQzBAAAAAABEVRYWFhYAAAAHAAAAGluZm8AMDAwMDAwMDAwMDAwMDAwMDAwMDAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZm8AAAAHAAAAAwAAAGUAAAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusrba3uLm6u7y9vr+AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//uQZAAEA6G9pYm6e4ADuFpA67nEAAIuFpAAAAAIBi4WkAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
     this.silentAudio = new Audio(silentMp3);
     this.silentAudio.loop = true;
@@ -117,17 +114,17 @@ export class PerformanceTimers implements OnDestroy {
   }
 
   private tick() {
-    this.timeLeft.update(t => t - 1);
+    if (!this.isRunning() || this.isPaused()) return;
 
-    if (this.timeLeft() <= 5 && this.timeLeft() > 0) {
-      this.playSound('warning');
-    }
+    const elapsed = Math.floor((Date.now() - this.phaseStartTime) / 1000);
+    const duration = this.isPrepPhase() ? 10 : (this.isWorkPhase() ? this.workTime() : this.restTime());
+    const remaining = Math.max(0, duration - elapsed);
+    
+    this.timeLeft.set(remaining);
 
-    if (this.timeLeft() <= 0) {
+    if (remaining <= 0) {
       if (this.isPrepPhase()) {
-        this.isPrepPhase.set(false);
-        this.timeLeft.set(this.workTime());
-        this.playSound('start');
+        this.startPhase('work');
       } else {
         this.handlePhaseEnd();
       }
@@ -143,17 +140,23 @@ export class PerformanceTimers implements OnDestroy {
   }
 
   start() {
+    if (this.isRunning() && this.isPaused()) {
+      this.isPaused.set(false);
+      this.phaseStartTime = Date.now() - (this.isPrepPhase() ? 10 - this.timeLeft() : (this.isWorkPhase() ? this.workTime() - this.timeLeft() : this.restTime() - this.timeLeft())) * 1000;
+      this.rescheduleCurrentPhase();
+      if (this.silentAudio) this.silentAudio.play().catch(() => {});
+      return;
+    }
+
     if (this.isRunning()) return;
-    
+
     this.isRunning.set(true);
     this.isPaused.set(false);
     this.isFinished.set(false);
-    this.isPrepPhase.set(true); // Always start with a 10s prep
-    this.timeLeft.set(10);
     this.currentRound.set(1);
-    this.isWorkPhase.set(true);
     
-    this.playSound('warning');
+    this.startPhase('prep');
+    
     if (this.worker) {
       this.worker.postMessage('start');
     }
@@ -164,20 +167,63 @@ export class PerformanceTimers implements OnDestroy {
     this.requestWakeLock();
   }
 
+  private startPhase(phase: 'prep' | 'work' | 'rest') {
+    this.clearScheduledAudio();
+    this.phaseStartTime = Date.now();
+    
+    if (phase === 'prep') {
+      this.isPrepPhase.set(true);
+      this.isWorkPhase.set(true); // Prep is always a work-ish phase
+      this.timeLeft.set(10);
+      this.playSound('warning'); // Initial beep
+      this.scheduleUpcomingAudio(10, 'start');
+    } else if (phase === 'work') {
+      this.isPrepPhase.set(false);
+      this.isWorkPhase.set(true);
+      this.timeLeft.set(this.workTime());
+      this.playSound('start');
+      this.scheduleUpcomingAudio(this.workTime(), 'end');
+    } else if (phase === 'rest') {
+      this.isPrepPhase.set(false);
+      this.isWorkPhase.set(false);
+      this.timeLeft.set(this.restTime());
+      this.playSound('rest');
+      this.scheduleUpcomingAudio(this.restTime(), 'end');
+    }
+  }
+
+  private clearScheduledAudio() {
+    this.activeOscillators.forEach(osc => {
+      try { osc.stop(); } catch(e) {}
+    });
+    this.activeOscillators = [];
+  }
+
+  private rescheduleCurrentPhase() {
+    const elapsed = Math.floor((Date.now() - this.phaseStartTime) / 1000);
+    const duration = this.isPrepPhase() ? 10 : (this.isWorkPhase() ? this.workTime() : this.restTime());
+    const remaining = duration - elapsed;
+    if (remaining > 0) {
+      this.scheduleUpcomingAudio(duration, 'dummy', elapsed); 
+    }
+  }
+
   pause() {
     this.isPaused.set(!this.isPaused());
-    if (this.silentAudio) {
-      if (this.isPaused()) {
-        this.silentAudio.pause();
-      } else if (this.isRunning()) {
-        this.silentAudio.play().catch(e => console.error('Silent audio resume failed:', e));
-      }
+    if (this.isPaused()) {
+      this.clearScheduledAudio();
+      if (this.silentAudio) this.silentAudio.pause();
+    } else if (this.isRunning()) {
+      this.phaseStartTime = Date.now() - (this.isPrepPhase() ? 10 - this.timeLeft() : (this.isWorkPhase() ? this.workTime() - this.timeLeft() : this.restTime() - this.timeLeft())) * 1000;
+      this.rescheduleCurrentPhase();
+      if (this.silentAudio) this.silentAudio.play().catch(() => {});
     }
   }
 
   stop() {
     this.isRunning.set(false);
     this.isPaused.set(false);
+    this.clearScheduledAudio();
     if (this.worker) {
       this.worker.postMessage('stop');
     }
@@ -219,32 +265,23 @@ export class PerformanceTimers implements OnDestroy {
     this.isFullscreen.set(!this.isFullscreen());
   }
 
-  private runTick() {
-    // Methods replaced by worker
-  }
-
   private handlePhaseEnd() {
     if (this.mode() === 'EMOM') {
       if (this.currentRound() >= this.rounds()) {
         this.handleCompletion();
       } else {
         this.currentRound.update(r => r + 1);
-        this.timeLeft.set(this.workTime());
-        this.playSound('start');
+        this.startPhase('work');
       }
     } else if (this.mode() === 'TABATA') {
       if (this.isWorkPhase()) {
-        this.isWorkPhase.set(false);
-        this.timeLeft.set(this.restTime());
-        this.playSound('rest'); // Or just start
+        this.startPhase('rest');
       } else {
         if (this.currentRound() >= this.rounds()) {
           this.handleCompletion();
         } else {
-          this.isWorkPhase.set(true);
           this.currentRound.update(r => r + 1);
-          this.timeLeft.set(this.workTime());
-          this.playSound('start');
+          this.startPhase('work');
         }
       }
     } else if (this.mode() === 'REST') {
@@ -261,7 +298,57 @@ export class PerformanceTimers implements OnDestroy {
       const user = this.authService.currentUser();
       const alias = user?.nickname || user?.name || 'atleta';
       this.speak(`Bien hecho ${alias}, sigue así`);
-    }, 3500); // Speak after the 3s long beep
+    }, 3500); 
+  }
+
+  private async scheduleUpcomingAudio(duration: number, nextType: string, offset: number = 0) {
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+
+    const now = this.audioContext.currentTime;
+    const vol = this.volume() / 100;
+
+    // Schedule 5 warning beeps
+    for (let i = 1; i <= 5; i++) {
+        const timeToBeep = duration - i - offset;
+        if (timeToBeep > 0) {
+            this.scheduleBeep(now + timeToBeep, 0.2, 660, vol);
+        }
+    }
+
+    // Schedule end beep (longer)
+    const timeToEnd = duration - offset;
+    if (timeToEnd > 0) {
+        this.scheduleBeep(now + timeToEnd, 0.8, 880, vol);
+    }
+  }
+
+  private scheduleBeep(startTime: number, duration: number, freq: number, volume: number) {
+    if (!this.audioContext) return;
+    
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, startTime);
+    
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(volume * 1.5, startTime + 0.01);
+    gain.gain.setValueAtTime(volume * 1.5, startTime + duration - 0.05);
+    gain.gain.linearRampToValueAtTime(0, startTime + duration);
+    
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
+    
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+    
+    this.activeOscillators.push(osc);
   }
 
   private async playSound(type: 'start' | 'warning' | 'end' | 'rest' | 'bell') {
@@ -269,7 +356,6 @@ export class PerformanceTimers implements OnDestroy {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
     
-    // Ensure the audio context is active (necessary if the screen was locked/backgrounded)
     if (this.audioContext.state === 'suspended') {
       await this.audioContext.resume();
     }
@@ -277,20 +363,19 @@ export class PerformanceTimers implements OnDestroy {
     const osc = this.audioContext.createOscillator();
     const gain = this.audioContext.createGain();
     
-    osc.type = 'square'; // More "piercing" sound for noisy gyms
+    osc.type = 'square';
     osc.connect(gain);
     gain.connect(this.audioContext.destination);
 
-    // Increase perceived volume by allowing gain up to 1.5x (be careful with clipping)
     const baseVolume = this.volume() * 1.5; 
     
     if (type === 'start') {
-      osc.frequency.setValueAtTime(880, this.audioContext.currentTime); // A5
+      osc.frequency.setValueAtTime(880, this.audioContext.currentTime);
       gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
       osc.start();
-      osc.stop(this.audioContext.currentTime + 0.8); // Long beep
+      osc.stop(this.audioContext.currentTime + 0.8);
     } else if (type === 'warning') {
-      osc.frequency.setValueAtTime(440, this.audioContext.currentTime); // A4
+      osc.frequency.setValueAtTime(440, this.audioContext.currentTime);
       gain.gain.setValueAtTime(baseVolume * 0.4, this.audioContext.currentTime);
       osc.start();
       osc.stop(this.audioContext.currentTime + 0.1);
@@ -298,12 +383,12 @@ export class PerformanceTimers implements OnDestroy {
       osc.frequency.setValueAtTime(1200, this.audioContext.currentTime);
       gain.gain.setValueAtTime(baseVolume * 1.5, this.audioContext.currentTime); 
       osc.start();
-      osc.stop(this.audioContext.currentTime + 3.0); // Very long beep per request
+      osc.stop(this.audioContext.currentTime + 3.0);
     } else if (type === 'rest') {
       osc.frequency.setValueAtTime(660, this.audioContext.currentTime);
       gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
       osc.start();
-      osc.stop(this.audioContext.currentTime + 0.8); // Long beep
+      osc.stop(this.audioContext.currentTime + 0.8);
     } else if (type === 'bell') {
       const mod = this.audioContext.createOscillator();
       const modGain = this.audioContext.createGain();
