@@ -34,16 +34,21 @@
   <!-- Main Timer Display -->
   <div class="flex-1 flex flex-col items-center justify-center gap-8">
     <div class="p-8 md:p-16 rounded-[40px] bg-surface border-4 border-border shadow-2xl flex flex-col items-center justify-center min-w-[300px] md:min-w-[500px] transition-all"
-      [class.border-primary]="isRunning() && isWorkPhase() && !isPaused()"
-      [class.border-secondary]="isRunning() && !isWorkPhase() && !isPaused()"
+      [class.border-yellow-400]="isPrepPhase() && isRunning() && !isPaused()"
+      [class.border-red-600]="isWorkPhase() && !isPrepPhase() && isRunning() && !isPaused()"
+      [class.border-secondary]="!isWorkPhase() && !isPrepPhase() && isRunning() && !isPaused()"
       [class.scale-105]="isRunning() && !isPaused()">
       
-      <span class="text-xs font-black uppercase tracking-[0.2em] text-text-muted mb-2">
+      <span class="text-xs font-black uppercase tracking-[0.2em] text-text-muted mb-2"
+        [class.font-bold]="isPrepPhase()" [class.text-yellow-400]="isPrepPhase()">
         {{ isPrepPhase() ? 'Prepárate' : (isWorkPhase() ? 'Trabajo' : 'Descanso') }}
       </span>
       
       <div class="text-8xl md:text-[12rem] font-black leading-none tracking-tighter tabular-nums"
-        [class.text-primary]="isWorkPhase()" [class.text-secondary]="!isWorkPhase()" [class.opacity-50]="isPaused()">
+        [class.text-yellow-400]="isPrepPhase()"
+        [class.text-red-600]="isWorkPhase() && !isPrepPhase()" 
+        [class.text-secondary]="!isWorkPhase() && !isPrepPhase()" 
+        [class.opacity-50]="isPaused()">
         {{ isFinished() ? 'FIN' : formatTime(timeLeft()) }}
       </div>
       
