@@ -1,13 +1,13 @@
 import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import { DataService } from '../../services/data';
 
 @Component({
   selector: 'app-routine-calendar',
   standalone: true,
-  imports: [RouterLink, DatePipe, NgClass],
+  imports: [RouterLink, DatePipe],
   templateUrl: './routine-calendar.html'
 })
 export class RoutineCalendar implements OnInit {

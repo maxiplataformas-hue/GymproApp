@@ -13,7 +13,7 @@ export class AdminDashboard {
     data = inject(DataService);
     auth = inject(AuthService);
 
-    coaches = this.data.allCoaches;
+    coaches = this.data.allCoaches as any;
     isCreating = signal(false);
     saveError = signal<string | null>(null);
 

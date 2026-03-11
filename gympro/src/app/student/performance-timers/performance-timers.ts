@@ -12,6 +12,7 @@ type TimerMode = 'EMOM' | 'TABATA' | 'REST';
   styleUrl: './performance-timers.css'
 })
 export class PerformanceTimers implements OnDestroy {
+  timerModes: TimerMode[] = ['EMOM', 'TABATA', 'REST'];
   mode = signal<TimerMode>('EMOM');
   isRunning = signal(false);
   isPaused = signal(false);

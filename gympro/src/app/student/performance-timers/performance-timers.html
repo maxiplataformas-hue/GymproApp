@@ -20,9 +20,8 @@
     </div>
   </div>
 
-  <!-- Mode Selector -->
   <div class="flex gap-2 mb-8 overflow-x-auto pb-2 shrink-0" *ngIf="!isRunning()">
-    <button *ngFor="let m of ['EMOM', 'TABATA', 'REST']" 
+    <button *ngFor="let m of timerModes" 
       (click)="mode.set(m); mode() === 'REST' ? timeLeft.set(60) : null"
       class="px-6 py-2 rounded-xl font-bold transition-all border shrink-0"
       [class.bg-primary]="mode() === m" [class.text-white]="mode() === m"
