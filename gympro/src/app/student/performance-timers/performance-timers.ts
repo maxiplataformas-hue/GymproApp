@@ -86,7 +86,7 @@ export class PerformanceTimers implements OnDestroy {
 
       this.timeLeft.update(t => t - 1);
 
-      if (this.timeLeft() === 5) {
+      if (this.timeLeft() <= 5 && this.timeLeft() > 0) {
         this.playSound('warning');
       }
 
@@ -143,7 +143,7 @@ export class PerformanceTimers implements OnDestroy {
       osc.frequency.setValueAtTime(880, this.audioContext.currentTime); // A5
       gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
       osc.start();
-      osc.stop(this.audioContext.currentTime + 0.3);
+      osc.stop(this.audioContext.currentTime + 0.8); // Long beep
     } else if (type === 'warning') {
       osc.frequency.setValueAtTime(440, this.audioContext.currentTime); // A4
       gain.gain.setValueAtTime(0.05, this.audioContext.currentTime);
@@ -158,7 +158,7 @@ export class PerformanceTimers implements OnDestroy {
       osc.frequency.setValueAtTime(660, this.audioContext.currentTime);
       gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
       osc.start();
-      osc.stop(this.audioContext.currentTime + 0.3);
+      osc.stop(this.audioContext.currentTime + 0.8); // Long beep
     }
   }
 
