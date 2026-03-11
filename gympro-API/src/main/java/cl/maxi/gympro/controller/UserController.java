@@ -46,18 +46,33 @@ public class UserController {
     /** GET /api/users/{email} */
     @GetMapping("/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        Optional<User> user = userRepository.findByEmailIgnoreCase(email);
-        return user.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        // Use findAll to handle potential historical duplicates safely
+        List<User> users = userRepository.findAll()
+                .stream()
+                .filter(u -> email.equalsIgnoreCase(u.getEmail()) && !Boolean.TRUE.equals(u.getIsDeleted()))
+                .collect(Collectors.toList());
+
+        if (users.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        // Return the first active one or just the first one
+        return ResponseEntity.ok(users.get(0));
     }
 
     /** POST /api/users → create user */
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody User user) {
         if (user.getEmail() != null) {
-            user.setEmail(user.getEmail().trim().toLowerCase());
+            String email = user.getEmail().trim().toLowerCase();
+            user.setEmail(email);
+
+            // Prevent duplicates
+            Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
+            if (existing.isPresent() && !Boolean.TRUE.equals(existing.get().getIsDeleted())) {
+                return ResponseEntity.status(409).body("El correo ya está registrado.");
+            }
         }
-        return userRepository.save(user);
+        return ResponseEntity.ok(userRepository.save(user));
     }
 
     /** PUT /api/users/{email} → update fields */

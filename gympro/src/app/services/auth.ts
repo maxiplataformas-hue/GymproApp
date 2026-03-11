@@ -52,36 +52,45 @@ export class AuthService {
     this.isLoading.set(true);
 
     const normalizedEmail = email.trim().toLowerCase();
-    this.http.get<User>(`${this.usersUrl}/${normalizedEmail}`).pipe(
-      catchError(() => of(null))
-    ).subscribe(user => {
-      if (!user) {
-        this.loginError.set('Este correo no está registrado. Contacta a tu Coach.');
-        this.isLoading.set(false);
-        return;
-      }
-      if (user.role === 'student' && user.isActive === false) {
-        this.loginError.set('Tu cuenta ha sido desactivada. Contacta a tu Coach.');
-        this.isLoading.set(false);
-        return;
-      }
-      if (!user.isOnboarded && user.role === 'student') {
-        this.loginError.set('Tu cuenta aún no ha sido configurada por tu Coach.');
-        this.isLoading.set(false);
-        return;
-      }
+    this.http.get<User>(`${this.usersUrl}/${normalizedEmail}`).subscribe({
+      next: (user) => {
+        if (!user) {
+          this.loginError.set('Este correo no está registrado. Contacta a tu Coach.');
+          this.isLoading.set(false);
+          return;
+        }
+        if (user.role === 'student' && user.isActive === false) {
+          this.loginError.set('Tu cuenta ha sido desactivada. Contacta a tu Coach.');
+          this.isLoading.set(false);
+          return;
+        }
+        if (!user.isOnboarded && user.role === 'student') {
+          this.loginError.set('Tu cuenta aún no ha sido configurada por tu Coach.');
+          this.isLoading.set(false);
+          return;
+        }
 
-      if (user.theme) {
-        this.themeService.setTheme(user.theme as AppTheme);
-      }
-      this.currentUser.set(user);
-      localStorage.setItem('gympro-user', JSON.stringify(user));
-      this.isLoading.set(false);
+        if (user.theme) {
+          this.themeService.setTheme(user.theme as AppTheme);
+        }
+        this.currentUser.set(user);
+        localStorage.setItem('gympro-user', JSON.stringify(user));
+        this.isLoading.set(false);
 
-      if (onSuccess) {
-        onSuccess(user);
-      } else {
-        this.router.navigate(['/app', user.role]);
+        if (onSuccess) {
+          onSuccess(user);
+        } else {
+          this.router.navigate(['/app', user.role]);
+        }
+      },
+      error: (err) => {
+        console.error('Login error:', err);
+        if (err.status === 404) {
+          this.loginError.set('Este correo no está registrado. Contacta a tu Coach.');
+        } else {
+          this.loginError.set('Error de servidor. Reintenta en un momento.');
+        }
+        this.isLoading.set(false);
       }
     });
   }
