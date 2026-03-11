@@ -22,7 +22,7 @@
 
   <div class="flex gap-2 mb-8 overflow-x-auto pb-2 shrink-0" *ngIf="!isRunning()">
     <button *ngFor="let m of timerModes" 
-      (click)="mode.set(m); mode() === 'REST' ? timeLeft.set(60) : null"
+      (click)="setMode(m)"
       class="px-6 py-2 rounded-xl font-bold transition-all border shrink-0"
       [class.bg-primary]="mode() === m" [class.text-white]="mode() === m"
       [class.border-primary]="mode() === m" [class.bg-surface]="mode() !== m"

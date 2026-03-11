@@ -13,19 +13,19 @@ type TimerMode = 'EMOM' | 'TABATA' | 'REST';
 })
 export class PerformanceTimers implements OnDestroy {
   timerModes: TimerMode[] = ['EMOM', 'TABATA', 'REST'];
-  mode = signal<TimerMode>('EMOM');
+  mode = signal<TimerMode>('TABATA');
   isRunning = signal(false);
   isPaused = signal(false);
   isFullscreen = signal(false);
   
   // Configuration
-  workTime = signal(60); // seconds
+  workTime = signal(20); // seconds
   restTime = signal(10); // seconds
-  rounds = signal(10);
+  rounds = signal(8);
   
   // State
   currentRound = signal(1);
-  timeLeft = signal(60);
+  timeLeft = signal(20);
   isWorkPhase = signal(true);
   
   private interval: any;
@@ -74,6 +74,24 @@ export class PerformanceTimers implements OnDestroy {
     this.isRunning.set(false);
     this.isPaused.set(false);
     clearInterval(this.interval);
+  }
+
+  setMode(m: TimerMode) {
+    this.mode.set(m);
+    if (m === 'TABATA') {
+      this.workTime.set(20);
+      this.restTime.set(10);
+      this.rounds.set(8);
+      this.timeLeft.set(20);
+    } else if (m === 'EMOM') {
+      this.workTime.set(60);
+      this.restTime.set(10);
+      this.rounds.set(10);
+      this.timeLeft.set(60);
+    } else if (m === 'REST') {
+      this.workTime.set(60);
+      this.timeLeft.set(60);
+    }
   }
 
   toggleFullscreen() {
