@@ -160,10 +160,12 @@ export class PerformanceTimers implements OnDestroy {
     const osc = this.audioContext.createOscillator();
     const gain = this.audioContext.createGain();
     
+    osc.type = 'square'; // More "piercing" sound for noisy gyms
     osc.connect(gain);
     gain.connect(this.audioContext.destination);
 
-    const baseVolume = this.volume();
+    // Increase perceived volume by allowing gain up to 1.5x (be careful with clipping)
+    const baseVolume = this.volume() * 1.5; 
     
     if (type === 'start') {
       osc.frequency.setValueAtTime(880, this.audioContext.currentTime); // A5
@@ -172,14 +174,14 @@ export class PerformanceTimers implements OnDestroy {
       osc.stop(this.audioContext.currentTime + 0.8); // Long beep
     } else if (type === 'warning') {
       osc.frequency.setValueAtTime(440, this.audioContext.currentTime); // A4
-      gain.gain.setValueAtTime(baseVolume * 0.5, this.audioContext.currentTime);
+      gain.gain.setValueAtTime(baseVolume * 0.4, this.audioContext.currentTime);
       osc.start();
       osc.stop(this.audioContext.currentTime + 0.1);
     } else if (type === 'end') {
       osc.frequency.setValueAtTime(1200, this.audioContext.currentTime);
-      gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
+      gain.gain.setValueAtTime(baseVolume * 1.2, this.audioContext.currentTime); // Even louder for final
       osc.start();
-      osc.stop(this.audioContext.currentTime + 0.8);
+      osc.stop(this.audioContext.currentTime + 1.0);
     } else if (type === 'rest') {
       osc.frequency.setValueAtTime(660, this.audioContext.currentTime);
       gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
