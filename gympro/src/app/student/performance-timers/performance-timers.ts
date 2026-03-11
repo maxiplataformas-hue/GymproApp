@@ -33,6 +33,7 @@ export class PerformanceTimers implements OnDestroy {
   
   private interval: any;
   private audioContext: AudioContext | null = null;
+  private wakeLock: any = null;
 
   constructor() {
     effect(() => {
@@ -47,10 +48,18 @@ export class PerformanceTimers implements OnDestroy {
     document.onfullscreenchange = () => {
       this.isFullscreen.set(!!document.fullscreenElement);
     };
+
+    // Re-request wake lock if tab becomes visible again
+    document.addEventListener('visibilitychange', async () => {
+      if (this.wakeLock !== null && document.visibilityState === 'visible' && this.isRunning()) {
+        await this.requestWakeLock();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.stop();
+    this.releaseWakeLock();
     if (this.audioContext) {
       this.audioContext.close();
     }
@@ -69,6 +78,7 @@ export class PerformanceTimers implements OnDestroy {
     
     this.playSound('warning');
     this.runTick();
+    this.requestWakeLock();
   }
 
   pause() {
@@ -79,6 +89,7 @@ export class PerformanceTimers implements OnDestroy {
     this.isRunning.set(false);
     this.isPaused.set(false);
     clearInterval(this.interval);
+    this.releaseWakeLock();
   }
 
   reset() {
@@ -230,6 +241,27 @@ export class PerformanceTimers implements OnDestroy {
       utterance.pitch = 1.0;
       utterance.volume = this.volume();
       window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  private async requestWakeLock() {
+    if ('wakeLock' in navigator) {
+      try {
+        this.wakeLock = await (navigator as any).wakeLock.request('screen');
+        this.wakeLock.addEventListener('release', () => {
+          this.wakeLock = null;
+        });
+      } catch (err: any) {
+        console.error(`${err.name}, ${err.message}`);
+      }
+    }
+  }
+
+  private releaseWakeLock() {
+    if (this.wakeLock) {
+      this.wakeLock.release().then(() => {
+        this.wakeLock = null;
+      });
     }
   }
 
