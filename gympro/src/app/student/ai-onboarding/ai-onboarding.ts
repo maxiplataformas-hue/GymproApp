@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { BiometricService } from '../../services/biometric';
 
@@ -121,19 +122,23 @@ export class AiOnboarding implements OnInit {
     // The backend PUT /users/{email} handles update. 
     // If it's a new user, we should probably POST first. 
     // Let's check user existence first.
-    this.http.get(`${this.apiUrl}/users/${email}`).subscribe({
-      next: () => this.finishOnboarding(email, payload),
-      error: () => {
-        // Create new user
-        this.http.post(`${this.apiUrl}/users`, {
-          email: email,
-          role: 'student',
-          coachEmail: 'IA_ASSISTED',
-          isOnboarded: true,
-          isActive: true
-        }).subscribe(() => this.finishOnboarding(email, payload));
-      }
-    });
+    // Use a more silent way to check if user exists (or just try PUT directly and catch error)
+    this.http.get(`${this.apiUrl}/users/${email}`).pipe(
+      catchError((error) => {
+        // If user not found (e.g., 404), create new user
+        if (error.status === 404) {
+          return this.http.post(`${this.apiUrl}/users`, {
+            email: email,
+            role: 'student',
+            coachEmail: 'IA_ASSISTED',
+            isOnboarded: true,
+            isActive: true
+          });
+        }
+        // Re-throw other errors
+        return of(error); // Or throw error; depending on desired error handling
+      })
+    ).subscribe(() => this.finishOnboarding(email, payload));
   }
 
   private finishOnboarding(email: string, payload: any) {

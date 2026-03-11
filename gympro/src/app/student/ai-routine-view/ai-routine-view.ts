@@ -43,21 +43,22 @@ export class AiRoutineView implements OnInit {
           this.isLoading.set(false);
           return;
         }
-        // Map the backend Routine model to our View model
-        this.routine.set({
+        const routineData = {
           title: 'Tu Rutina IA de Hoy',
           description: 'Generada específicamente para tus objetivos y equipo disponible.',
           exercises: data.items.map((it: any) => ({
-            name: it.exerciseId, // We stored name in exerciseId for now
+            name: it.exerciseId, 
             sets: it.sets,
             reps: it.reps,
-            rest: '60s', // Placeholder
+            rest: '60s', 
             icon: '⚡'
           })),
           timers: [
             { id: 'tabata-finisher', name: 'Tabata Finisher (4 min)', type: 'TABATA', rounds: 8, work: 20, rest: 10 }
           ]
-        });
+        };
+        console.log('Setting routine signal with data:', routineData);
+        this.routine.set(routineData);
         this.isLoading.set(false);
       },
       error: (err) => {
