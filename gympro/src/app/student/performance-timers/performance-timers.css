@@ -23,3 +23,35 @@ input[type=number]::-webkit-outer-spin-button {
 .animate-pulse-border {
     animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Landscape/Fullscreen Optimizations */
+.landscape-timer {
+    border-radius: 0 !important;
+    border-width: 0 !important;
+    padding: 0 !important;
+    min-width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    gap: 0 !important;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .landscape-timer .text-8xl,
+    .landscape-timer .text-\[12rem\] {
+        font-size: 40vh !important;
+        line-height: 1 !important;
+    }
+    
+    .landscape-timer span {
+        font-size: 3vh !important;
+    }
+
+    .landscape-timer .mt-4 {
+        margin-top: 2vh !important;
+    }
+
+    .landscape-timer .text-xl {
+        font-size: 4vh !important;
+    }
+}

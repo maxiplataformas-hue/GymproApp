@@ -32,7 +32,7 @@ export class PerformanceTimers implements OnDestroy {
   isPrepPhase = signal(false);
   isFinished = signal(false);
   
-  private interval: any;
+  private worker: Worker | null = null;
   private audioContext: AudioContext | null = null;
   private wakeLock: any = null;
   private authService = inject(AuthService);
@@ -51,12 +51,55 @@ export class PerformanceTimers implements OnDestroy {
       this.isFullscreen.set(!!document.fullscreenElement);
     };
 
+    // Auto-fullscreen on landscape
+    const query = window.matchMedia('(orientation: landscape)');
+    const handleOrientation = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches && window.innerWidth < 1024) { // Only on mobile/tablet
+        this.isFullscreen.set(true);
+      } else {
+        this.isFullscreen.set(false);
+      }
+    };
+    query.addEventListener('change', handleOrientation);
+    handleOrientation(query);
+
     // Re-request wake lock if tab becomes visible again
     document.addEventListener('visibilitychange', async () => {
       if (this.wakeLock !== null && document.visibilityState === 'visible' && this.isRunning()) {
         await this.requestWakeLock();
       }
     });
+
+    this.initWorker();
+  }
+
+  private initWorker() {
+    if (typeof Worker !== 'undefined') {
+      this.worker = new Worker(new URL('./timer.worker', import.meta.url));
+      this.worker.onmessage = ({ data }) => {
+        if (data === 'tick' && !this.isPaused()) {
+          this.tick();
+        }
+      };
+    }
+  }
+
+  private tick() {
+    this.timeLeft.update(t => t - 1);
+
+    if (this.timeLeft() <= 5 && this.timeLeft() > 0) {
+      this.playSound('warning');
+    }
+
+    if (this.timeLeft() <= 0) {
+      if (this.isPrepPhase()) {
+        this.isPrepPhase.set(false);
+        this.timeLeft.set(this.workTime());
+        this.playSound('start');
+      } else {
+        this.handlePhaseEnd();
+      }
+    }
   }
 
   ngOnDestroy() {
@@ -79,7 +122,9 @@ export class PerformanceTimers implements OnDestroy {
     this.isWorkPhase.set(true);
     
     this.playSound('warning');
-    this.runTick();
+    if (this.worker) {
+      this.worker.postMessage('start');
+    }
     this.requestWakeLock();
   }
 
@@ -90,7 +135,9 @@ export class PerformanceTimers implements OnDestroy {
   stop() {
     this.isRunning.set(false);
     this.isPaused.set(false);
-    clearInterval(this.interval);
+    if (this.worker) {
+      this.worker.postMessage('stop');
+    }
     this.releaseWakeLock();
   }
 
@@ -123,25 +170,7 @@ export class PerformanceTimers implements OnDestroy {
   }
 
   private runTick() {
-    this.interval = setInterval(() => {
-      if (this.isPaused()) return;
-
-      this.timeLeft.update(t => t - 1);
-
-      if (this.timeLeft() <= 5 && this.timeLeft() > 0) {
-        this.playSound('warning');
-      }
-
-      if (this.timeLeft() <= 0) {
-        if (this.isPrepPhase()) {
-          this.isPrepPhase.set(false);
-          this.timeLeft.set(this.workTime());
-          this.playSound('start');
-        } else {
-          this.handlePhaseEnd();
-        }
-      }
-    }, 1000);
+    // Methods replaced by worker
   }
 
   private handlePhaseEnd() {

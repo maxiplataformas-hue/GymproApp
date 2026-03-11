@@ -1,7 +1,7 @@
 <div class="h-full flex flex-col bg-background text-text p-4 md:p-8" [class.fixed]="isFullscreen()" [class.inset-0]="isFullscreen()" [class.z-[100]]="isFullscreen()">
   
   <!-- Header -->
-  <div class="flex items-center justify-between mb-8">
+  <div class="flex items-center justify-between mb-8" *ngIf="!isFullscreen()">
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Cronómetros de Rendimiento</h1>
       <p class="text-text-muted text-sm">{{ mode() }} - {{ isPrepPhase() ? 'PREPARACIÓN' : 'Ronda ' + currentRound() + ' de ' + rounds() }}</p>
@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <div class="flex gap-2 mb-8 overflow-x-auto pb-2 shrink-0" *ngIf="!isRunning()">
+  <div class="flex gap-2 mb-8 overflow-x-auto pb-2 shrink-0" *ngIf="!isRunning() && !isFullscreen()">
     <button *ngFor="let m of timerModes" 
       (click)="setMode(m)"
       class="px-6 py-2 rounded-xl font-bold transition-all border shrink-0"
@@ -37,7 +37,8 @@
       [class.border-yellow-400]="isPrepPhase() && isRunning() && !isPaused()"
       [class.border-red-600]="isWorkPhase() && !isPrepPhase() && isRunning() && !isPaused()"
       [class.border-secondary]="!isWorkPhase() && !isPrepPhase() && isRunning() && !isPaused()"
-      [class.scale-105]="isRunning() && !isPaused()">
+      [class.scale-105]="isRunning() && !isPaused()"
+      [class.landscape-timer]="isFullscreen()">
       
       <span class="text-xs font-black uppercase tracking-[0.2em] text-text-muted mb-2"
         [class.font-bold]="isPrepPhase()" [class.text-yellow-400]="isPrepPhase()">
@@ -102,7 +103,7 @@
   </div>
 
   <!-- Settings (only shown when not running) -->
-  <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4" *ngIf="!isRunning()">
+  <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4" *ngIf="!isRunning() && !isFullscreen()">
     <div class="bg-surface p-4 rounded-2xl border border-border">
       <label class="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2 block">Tiempo Trabajo (seg)</label>
       <input type="number" [(ngModel)]="workTime" (change)="timeLeft.set(workTime())"
@@ -120,8 +121,8 @@
     </div>
   </div>
 
-  <!-- Volume Control (Always visible) -->
-  <div class="mt-4 w-full max-w-md mx-auto bg-surface p-4 rounded-2xl border border-border shadow-sm">
+  <!-- Volume Control (Always visible except in extreme landscape) -->
+  <div class="mt-4 w-full max-w-md mx-auto bg-surface p-4 rounded-2xl border border-border shadow-sm no-landscape" *ngIf="!isFullscreen()">
     <div class="flex items-center justify-between mb-2">
       <div class="flex items-center gap-2">
         <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
