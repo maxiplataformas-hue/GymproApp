@@ -220,9 +220,14 @@ export class PerformanceTimers implements OnDestroy {
     }, 3500); // Speak after the 3s long beep
   }
 
-  private playSound(type: 'start' | 'warning' | 'end' | 'rest' | 'bell') {
+  private async playSound(type: 'start' | 'warning' | 'end' | 'rest' | 'bell') {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    
+    // Ensure the audio context is active (necessary if the screen was locked/backgrounded)
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
     }
     
     const osc = this.audioContext.createOscillator();
