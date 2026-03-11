@@ -182,7 +182,10 @@ export class AiOnboarding implements OnInit {
       email: email,
       goal: this.goal(),
       level: this.level(),
-      equipment: this.equipment()
+      equipment: this.equipment(),
+      age: this.ageField(),
+      weight: this.weightField(),
+      height: this.heightField()
     };
 
     // 1. Mark user as IA_ASSISTED and onboarded (or create if new)
@@ -211,7 +214,10 @@ export class AiOnboarding implements OnInit {
   private finishOnboarding(email: string, payload: any) {
     this.http.put(`${this.apiUrl}/users/${email}`, {
       coachEmail: 'IA_ASSISTED',
-      isOnboarded: true
+      isOnboarded: true,
+      age: this.ageField(),
+      initialWeight: this.weightField(),
+      height: this.heightField()
     }).subscribe(() => {
       this.auth.login(email, () => {
         this.http.post(`${this.apiUrl}/ai-coach/generate-routine`, payload).subscribe(() => {

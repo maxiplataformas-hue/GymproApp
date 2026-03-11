@@ -1,7 +1,9 @@
 package cl.maxi.gympro.controller;
 
+import cl.maxi.gympro.model.PhysioEntry;
 import cl.maxi.gympro.model.Routine;
 import cl.maxi.gympro.model.RoutineItem;
+import cl.maxi.gympro.repository.PhysioRepository;
 import cl.maxi.gympro.repository.RoutineRepository;
 import cl.maxi.gympro.service.GeminiService;
 import lombok.Data;
@@ -26,14 +28,24 @@ public class AiCoachController {
     @Autowired
     private RoutineRepository routineRepository;
 
+    @Autowired
+    private PhysioRepository physioRepository;
+
     @PostMapping("/generate-routine")
     public ResponseEntity<Routine> generateRoutine(@RequestBody AiRoutineRequest request) {
         String prompt = String.format(
-            "Genera una rutina de entrenamiento para un usuario con el objetivo de '%s', nivel '%s' y con el siguiente equipo: %s. " +
+            "Genera una rutina de entrenamiento para un usuario con: " +
+            "Objetivo: '%s', Nivel: '%s', Edad: %d años, Peso: %.1f kg, Estatura: %.1f cm. " +
+            "Equipo disponible: %s. " +
             "Responde ÚNICAMENTE con un objeto JSON válido que tenga esta estructura exacta: " +
             "{ \"exercises\": [ { \"name\": \"Nombre del Ejercicio\", \"sets\": 3, \"reps\": \"12\", \"weight\": 0.0 } ] }. " +
+            "Adapta el volumen e intensidad a los datos físicos. " +
             "Diferencia bien los ejercicios según el equipo. Si es 'weight-loss', prioriza repeticiones altas (15+). Si es 'muscle-gain', prioriza series de fuerza (8-12).",
-            request.getGoal(), request.getLevel(), String.join(", ", request.getEquipment())
+            request.getGoal(), request.getLevel(), 
+            request.getAge() != null ? request.getAge() : 30,
+            request.getWeight() != null ? request.getWeight() : 70.0,
+            request.getHeight() != null ? request.getHeight() : 170.0,
+            String.join(", ", request.getEquipment())
         );
 
         String aiResponse = geminiService.getResponse(prompt, "CONTEXTO: Generación de rutina estructurada JSON para CoachPRO. NO USAR MARKDOWN, SOLO JSON.");
@@ -48,6 +60,23 @@ public class AiCoachController {
         Routine routine = existing.orElse(new Routine());
         routine.setStudentEmail(request.getEmail());
         routine.setDate(today);
+        
+        // Auto-save initial weight entry if not exists for today
+        if (request.getWeight() != null) {
+            try {
+                List<PhysioEntry> history = physioRepository.findByStudentEmailIgnoreCase(request.getEmail());
+                if (history.stream().noneMatch(e -> today.equals(e.getDate()))) {
+                    PhysioEntry newEntry = new PhysioEntry();
+                    newEntry.setStudentEmail(request.getEmail());
+                    newEntry.setDate(today);
+                    newEntry.setWeight(request.getWeight());
+                    newEntry.setMeasuredBy("student");
+                    physioRepository.save(newEntry);
+                }
+            } catch (Exception e) {
+                // Ignore errors here, main goal is routine
+            }
+        }
         List<RoutineItem> items = new ArrayList<>();
 
         try {
@@ -93,5 +122,8 @@ public class AiCoachController {
         private String goal;
         private String level;
         private List<String> equipment;
+        private Integer age;
+        private Double weight;
+        private Double height;
     }
 }
