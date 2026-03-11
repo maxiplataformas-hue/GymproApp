@@ -30,7 +30,7 @@ export class SplashScreen implements OnInit {
     if (user) {
       this.router.navigate(['/app', user.role]);
     } else {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/select-mode']);
     }
   }
 }

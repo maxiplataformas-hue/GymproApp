@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { SplashScreen } from './core/splash-screen/splash-screen';
 import { Login } from './core/login/login';
+import { ModeSelection } from './core/mode-selection/mode-selection';
 
 import { Layout } from './core/layout/layout';
 import { StudentDashboard } from './student/student-dashboard/student-dashboard';
@@ -16,6 +17,7 @@ import { PerformanceTimers } from './student/performance-timers/performance-time
 
 export const routes: Routes = [
     { path: '', component: SplashScreen },
+    { path: 'select-mode', component: ModeSelection },
     { path: 'login', component: Login },
 
     {
