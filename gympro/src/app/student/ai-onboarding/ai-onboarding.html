@@ -3,7 +3,7 @@
   <!-- Progress Bar -->
   <div class="w-full max-w-lg mb-12">
     <div class="flex justify-between mb-2">
-      <span class="text-xs font-bold uppercase tracking-widest text-primary">Paso {{ step() }} de 4</span>
+      <span class="text-xs font-bold uppercase tracking-widest text-primary">Paso {{ step() }} de 5</span>
       <span class="text-xs font-medium text-text-muted">{{ (step() * 20) | number:'1.0-0' }}% completado</span>
     </div>
     <div class="h-1.5 w-full bg-surface rounded-full overflow-hidden border border-border/30">
@@ -58,8 +58,46 @@
     </div>
     }
 
-    <!-- STEP 1: BIOMETRICS SETUP -->
+    <!-- STEP 1: BASIC PROFILE FORM (New users only) -->
     @if (step() === 1) {
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-black text-text mb-3 tracking-tighter">¡Bienvenido a CoachPRO!</h2>
+      <p class="text-text-muted">Necesitamos unos datos básicos para crear tu perfil personalizado.</p>
+    </div>
+
+    <div class="space-y-4 max-w-sm mx-auto">
+      <div class="relative">
+        <input type="text" [(ngModel)]="nameField" placeholder="Nombre completo" 
+               class="w-full px-6 py-4 bg-surface border border-border/50 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-text font-medium outline-none">
+      </div>
+      <div class="relative">
+        <input type="text" [(ngModel)]="nicknameField" placeholder="Apodo (opcional)" 
+               class="w-full px-6 py-4 bg-surface border border-border/50 rounded-2xl focus:border-primary outline-none">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <input type="number" [(ngModel)]="ageField" placeholder="Edad" 
+               class="w-full px-6 py-4 bg-surface border border-border/50 rounded-2xl focus:border-primary outline-none">
+        <input type="number" [(ngModel)]="weightField" placeholder="Peso (kg)" 
+               class="w-full px-6 py-4 bg-surface border border-border/50 rounded-2xl focus:border-primary outline-none">
+      </div>
+      <div class="relative">
+        <input type="number" [(ngModel)]="heightField" placeholder="Estatura (cm)" 
+               class="w-full px-6 py-4 bg-surface border border-border/50 rounded-2xl focus:border-primary outline-none">
+      </div>
+
+      <button (click)="nextStep()" 
+              [disabled]="isBiometricLoading()"
+              class="w-full py-5 bg-primary text-white font-black text-lg rounded-3xl shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all flex items-center justify-center gap-3 mt-6">
+        @if (isBiometricLoading()) {
+          <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        }
+        Crear Perfil y Continuar
+      </button>
+    </div>
+    }
+
+    <!-- STEP 2: BIOMETRICS SETUP -->
+    @if (step() === 2) {
     <div class="text-center mb-10">
       <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
         <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,8 +123,8 @@
     </div>
     }
 
-    <!-- STEP 2: GOAL -->
-    @if (step() === 2) {
+    <!-- STEP 3: GOAL -->
+    @if (step() === 3) {
     <div class="text-center mb-10">
       <h2 class="text-3xl font-black text-text mb-3 tracking-tighter">¿Cuál es tu objetivo principal?</h2>
       <p class="text-text-muted">Personalizaremos tu entrenamiento según lo que desees lograr.</p>
@@ -106,8 +144,8 @@
     </div>
     }
 
-    <!-- STEP 3: LEVEL -->
-    @if (step() === 3) {
+    <!-- STEP 4: LEVEL -->
+    @if (step() === 4) {
     <div class="text-center mb-10">
       <h2 class="text-3xl font-black text-text mb-3 tracking-tighter">¿Cuál es tu nivel de experiencia?</h2>
       <p class="text-text-muted">Esto nos ayuda a ajustar la intensidad de los ejercicios.</p>
@@ -132,8 +170,8 @@
     </div>
     }
 
-    <!-- STEP 4: EQUIPMENT -->
-    @if (step() === 4) {
+    <!-- STEP 5: EQUIPMENT -->
+    @if (step() === 5) {
     <div class="text-center mb-10">
       <h2 class="text-3xl font-black text-text mb-3 tracking-tighter">¿Con qué equipo cuentas?</h2>
       <p class="text-text-muted">Selecciona todas las opciones que apliquen para hoy.</p>

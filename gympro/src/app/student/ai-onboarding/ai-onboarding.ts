@@ -23,6 +23,15 @@ export class AiOnboarding implements OnInit {
 
   step = signal(0);
   emailField = signal('');
+  isNewUser = signal(false);
+  
+  // Profile fields for new users
+  nameField = signal('');
+  nicknameField = signal('');
+  ageField = signal<number | null>(null);
+  weightField = signal<number | null>(null);
+  heightField = signal<number | null>(null);
+
   goal = signal('');
   level = signal('');
   equipment = signal<string[]>([]);
@@ -57,21 +66,77 @@ export class AiOnboarding implements OnInit {
   }
 
   async nextStep() {
-    if (this.step() === 0) {
+    const s = this.step();
+    if (s === 0) {
       if (!this.emailField() || !this.emailField().includes('@')) {
         alert('Por favor, ingresa un correo electrónico válido.');
         return;
       }
       
-      // If biometrics available and not registered, show setup step (Step 0.5 effectively, using decimal logic or just adding a step)
-      // I'll use Step 5 as "Biometric Setup" for now or just insert it as step 1.
+      this.isBiometricLoading.set(true);
+      const email = this.emailField().trim().toLowerCase();
+      
+      this.http.get(`${this.apiUrl}/users/${email}`).pipe(
+        catchError((err) => {
+          if (err.status === 404) {
+            this.isNewUser.set(true);
+            this.step.set(1); // Go to Profile Form
+          } else {
+            alert('Error al verificar el usuario. Reintenta.');
+          }
+          return of(null);
+        })
+      ).subscribe((user) => {
+        this.isBiometricLoading.set(false);
+        if (user) {
+          this.isNewUser.set(false);
+          this.step.set(2); // Skip Profile, go to Biometrics
+        }
+      });
+      return;
+    }
+
+    if (s === 1) { // Basic Profile Registration
+      if (!this.nameField() || !this.ageField() || !this.weightField() || !this.heightField()) {
+        alert('Por favor, completa todos los campos obligatorios.');
+        return;
+      }
+      this.registerUser();
+      return;
     }
     
-    if (this.step() < 4) {
+    if (this.step() < 5) {
       this.step.update(s => s + 1);
     } else {
       this.completeOnboarding();
     }
+  }
+
+  private registerUser() {
+    this.isBiometricLoading.set(true);
+    const payload = {
+      email: this.emailField().trim().toLowerCase(),
+      name: this.nameField(),
+      nickname: this.nicknameField() || this.nameField().split(' ')[0],
+      age: this.ageField(),
+      initialWeight: this.weightField(),
+      height: this.heightField(),
+      role: 'student',
+      coachEmail: 'IA_ASSISTED',
+      isOnboarded: false,
+      isActive: true
+    };
+
+    this.http.post(`${this.apiUrl}/users`, payload).subscribe({
+      next: () => {
+        this.isBiometricLoading.set(false);
+        this.step.set(2); // Proceed to Biometrics
+      },
+      error: (err) => {
+        this.isBiometricLoading.set(false);
+        alert('Error al registrar el perfil. ' + (err.error || ''));
+      }
+    });
   }
 
   async attemptBiometricLogin() {
@@ -95,7 +160,9 @@ export class AiOnboarding implements OnInit {
   }
 
   prevStep() {
-    if (this.step() > 0) {
+    if (this.step() === 2 && !this.isNewUser()) {
+      this.step.set(0);
+    } else if (this.step() > 0) {
       this.step.update(s => s - 1);
     }
   }
