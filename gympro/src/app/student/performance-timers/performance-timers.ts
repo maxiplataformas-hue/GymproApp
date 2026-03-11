@@ -36,6 +36,7 @@ export class PerformanceTimers implements OnDestroy {
   private audioContext: AudioContext | null = null;
   private wakeLock: any = null;
   private authService = inject(AuthService);
+  private silentAudio: HTMLAudioElement | null = null;
 
   constructor() {
     effect(() => {
@@ -77,6 +78,31 @@ export class PerformanceTimers implements OnDestroy {
     });
 
     this.initWorker();
+    this.setupSilentAudio();
+  }
+
+  private setupSilentAudio() {
+    // 1 second of silence in a base64 encoded MP3
+    const silentMp3 = 'data:audio/mp3;base64,SUQzBAAAAAABEVRYWFhYAAAAHAAAAGluZm8AMDAwMDAwMDAwMDAwMDAwMDAwMDAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZm8AAAAHAAAAAwAAAGUAAAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusrba3uLm6u7y9vr+AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//uQZAAEA6G9pYm6e4ADuFpA67nEAAIuFpAAAAAIBi4WkAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+    this.silentAudio = new Audio(silentMp3);
+    this.silentAudio.loop = true;
+  }
+
+  private setupMediaSession() {
+    if ('mediaSession' in navigator) {
+      (navigator as any).mediaSession.metadata = new (window as any).MediaMetadata({
+        title: `Temporizador - ${this.mode()}`,
+        artist: 'GymproApp',
+        album: 'Entrenamiento de Intervalos',
+        artwork: [
+          { src: 'assets/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+        ]
+      });
+
+      (navigator as any).mediaSession.setActionHandler('play', () => this.start());
+      (navigator as any).mediaSession.setActionHandler('pause', () => this.pause());
+      (navigator as any).mediaSession.setActionHandler('stop', () => this.stop());
+    }
   }
 
   private initWorker() {
@@ -131,11 +157,22 @@ export class PerformanceTimers implements OnDestroy {
     if (this.worker) {
       this.worker.postMessage('start');
     }
+    if (this.silentAudio) {
+      this.silentAudio.play().catch(e => console.error('Silent audio failed:', e));
+    }
+    this.setupMediaSession();
     this.requestWakeLock();
   }
 
   pause() {
     this.isPaused.set(!this.isPaused());
+    if (this.silentAudio) {
+      if (this.isPaused()) {
+        this.silentAudio.pause();
+      } else if (this.isRunning()) {
+        this.silentAudio.play().catch(e => console.error('Silent audio resume failed:', e));
+      }
+    }
   }
 
   stop() {
@@ -143,6 +180,13 @@ export class PerformanceTimers implements OnDestroy {
     this.isPaused.set(false);
     if (this.worker) {
       this.worker.postMessage('stop');
+    }
+    if (this.silentAudio) {
+      this.silentAudio.pause();
+      this.silentAudio.currentTime = 0;
+    }
+    if ('mediaSession' in navigator) {
+      (navigator as any).mediaSession.playbackState = 'none';
     }
     this.releaseWakeLock();
   }
