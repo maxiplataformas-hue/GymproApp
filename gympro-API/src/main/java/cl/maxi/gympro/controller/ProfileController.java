@@ -20,14 +20,15 @@ public class ProfileController {
     @GetMapping("/{email}")
     public ResponseEntity<List<StudentProfile>> getProfileHistoryByEmail(@PathVariable String email) {
         // Orden descendente por ID o Fecha para traer el más nuevo primero
-        List<StudentProfile> history = repository.findByStudentEmail(email, Sort.by(Sort.Direction.DESC, "recordDate"));
+        List<StudentProfile> history = repository.findByStudentEmailIgnoreCase(email, Sort.by(Sort.Direction.DESC, "recordDate"));
         return ResponseEntity.ok(history);
     }
 
     @PostMapping("/{email}")
     public ResponseEntity<StudentProfile> createNewProfileSnapshot(@PathVariable String email,
             @RequestBody StudentProfile dto) {
-        dto.setStudentEmail(email);
+        String normalizedEmail = email.trim().toLowerCase();
+        dto.setStudentEmail(normalizedEmail);
 
         // Si no viene con fecha o nombre, asignamos el de hoy
         if (dto.getRecordDate() == null || dto.getRecordDate().isEmpty()) {

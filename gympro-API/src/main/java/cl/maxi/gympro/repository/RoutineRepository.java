@@ -9,6 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface RoutineRepository extends MongoRepository<Routine, String> {
+    List<Routine> findByStudentEmailIgnoreCase(String studentEmail);
     List<Routine> findByStudentEmail(String studentEmail);
+
+    Optional<Routine> findByStudentEmailIgnoreCaseAndDate(String studentEmail, String date);
     Optional<Routine> findByStudentEmailAndDate(String studentEmail, String date);
 }

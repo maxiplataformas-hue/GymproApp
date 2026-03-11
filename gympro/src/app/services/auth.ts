@@ -51,7 +51,8 @@ export class AuthService {
     this.loginError.set(null);
     this.isLoading.set(true);
 
-    this.http.get<User>(`${this.usersUrl}/${email}`).pipe(
+    const normalizedEmail = email.trim().toLowerCase();
+    this.http.get<User>(`${this.usersUrl}/${normalizedEmail}`).pipe(
       catchError(() => of(null))
     ).subscribe(user => {
       if (!user) {

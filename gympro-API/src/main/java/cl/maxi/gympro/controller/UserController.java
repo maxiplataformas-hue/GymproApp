@@ -46,7 +46,7 @@ public class UserController {
     /** GET /api/users/{email} */
     @GetMapping("/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        Optional<User> user = userRepository.findByEmail(email);
+        Optional<User> user = userRepository.findByEmailIgnoreCase(email);
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -54,13 +54,16 @@ public class UserController {
     /** POST /api/users → create user */
     @PostMapping
     public User createUser(@RequestBody User user) {
+        if (user.getEmail() != null) {
+            user.setEmail(user.getEmail().trim().toLowerCase());
+        }
         return userRepository.save(user);
     }
 
     /** PUT /api/users/{email} → update fields */
     @PutMapping("/{email}")
     public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody User userDetails) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+        Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(email);
 
         if (optionalUser.isPresent()) {
             User existing = optionalUser.get();

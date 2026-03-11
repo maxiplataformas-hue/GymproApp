@@ -25,20 +25,25 @@ public class RoutineController {
 
     @GetMapping("/{studentEmail}")
     public List<Routine> getRoutinesByStudent(@PathVariable String studentEmail) {
-        return routineRepository.findByStudentEmail(studentEmail);
+        return routineRepository.findByStudentEmailIgnoreCase(studentEmail);
     }
 
     @GetMapping("/{studentEmail}/{date}")
     public ResponseEntity<Routine> getRoutineByDate(@PathVariable String studentEmail, @PathVariable String date) {
-        Optional<Routine> routine = routineRepository.findByStudentEmailAndDate(studentEmail, date);
+        Optional<Routine> routine = routineRepository.findByStudentEmailIgnoreCaseAndDate(studentEmail, date);
         return routine.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public Routine saveRoutine(@RequestBody Routine routine) {
+        // Normalize student email
+        if (routine.getStudentEmail() != null) {
+            routine.setStudentEmail(routine.getStudentEmail().trim().toLowerCase());
+        }
+        
         // Find existing routine for this user and date
-        Optional<Routine> existing = routineRepository.findByStudentEmailAndDate(routine.getStudentEmail(),
+        Optional<Routine> existing = routineRepository.findByStudentEmailIgnoreCaseAndDate(routine.getStudentEmail(),
                 routine.getDate());
 
         if (existing.isPresent()) {
@@ -70,7 +75,7 @@ public class RoutineController {
             @PathVariable String date,
             @PathVariable String itemId) {
 
-        Optional<Routine> existing = routineRepository.findByStudentEmailAndDate(studentEmail, date);
+        Optional<Routine> existing = routineRepository.findByStudentEmailIgnoreCaseAndDate(studentEmail, date);
 
         if (existing.isPresent()) {
             Routine routine = existing.get();

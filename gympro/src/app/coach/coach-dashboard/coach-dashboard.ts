@@ -103,7 +103,7 @@ export class CoachDashboard {
     if (this.newStudentForm.valid) {
       const formValue = this.newStudentForm.value;
       const studentData: User = {
-        email: formValue.email!,
+        email: formValue.email!.trim().toLowerCase(),
         name: formValue.name!,
         nickname: formValue.nickname || undefined,
         age: formValue.age!,
