@@ -34,8 +34,15 @@ export class AiRoutineView implements OnInit {
     }
 
     const today = new Date().toISOString().split('T')[0];
+    console.log(`Fetching routine for ${user.email} on ${today}`);
     this.http.get<any>(`${this.apiUrl}/routines/${user.email}/${today}`).subscribe({
       next: (data) => {
+        console.log('Routine data received:', data);
+        if (!data || !data.items || data.items.length === 0) {
+          this.error.set('La IA no ha generado ejercicios para hoy. Reintenta el onboarding.');
+          this.isLoading.set(false);
+          return;
+        }
         // Map the backend Routine model to our View model
         this.routine.set({
           title: 'Tu Rutina IA de Hoy',
@@ -54,7 +61,8 @@ export class AiRoutineView implements OnInit {
         this.isLoading.set(false);
       },
       error: (err) => {
-        this.error.set('No encontramos tu rutina de hoy. ¡Empieza el onboarding!');
+        console.error('Error fetching routine:', err);
+        this.error.set('No pudimos conectar con el servidor para obtener tu rutina.');
         this.isLoading.set(false);
       }
     });

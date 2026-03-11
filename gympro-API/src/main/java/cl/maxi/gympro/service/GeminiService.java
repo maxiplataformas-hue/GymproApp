@@ -12,7 +12,7 @@ public class GeminiService {
     @Value("${gemini.api.key:}")
     private String apiKey;
 
-    private final String API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
+    private final String API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
 
     private final String SYSTEM_PROMPT = "Eres un Entrenador Personal Profesional de la app COACHPRO. " +
             "Tu objetivo es proveer información técnica, rutinas y datos de salud de forma ULTRA-CONCISA. " +
