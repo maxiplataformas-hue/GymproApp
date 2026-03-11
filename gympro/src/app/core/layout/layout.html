@@ -5,7 +5,7 @@
         <div class="p-6 border-b border-border flex flex-col items-center gap-4">
             <h1 class="text-3xl font-black tracking-tighter flex items-center gap-2">
                 COACH<span class="text-primary">PRO</span>
-                <img src="logo.png" alt="Logo" class="w-8 h-8 rounded-lg shadow-sm border border-primary/10">
+                <img src="logo.png" alt="Logo" class="w-10 h-10 mix-blend-screen brightness-110 drop-shadow-[0_0_10px_rgba(6,182,212,0.2)]">
             </h1>
             
             @if (auth.currentUser()?.role === 'student') {
@@ -156,7 +156,7 @@
             class="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-border shrink-0 z-30">
             <h1 class="text-xl font-black tracking-tighter flex items-center gap-2">
                 COACH<span class="text-primary">PRO</span>
-                <img src="logo.png" alt="Logo" class="w-6 h-6 rounded-md shadow-sm border border-primary/10">
+                <img src="logo.png" alt="Logo" class="w-6 h-6 mix-blend-screen brightness-110">
             </h1>
             <div class="flex items-center gap-2">
                 @if (auth.currentUser()?.role === 'student') {
