@@ -22,6 +22,7 @@ export class PerformanceTimers implements OnDestroy {
   workTime = signal(20); // seconds
   restTime = signal(10); // seconds
   rounds = signal(8);
+  volume = signal(0.5); // Default to 50%
   
   // State
   currentRound = signal(1);
@@ -161,25 +162,27 @@ export class PerformanceTimers implements OnDestroy {
     
     osc.connect(gain);
     gain.connect(this.audioContext.destination);
+
+    const baseVolume = this.volume();
     
     if (type === 'start') {
       osc.frequency.setValueAtTime(880, this.audioContext.currentTime); // A5
-      gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+      gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
       osc.start();
       osc.stop(this.audioContext.currentTime + 0.8); // Long beep
     } else if (type === 'warning') {
       osc.frequency.setValueAtTime(440, this.audioContext.currentTime); // A4
-      gain.gain.setValueAtTime(0.05, this.audioContext.currentTime);
+      gain.gain.setValueAtTime(baseVolume * 0.5, this.audioContext.currentTime);
       osc.start();
       osc.stop(this.audioContext.currentTime + 0.1);
     } else if (type === 'end') {
       osc.frequency.setValueAtTime(1200, this.audioContext.currentTime);
-      gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+      gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
       osc.start();
       osc.stop(this.audioContext.currentTime + 0.8);
     } else if (type === 'rest') {
       osc.frequency.setValueAtTime(660, this.audioContext.currentTime);
-      gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+      gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
       osc.start();
       osc.stop(this.audioContext.currentTime + 0.8); // Long beep
     }
