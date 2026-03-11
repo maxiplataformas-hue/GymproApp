@@ -17,7 +17,6 @@ export class ModeSelection {
   }
 
   selectAiCoach() {
-    // For now, this doesn't do anything as requested, but we could add a toast or similar
-    console.log('Coach IA selected - functionality coming soon');
+    this.router.navigate(['/app/student/ai-onboarding']);
   }
 }

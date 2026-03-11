@@ -1,0 +1,82 @@
+<div class="routine-container min-h-screen w-full bg-background p-6">
+  
+  <header class="mb-10 animate-fade-in">
+    <div class="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em] mb-3">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+      </svg>
+      Coach IA • Generado hoy
+    </div>
+    <h1 class="text-4xl font-black text-text tracking-tighter mb-4">{{ routine().title }}</h1>
+    <p class="text-text-muted leading-relaxed max-w-2xl">{{ routine().description }}</p>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Exercises List -->
+    <div class="lg:col-span-2 space-y-4 animate-fade-in-up">
+      <h3 class="text-xl font-bold text-text flex items-center gap-2 mb-6">
+        <span class="w-2 h-8 bg-primary rounded-full"></span>
+        Bloque de Fuerza y Musculación
+      </h3>
+      
+      @for (ex of routine().exercises; track ex.name) {
+      <div class="exercise-card p-6 rounded-[2rem] bg-surface border border-border/50 hover:border-primary/30 transition-all flex items-center justify-between group">
+        <div class="flex items-center gap-5">
+          <div class="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center text-2xl group-hover:bg-primary/10 transition-colors">
+            {{ ex.icon }}
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-text">{{ ex.name }}</h4>
+            <p class="text-sm text-text-muted">Descanso: {{ ex.rest }}</p>
+          </div>
+        </div>
+        
+        <div class="flex flex-col items-end">
+          <span class="text-2xl font-black text-primary">{{ ex.sets }} <span class="text-xs text-text-muted font-bold opacity-60 uppercase tracking-tighter">Series</span></span>
+          <span class="text-sm font-bold text-text-muted">{{ ex.reps }} <span class="opacity-70">Reps</span></span>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Sidebar: Timers & Tools -->
+    <div class="space-y-6 animate-fade-in-up delay-100">
+      <div class="p-8 rounded-[2.5rem] bg-surface border border-border/50 shadow-xl overflow-hidden relative">
+        <div class="absolute top-0 right-0 p-6 opacity-10">
+          <svg class="w-24 h-24 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        
+        <h3 class="text-xl font-bold text-text mb-6">Finalizador HIIT</h3>
+        
+        @for (timer of routine().timers; track timer.id) {
+        <div class="timer-preview p-5 rounded-3xl bg-secondary/5 border border-secondary/20 mb-6">
+          <p class="text-sm font-bold text-secondary uppercase tracking-widest mb-1">{{ timer.name }}</p>
+          <p class="text-xs text-text-muted mb-4">{{ timer.rounds }} rondas • {{ timer.work }}s trabajo • {{ timer.rest }}s descanso</p>
+          
+          <button (click)="startTimer(timer)" 
+                  class="w-full py-4 bg-secondary text-white font-black rounded-2xl shadow-lg shadow-secondary/30 hover:shadow-secondary/50 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            Iniciar Cronómetro
+          </button>
+        </div>
+        }
+        
+        <p class="text-xs text-text-muted italic leading-relaxed">
+          * La IA recomienda este bloque metabólico al final para maximizar la quema de grasa y resistencia.
+        </p>
+      </div>
+
+      <button (click)="shareRoutine()" 
+              class="w-full py-5 rounded-[2rem] border-2 border-dashed border-border text-text-muted font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+        </svg>
+        Compartir Rutina
+      </button>
+    </div>
+
+  </div>
+
+</div>

@@ -49,6 +49,7 @@
             </a>
             } @else {
             <!-- Student Sidebar Menu -->
+            @if (auth.currentUser()?.role === 'student' && auth.currentUser()?.coachEmail !== 'IA_ASSISTED') {
             <a routerLink="/app/student/calendar" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
@@ -59,6 +60,18 @@
                 </svg>
                 Calendario
             </a>
+            }
+
+            @if (auth.currentUser()?.coachEmail === 'IA_ASSISTED') {
+            <a routerLink="/app/student/ai-routine" routerLinkActive="bg-primary text-white"
+                [routerLinkActiveOptions]="{exact: true}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Mi Rutina IA
+            </a>
+            }
             <a routerLink="/app/student" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
@@ -251,6 +264,7 @@
                 </a>
                 } @else {
                 <!-- Student Links -->
+                @if (auth.currentUser()?.role === 'student' && auth.currentUser()?.coachEmail !== 'IA_ASSISTED') {
                 <a routerLink="/app/student/calendar" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
@@ -261,6 +275,18 @@
                     </svg>
                     Calendario
                 </a>
+                }
+
+                @if (auth.currentUser()?.coachEmail === 'IA_ASSISTED') {
+                <a routerLink="/app/student/ai-routine" routerLinkActive="bg-primary/10 text-primary font-bold"
+                    [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Mi Rutina IA
+                </a>
+                }
                 <a routerLink="/app/student" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
