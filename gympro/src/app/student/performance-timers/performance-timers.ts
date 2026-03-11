@@ -76,6 +76,11 @@ export class PerformanceTimers implements OnDestroy {
     clearInterval(this.interval);
   }
 
+  reset() {
+    this.stop();
+    this.setMode(this.mode());
+  }
+
   setMode(m: TimerMode) {
     this.mode.set(m);
     if (m === 'TABATA') {
