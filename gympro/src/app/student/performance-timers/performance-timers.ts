@@ -1,6 +1,7 @@
-import { Component, signal, effect, OnDestroy } from '@angular/core';
+import { Component, signal, effect, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth';
 
 type TimerMode = 'EMOM' | 'TABATA' | 'REST';
 
@@ -34,6 +35,7 @@ export class PerformanceTimers implements OnDestroy {
   private interval: any;
   private audioContext: AudioContext | null = null;
   private wakeLock: any = null;
+  private authService = inject(AuthService);
 
   constructor() {
     effect(() => {
@@ -145,9 +147,7 @@ export class PerformanceTimers implements OnDestroy {
   private handlePhaseEnd() {
     if (this.mode() === 'EMOM') {
       if (this.currentRound() >= this.rounds()) {
-        this.playSound('end');
-        this.isFinished.set(true);
-        this.stop();
+        this.handleCompletion();
       } else {
         this.currentRound.update(r => r + 1);
         this.timeLeft.set(this.workTime());
@@ -160,9 +160,7 @@ export class PerformanceTimers implements OnDestroy {
         this.playSound('rest'); // Or just start
       } else {
         if (this.currentRound() >= this.rounds()) {
-          this.playSound('end');
-          this.isFinished.set(true);
-          this.stop();
+          this.handleCompletion();
         } else {
           this.isWorkPhase.set(true);
           this.currentRound.update(r => r + 1);
@@ -171,10 +169,20 @@ export class PerformanceTimers implements OnDestroy {
         }
       }
     } else if (this.mode() === 'REST') {
-      this.playSound('end');
-      this.isFinished.set(true);
-      this.stop();
+      this.handleCompletion();
     }
+  }
+
+  private handleCompletion() {
+    this.playSound('end');
+    this.isFinished.set(true);
+    this.stop();
+    
+    setTimeout(() => {
+      const user = this.authService.currentUser();
+      const alias = user?.nickname || user?.name || 'atleta';
+      this.speak(`Bien hecho ${alias}, sigue así`);
+    }, 3500); // Speak after the 3s long beep
   }
 
   private playSound(type: 'start' | 'warning' | 'end' | 'rest' | 'bell') {
