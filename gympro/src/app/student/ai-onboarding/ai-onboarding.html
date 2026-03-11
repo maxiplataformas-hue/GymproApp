@@ -15,7 +15,8 @@
     
     <!-- STEP 0: EMAIL -->
     @if (step() === 0) {
-    <div class="text-center mb-10">
+    <div class="z-10 flex flex-col items-center text-center mb-8">
+      <img src="logo.png" alt="CoachPro Logo" class="w-32 h-32 mb-6 drop-shadow-[0_0_20px_rgba(6,182,212,0.3)] animate-pulse-slow">
       <h2 class="text-3xl font-black text-text mb-3 tracking-tighter">Comencemos con tu acceso</h2>
       <p class="text-text-muted">Ingresa tu correo para vincular tu progreso y rutinas de IA.</p>
     </div>
@@ -37,10 +38,40 @@
         Siguiente
       </button>
 
+      <!-- Theme Selection -->
+      <div class="flex flex-col items-center gap-6 mt-8">
+        <p class="text-xs font-bold uppercase tracking-widest text-text-muted">Personaliza tu tema</p>
+        <div class="flex gap-6">
+          <button (click)="setTheme('light')" 
+                  class="w-10 h-10 rounded-full border-2 transition-all p-0 border-border"
+                  [class.border-primary]="theme.currentTheme() === 'light'"
+                  [class.scale-125]="theme.currentTheme() === 'light'"
+                  style="background-color: #f8fafc;"></button>
+          <button (click)="setTheme('dark')" 
+                  class="w-10 h-10 rounded-full border-2 transition-all p-0 border-border"
+                  [class.border-primary]="theme.currentTheme() === 'dark'"
+                  [class.scale-125]="theme.currentTheme() === 'dark'"
+                  style="background-color: #0f172a;"></button>
+          <button (click)="setTheme('pink')" 
+                  class="w-10 h-10 rounded-full border-2 transition-all p-0 border-border"
+                  [class.border-primary]="theme.currentTheme() === 'pink'"
+                  [class.scale-125]="theme.currentTheme() === 'pink'"
+                  style="background-color: #ec4899;"></button>
+        </div>
+      </div>
+
+      <!-- Back to Main Selection -->
+      <button (click)="backToModeSelection()" class="w-full mt-4 text-sm font-bold text-text-muted hover:text-primary transition-colors flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Volver a la selección principal
+      </button>
+
       @if (biometric.isAvailable() && biometric.hasSavedCredential()) {
       <button (click)="attemptBiometricLogin()" 
               [disabled]="isBiometricLoading()"
-              class="w-full py-4 bg-surface border border-primary/30 text-primary font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary/5 transition-all">
+              class="w-full py-4 bg-surface border border-primary/30 text-primary font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary/5 transition-all mt-4">
         @if (isBiometricLoading()) {
           <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         } @else {
@@ -51,10 +82,6 @@
         Continuar con Biometría
       </button>
       }
-      
-      <p class="text-[10px] text-text-muted text-center uppercase tracking-widest opacity-60">
-        Tus datos están protegidos y se guardarán automáticamente
-      </p>
     </div>
     }
 
@@ -98,7 +125,7 @@
 
     <!-- STEP 2: BIOMETRICS SETUP -->
     @if (step() === 2) {
-    <div class="text-center mb-10">
+    <div class="text-center mb-12 animate-fade-in">
       <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
         <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 21a10.003 10.003 0 008.384-4.51l.054.09m-4.283-9.93l-.01.01a3 3 0 11-4.243 4.242 3 3 0 014.243-4.242z"></path>
@@ -125,9 +152,10 @@
 
     <!-- STEP 3: GOAL -->
     @if (step() === 3) {
-    <div class="text-center mb-10">
-      <h2 class="text-3xl font-black text-text mb-3 tracking-tighter">¿Cuál es tu objetivo principal?</h2>
-      <p class="text-text-muted">Personalizaremos tu entrenamiento según lo que desees lograr.</p>
+    <div class="text-center mb-12 animate-fade-in">
+        <img src="logo.png" alt="CoachPro Logo" class="w-32 h-32 mx-auto mb-6 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)] animate-pulse-slow">
+      <h1 class="text-4xl font-black text-text mb-2 tracking-tighter">COACH<span class="text-primary italic">IA</span></h1>
+      <p class="text-text-muted max-w-xs mx-auto">Tu entrenador personal impulsado por inteligencia artificial.</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

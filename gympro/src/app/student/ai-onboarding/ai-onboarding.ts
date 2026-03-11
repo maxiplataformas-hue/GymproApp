@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { BiometricService } from '../../services/biometric';
+import { ThemeService, AppTheme } from '../../services/theme';
 
 @Component({
   selector: 'app-ai-onboarding',
@@ -19,6 +20,7 @@ export class AiOnboarding implements OnInit {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   biometric = inject(BiometricService);
+  theme = inject(ThemeService);
   private apiUrl = 'https://gymproapp.onrender.com/api';
 
   step = signal(0);
@@ -174,6 +176,14 @@ export class AiOnboarding implements OnInit {
     } else {
       this.equipment.set([...current, id]);
     }
+  }
+
+  backToModeSelection() {
+    this.router.navigate(['/select-mode']);
+  }
+
+  setTheme(t: AppTheme) {
+    this.theme.setTheme(t);
   }
 
   completeOnboarding() {
