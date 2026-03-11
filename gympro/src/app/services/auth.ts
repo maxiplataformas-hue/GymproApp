@@ -20,6 +20,8 @@ export interface User {
   isDeleted?: boolean;
   coachEmail?: string;
   theme?: string;
+  specialty?: string;
+  avatarUrl?: string;
 }
 
 @Injectable({

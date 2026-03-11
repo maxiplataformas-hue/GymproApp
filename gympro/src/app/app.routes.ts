@@ -12,6 +12,7 @@ import { StudentProgress } from './student/student-progress/student-progress';
 import { AppConfig } from './student/app-config/app-config';
 import { CoachDashboard } from './coach/coach-dashboard/coach-dashboard';
 import { AdminDashboard } from './admin/admin-dashboard/admin-dashboard';
+import { PerformanceTimers } from './student/performance-timers/performance-timers';
 
 export const routes: Routes = [
     { path: '', component: SplashScreen },
@@ -28,6 +29,7 @@ export const routes: Routes = [
             { path: 'student/calendar', component: RoutineCalendar },
             { path: 'student/chat', component: AiChat },
             { path: 'student/progress', component: StudentProgress },
+            { path: 'student/timers', component: PerformanceTimers },
             { path: 'student/config', component: AppConfig },
             { path: 'coach', component: CoachDashboard },
             { path: '', redirectTo: 'student/calendar', pathMatch: 'full' }

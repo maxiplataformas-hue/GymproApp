@@ -2,8 +2,21 @@
 
     <!-- Sidebar for Desktop -->
     <aside class="hidden md:flex flex-col w-64 border-r border-border bg-surface shadow-sm h-full flex-shrink-0 z-20">
-        <div class="p-6 border-b border-border flex items-center justify-center">
+        <div class="p-6 border-b border-border flex flex-col items-center gap-4">
             <h1 class="text-3xl font-black tracking-tighter">COACH<span class="text-primary">PRO</span></h1>
+            
+            @if (auth.currentUser()?.role === 'student') {
+            <!-- Student Exercise Badge Desktop -->
+            <div class="flex flex-col items-center gap-1">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black text-white shadow-lg transition-all duration-500 border-2 border-surface"
+                    [style.background-color]="data.todayExerciseCount() > 0 ? '#FF8C00' : '#808080'"
+                    [class.animate-pulse]="data.todayExerciseCount() > 0"
+                    [class.shadow-orange-500/50]="data.todayExerciseCount() > 0">
+                    {{ data.todayExerciseCount() }}
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted">Hoy</span>
+            </div>
+            }
         </div>
 
         <nav class="flex-1 px-4 py-8 space-y-2 overflow-y-auto">
@@ -95,6 +108,15 @@
                 </svg>
                 Progreso Visual
             </a>
+            <a routerLink="/app/student/timers" routerLinkActive="bg-primary text-white"
+                [routerLinkActiveOptions]="{exact: true}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Herramientas
+            </a>
             <a routerLink="/app/student/config" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
@@ -146,6 +168,15 @@
                     </span>
                     }
                 </button>
+
+                <!-- Exercise Badge -->
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white transition-colors duration-500"
+                        [style.background-color]="data.todayExerciseCount() > 0 ? '#FF8C00' : '#808080'"
+                        [title]="data.todayExerciseCount() > 0 ? 'Tienes ejercicios asignados hoy' : 'Sin ejercicios hoy'">
+                        {{ data.todayExerciseCount() }}
+                    </div>
+                </div>
                 }
                 <button (click)="toggleDrawer()" aria-label="Abrir menú"
                     class="w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-border/50 transition-colors cursor-pointer">
@@ -274,6 +305,15 @@
                             d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                     Progreso Visual
+                </a>
+                <a routerLink="/app/student/timers" routerLinkActive="bg-primary/10 text-primary font-bold"
+                    [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Herramientas
                 </a>
                 <a routerLink="/app/student/config" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"

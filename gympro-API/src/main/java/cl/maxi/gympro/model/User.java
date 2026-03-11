@@ -29,4 +29,6 @@ public class User {
     private String theme; // "light", "dark", or "pink"
     private String coachEmail; // email del coach al que pertenece el alumno
     private String password;
+    private String specialty; // for coaches
+    private String avatarUrl; // for profile photos
 }

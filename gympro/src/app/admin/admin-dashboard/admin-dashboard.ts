@@ -19,11 +19,15 @@ export class AdminDashboard {
 
     newCoachForm = new FormGroup({
         email: new FormControl('', [Validators.required, Validators.email]),
-        name: new FormControl('', Validators.required)
+        name: new FormControl('', Validators.required),
+        specialty: new FormControl('')
     });
 
+    isEditing = signal(false);
+    editingEmail = signal<string | null>(null);
+
     constructor() {
-        this.data.loadCoaches();
+        this.data.loadCoachMetrics();
     }
 
     startCreating() {
@@ -32,24 +36,56 @@ export class AdminDashboard {
         this.isCreating.set(true);
     }
 
-    cancelCreating() {
-        this.isCreating.set(false);
-    }
-
     saveCoach() {
         if (this.newCoachForm.valid) {
-            const { email, name } = this.newCoachForm.value;
-            const coach: User = { email: email!.trim().toLowerCase(), name: name!, role: 'coach', isOnboarded: true };
-            this.data.createCoach(coach).subscribe({
-                next: () => {
-                    this.isCreating.set(false);
-                    this.newCoachForm.reset();
-                },
-                error: () => this.saveError.set('Error al guardar. El correo podría ya existir.')
-            });
+            const { email, name, specialty } = this.newCoachForm.value;
+            const coach: User = { 
+                email: email!.trim().toLowerCase(), 
+                name: name!, 
+                specialty: specialty || '',
+                role: 'coach', 
+                isOnboarded: true 
+            };
+
+            if (this.isEditing()) {
+                this.data.updateUser(this.editingEmail()!, { name: name!, specialty: specialty || '' }).subscribe({
+                    next: () => {
+                        this.isCreating.set(false);
+                        this.isEditing.set(false);
+                        this.data.loadCoachMetrics();
+                    }
+                });
+            } else {
+                this.data.createCoach(coach).subscribe({
+                    next: () => {
+                        this.isCreating.set(false);
+                        this.newCoachForm.reset();
+                        this.data.loadCoachMetrics();
+                    },
+                    error: () => this.saveError.set('Error al guardar. El correo podría ya existir.')
+                });
+            }
         } else {
             this.newCoachForm.markAllAsTouched();
         }
+    }
+
+    editCoach(coach: User) {
+        this.isEditing.set(true);
+        this.editingEmail.set(coach.email);
+        this.isCreating.set(true);
+        this.newCoachForm.patchValue({
+            email: coach.email,
+            name: coach.name,
+            specialty: coach.specialty
+        });
+        this.newCoachForm.get('email')?.disable();
+    }
+
+    cancelCreating() {
+        this.isCreating.set(false);
+        this.isEditing.set(false);
+        this.newCoachForm.get('email')?.enable();
     }
 
     toggleCoach(coach: User) {

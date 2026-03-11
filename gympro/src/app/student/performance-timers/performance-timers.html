@@ -1,0 +1,110 @@
+<div class="h-full flex flex-col bg-background text-text p-4 md:p-8" [class.fixed]="isFullscreen()" [class.inset-0]="isFullscreen()" [class.z-[100]]="isFullscreen()">
+  
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Cronómetros de Rendimiento</h1>
+      <p class="text-text-muted text-sm">{{ mode() }} - Ronda {{ currentRound() }} de {{ rounds() }}</p>
+    </div>
+    <div class="flex gap-2">
+      <button (click)="toggleFullscreen()" 
+        class="p-3 rounded-xl bg-surface border border-border hover:bg-border transition-colors cursor-pointer"
+        title="Pantalla Completa">
+        <svg *ngIf="!isFullscreen()" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+        </svg>
+        <svg *ngIf="isFullscreen()" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mode Selector -->
+  <div class="flex gap-2 mb-8 overflow-x-auto pb-2 shrink-0" *ngIf="!isRunning()">
+    <button *ngFor="let m of ['EMOM', 'TABATA', 'REST']" 
+      (click)="mode.set(m); mode() === 'REST' ? timeLeft.set(60) : null"
+      class="px-6 py-2 rounded-xl font-bold transition-all border shrink-0"
+      [class.bg-primary]="mode() === m" [class.text-white]="mode() === m"
+      [class.border-primary]="mode() === m" [class.bg-surface]="mode() !== m"
+      [class.text-text-muted]="mode() !== m" [class.border-border]="mode() !== m">
+      {{ m }}
+    </button>
+  </div>
+
+  <!-- Main Timer Display -->
+  <div class="flex-1 flex flex-col items-center justify-center gap-8">
+    <div class="p-8 md:p-16 rounded-[40px] bg-surface border-4 border-border shadow-2xl flex flex-col items-center justify-center min-w-[300px] md:min-w-[500px] transition-all"
+      [class.border-primary]="isRunning() && isWorkPhase() && !isPaused()"
+      [class.border-secondary]="isRunning() && !isWorkPhase() && !isPaused()"
+      [class.scale-105]="isRunning() && !isPaused()">
+      
+      <span class="text-xs font-black uppercase tracking-[0.2em] text-text-muted mb-2">
+        {{ isWorkPhase() ? 'Trabajo' : 'Descanso' }}
+      </span>
+      
+      <div class="text-8xl md:text-[12rem] font-black leading-none tracking-tighter tabular-nums"
+        [class.text-primary]="isWorkPhase()" [class.text-secondary]="!isWorkPhase()" [class.opacity-50]="isPaused()">
+        {{ formatTime(timeLeft()) }}
+      </div>
+      
+      <div class="mt-4 flex flex-col items-center">
+        <span class="text-xl font-bold text-text">Ronda {{ currentRound() }} de {{ rounds() }}</span>
+        <div class="flex gap-1 mt-2">
+          <div *ngFor="let i of [].constructor(rounds()); let idx = index" 
+            class="w-2 md:w-3 h-2 rounded-full transition-colors"
+            [class.bg-primary]="idx < currentRound()" [class.bg-border]="idx >= currentRound()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center gap-6">
+      <button *ngIf="!isRunning()" (click)="start()"
+        class="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/40 hover:scale-110 active:scale-95 transition-all cursor-pointer">
+        <svg class="w-10 h-10 fill-current" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"></path>
+        </svg>
+      </button>
+
+      <ng-container *ngIf="isRunning()">
+        <button (click)="pause()"
+          class="w-16 h-16 rounded-full bg-surface border border-border text-text flex items-center justify-center hover:bg-border transition-all cursor-pointer">
+          <svg *ngIf="!isPaused()" class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+          </svg>
+          <svg *ngIf="isPaused()" class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"></path>
+          </svg>
+        </button>
+
+        <button (click)="stop()"
+          class="w-16 h-16 rounded-full bg-secondary/10 text-secondary border border-secondary/20 flex items-center justify-center hover:bg-secondary/20 transition-all cursor-pointer">
+          <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+            <path d="M6 6h12v12H6z"></path>
+          </svg>
+        </button>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Settings (only shown when not running) -->
+  <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4" *ngIf="!isRunning()">
+    <div class="bg-surface p-4 rounded-2xl border border-border">
+      <label class="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2 block">Tiempo Trabajo (seg)</label>
+      <input type="number" [(ngModel)]="workTime" (change)="timeLeft.set(workTime())"
+        class="w-full bg-background border border-border rounded-xl px-4 py-2 text-text font-bold focus:ring-2 focus:ring-primary outline-none">
+    </div>
+    <div class="bg-surface p-4 rounded-2xl border border-border" *ngIf="mode() === 'TABATA'">
+      <label class="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2 block">Tiempo Descanso (seg)</label>
+      <input type="number" [(ngModel)]="restTime"
+        class="w-full bg-background border border-border rounded-xl px-4 py-2 text-text font-bold focus:ring-2 focus:ring-primary outline-none">
+    </div>
+    <div class="bg-surface p-4 rounded-2xl border border-border" *ngIf="mode() !== 'REST'">
+      <label class="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2 block">Rondas</label>
+      <input type="number" [(ngModel)]="rounds"
+        class="w-full bg-background border border-border rounded-xl px-4 py-2 text-text font-bold focus:ring-2 focus:ring-primary outline-none">
+    </div>
+  </div>
+</div>

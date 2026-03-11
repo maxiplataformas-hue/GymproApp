@@ -1,0 +1,25 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+/* Tabular nums to prevent jitter */
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+@keyframes pulse-border {
+    0% { border-color: var(--border); }
+    50% { border-color: var(--primary); }
+    100% { border-color: var(--border); }
+}
+
+.animate-pulse-border {
+    animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

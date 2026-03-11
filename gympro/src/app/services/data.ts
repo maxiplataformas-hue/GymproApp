@@ -4,6 +4,11 @@ import { tap } from 'rxjs/operators';
 import { User } from './auth';
 import { PushNotificationService } from './push-notification';
 
+export interface CoachMetric extends User {
+  studentCount: number;
+  activityLevel: number;
+}
+
 export type MuscleGroup = 'Pecho' | 'Espalda' | 'Pierna' | 'Hombro' | 'Brazo' | 'Core';
 export type Equipment = 'Barra' | 'Mancuerna' | 'Máquina' | 'Libre';
 
@@ -190,6 +195,12 @@ export class DataService {
   currentProfiles = signal<StudentProfile[]>([]);
   notifications = signal<Notification[]>([]);
   unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
+
+  todayExerciseCount = computed(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const routine = this.routines().find(r => r.date === today);
+    return routine ? routine.items.length : 0;
+  });
 
   private http = inject(HttpClient);
   private push = inject(PushNotificationService);
@@ -396,6 +407,12 @@ export class DataService {
   markAllAsRead(email: string) {
     this.http.put(`${this.apiBase}/notifications/read-all/${email}`, {}).subscribe(() => {
       this.loadNotifications(email);
+    });
+  }
+
+  loadCoachMetrics() {
+    this.http.get<any[]>(`${this.apiBase}/users/coaches/metrics`).subscribe(metrics => {
+      this.allCoaches.set(metrics);
     });
   }
 
