@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -40,9 +41,13 @@ public class AiCoachController {
         // Clean JSON from potential markdown blocks
         String cleanJson = aiResponse.replaceAll("```json", "").replaceAll("```", "").trim();
         
-        Routine routine = new Routine();
+        // Check for existing routine to avoid NonUniqueResultException on retrieval
+        String today = LocalDate.now().toString();
+        Optional<Routine> existing = routineRepository.findByStudentEmailIgnoreCaseAndDate(request.getEmail(), today);
+        
+        Routine routine = existing.orElse(new Routine());
         routine.setStudentEmail(request.getEmail());
-        routine.setDate(LocalDate.now().toString());
+        routine.setDate(today);
         List<RoutineItem> items = new ArrayList<>();
 
         try {
@@ -54,9 +59,8 @@ public class AiCoachController {
                 for (com.fasterxml.jackson.databind.JsonNode node : exercises) {
                     RoutineItem item = new RoutineItem();
                     item.setId(UUID.randomUUID().toString());
-                    item.setExerciseId(node.path("name").asText()); // We store name in exerciseId for dynamic AI routine
+                    item.setExerciseId(node.path("name").asText());
                     item.setSets(node.path("sets").asInt(3));
-                    // Handle reps as string in case AI gives range
                     String repsStr = node.path("reps").asText("12");
                     try {
                         item.setReps(Integer.parseInt(repsStr.replaceAll("[^0-9]", "")));
@@ -69,7 +73,7 @@ public class AiCoachController {
                 }
             }
         } catch (Exception e) {
-            // Log error locally if possible and use backup
+            // Fallback content if AI fails to provide JSON
             items.add(new RoutineItem(UUID.randomUUID().toString(), "Caminata de Calentamiento", 1, 15, 0.0, false));
             items.add(new RoutineItem(UUID.randomUUID().toString(), "Sentadillas (Peso Corporal)", 3, 12, 0.0, false));
             items.add(new RoutineItem(UUID.randomUUID().toString(), "Flexiones o Push-ups", 3, 10, 0.0, false));
