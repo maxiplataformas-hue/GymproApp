@@ -28,6 +28,7 @@ export class PerformanceTimers implements OnDestroy {
   currentRound = signal(1);
   timeLeft = signal(20);
   isWorkPhase = signal(true);
+  isPrepPhase = signal(false);
   
   private interval: any;
   private audioContext: AudioContext | null = null;
@@ -59,11 +60,12 @@ export class PerformanceTimers implements OnDestroy {
     
     this.isRunning.set(true);
     this.isPaused.set(false);
+    this.isPrepPhase.set(true); // Always start with a 10s prep
+    this.timeLeft.set(10);
     this.currentRound.set(1);
     this.isWorkPhase.set(true);
-    this.timeLeft.set(this.workTime());
     
-    this.playSound('start');
+    this.playSound('warning');
     this.runTick();
   }
 
@@ -115,7 +117,13 @@ export class PerformanceTimers implements OnDestroy {
       }
 
       if (this.timeLeft() <= 0) {
-        this.handlePhaseEnd();
+        if (this.isPrepPhase()) {
+          this.isPrepPhase.set(false);
+          this.timeLeft.set(this.workTime());
+          this.playSound('start');
+        } else {
+          this.handlePhaseEnd();
+        }
       }
     }, 1000);
   }
@@ -123,7 +131,8 @@ export class PerformanceTimers implements OnDestroy {
   private handlePhaseEnd() {
     if (this.mode() === 'EMOM') {
       if (this.currentRound() >= this.rounds()) {
-        this.playSound('end');
+        this.playSound('bell');
+        this.speak("FELICITACIONES, FIN DEL entrenamiento de intervalo");
         this.stop();
       } else {
         this.currentRound.update(r => r + 1);
@@ -137,7 +146,8 @@ export class PerformanceTimers implements OnDestroy {
         this.playSound('rest'); // Or just start
       } else {
         if (this.currentRound() >= this.rounds()) {
-          this.playSound('end');
+          this.playSound('bell');
+          this.speak("FELICITACIONES, FIN DEL entrenamiento de intervalo");
           this.stop();
         } else {
           this.isWorkPhase.set(true);
@@ -147,12 +157,13 @@ export class PerformanceTimers implements OnDestroy {
         }
       }
     } else if (this.mode() === 'REST') {
-      this.playSound('end');
+      this.playSound('bell');
+      this.speak("FELICITACIONES, FIN DEL entrenamiento de intervalo");
       this.stop();
     }
   }
 
-  private playSound(type: 'start' | 'warning' | 'end' | 'rest') {
+  private playSound(type: 'start' | 'warning' | 'end' | 'rest' | 'bell') {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
@@ -187,6 +198,35 @@ export class PerformanceTimers implements OnDestroy {
       gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
       osc.start();
       osc.stop(this.audioContext.currentTime + 0.8); // Long beep
+    } else if (type === 'bell') {
+      const mod = this.audioContext.createOscillator();
+      const modGain = this.audioContext.createGain();
+      mod.type = 'triangle';
+      mod.frequency.setValueAtTime(300, this.audioContext.currentTime);
+      modGain.gain.setValueAtTime(200, this.audioContext.currentTime);
+
+      osc.frequency.setValueAtTime(440, this.audioContext.currentTime);
+      mod.connect(modGain);
+      modGain.connect(osc.frequency);
+      
+      gain.gain.setValueAtTime(baseVolume * 1.5, this.audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 2.0);
+      
+      mod.start();
+      osc.start();
+      mod.stop(this.audioContext.currentTime + 2.0);
+      osc.stop(this.audioContext.currentTime + 2.0);
+    }
+  }
+
+  private speak(text: string) {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = this.volume();
+      window.speechSynthesis.speak(utterance);
     }
   }
 

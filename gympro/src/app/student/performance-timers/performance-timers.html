@@ -4,7 +4,7 @@
   <div class="flex items-center justify-between mb-8">
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Cronómetros de Rendimiento</h1>
-      <p class="text-text-muted text-sm">{{ mode() }} - Ronda {{ currentRound() }} de {{ rounds() }}</p>
+      <p class="text-text-muted text-sm">{{ mode() }} - {{ isPrepPhase() ? 'PREPARACIÓN' : 'Ronda ' + currentRound() + ' de ' + rounds() }}</p>
     </div>
     <div class="flex gap-2">
       <button (click)="toggleFullscreen()" 
@@ -39,7 +39,7 @@
       [class.scale-105]="isRunning() && !isPaused()">
       
       <span class="text-xs font-black uppercase tracking-[0.2em] text-text-muted mb-2">
-        {{ isWorkPhase() ? 'Trabajo' : 'Descanso' }}
+        {{ isPrepPhase() ? 'Prepárate' : (isWorkPhase() ? 'Trabajo' : 'Descanso') }}
       </span>
       
       <div class="text-8xl md:text-[12rem] font-black leading-none tracking-tighter tabular-nums"
