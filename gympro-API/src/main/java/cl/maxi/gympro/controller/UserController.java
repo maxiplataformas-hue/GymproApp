@@ -100,7 +100,7 @@ public class UserController {
     /** DELETE /api/users/{email} → soft delete (isDeleted = true) */
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteUser(@PathVariable String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+        Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             user.setIsDeleted(true);

@@ -17,11 +17,14 @@ public class PhysioController {
 
     @GetMapping("/{studentEmail}")
     public List<PhysioEntry> getPhysioHistory(@PathVariable String studentEmail) {
-        return physioRepository.findByStudentEmail(studentEmail);
+        return physioRepository.findByStudentEmailIgnoreCase(studentEmail);
     }
 
     @PostMapping
     public PhysioEntry saveEntry(@RequestBody PhysioEntry entry) {
+        if (entry.getStudentEmail() != null) {
+            entry.setStudentEmail(entry.getStudentEmail().trim().toLowerCase());
+        }
         return physioRepository.save(entry);
     }
 }

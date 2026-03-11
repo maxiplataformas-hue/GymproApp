@@ -245,37 +245,43 @@ export class DataService {
   }
 
   toggleStudentStatus(email: string, isActive: boolean, coachEmail?: string) {
-    return this.http.put<User>(`${this.apiBase}/users/${email}`, { isActive }).pipe(
+    const normalizedEmail = email.trim().toLowerCase();
+    return this.http.put<User>(`${this.apiBase}/users/${normalizedEmail}`, { isActive }).pipe(
       tap(() => this.loadAllStudents(coachEmail))
     );
   }
 
   deleteStudent(email: string, coachEmail?: string) {
-    return this.http.delete(`${this.apiBase}/users/${email}`).pipe(
+    const normalizedEmail = email.trim().toLowerCase();
+    return this.http.delete(`${this.apiBase}/users/${normalizedEmail}`).pipe(
       tap(() => this.loadAllStudents(coachEmail))
     );
   }
 
   toggleCoachStatus(email: string, isActive: boolean) {
-    return this.http.put<User>(`${this.apiBase}/users/${email}`, { isActive }).pipe(
+    const normalizedEmail = email.trim().toLowerCase();
+    return this.http.put<User>(`${this.apiBase}/users/${normalizedEmail}`, { isActive }).pipe(
       tap(() => this.loadCoaches())
     );
   }
 
   updateUser(email: string, userData: Partial<User>, coachEmail?: string) {
-    return this.http.put<User>(`${this.apiBase}/users/${email}`, userData).pipe(
+    const normalizedEmail = email.trim().toLowerCase();
+    return this.http.put<User>(`${this.apiBase}/users/${normalizedEmail}`, userData).pipe(
       tap(() => this.loadAllStudents(coachEmail))
     );
   }
 
   loadRoutines(email: string) {
-    this.http.get<RoutineAssignment[]>(`${this.apiBase}/routines/${email}`).subscribe(data => {
+    const normalizedEmail = email.trim().toLowerCase();
+    this.http.get<RoutineAssignment[]>(`${this.apiBase}/routines/${normalizedEmail}`).subscribe(data => {
       this.routines.set(data);
     });
   }
 
   loadPhysio(email: string) {
-    this.http.get<PhysiologicalEntry[]>(`${this.apiBase}/physio/${email}`).subscribe(data => {
+    const normalizedEmail = email.trim().toLowerCase();
+    this.http.get<PhysiologicalEntry[]>(`${this.apiBase}/physio/${normalizedEmail}`).subscribe(data => {
       this.physioEntries.set(data);
     });
   }

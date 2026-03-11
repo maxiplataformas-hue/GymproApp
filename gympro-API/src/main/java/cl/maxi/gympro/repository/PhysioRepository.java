@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface PhysioRepository extends MongoRepository<PhysioEntry, String> {
+    List<PhysioEntry> findByStudentEmailIgnoreCase(String studentEmail);
     List<PhysioEntry> findByStudentEmail(String studentEmail);
 }
