@@ -29,6 +29,7 @@ export class PerformanceTimers implements OnDestroy {
   timeLeft = signal(20);
   isWorkPhase = signal(true);
   isPrepPhase = signal(false);
+  isFinished = signal(false);
   
   private interval: any;
   private audioContext: AudioContext | null = null;
@@ -60,6 +61,7 @@ export class PerformanceTimers implements OnDestroy {
     
     this.isRunning.set(true);
     this.isPaused.set(false);
+    this.isFinished.set(false);
     this.isPrepPhase.set(true); // Always start with a 10s prep
     this.timeLeft.set(10);
     this.currentRound.set(1);
@@ -81,6 +83,7 @@ export class PerformanceTimers implements OnDestroy {
 
   reset() {
     this.stop();
+    this.isFinished.set(false);
     this.setMode(this.mode());
   }
 
@@ -131,8 +134,8 @@ export class PerformanceTimers implements OnDestroy {
   private handlePhaseEnd() {
     if (this.mode() === 'EMOM') {
       if (this.currentRound() >= this.rounds()) {
-        this.playSound('bell');
-        this.speak("FELICITACIONES, FIN DEL entrenamiento de intervalo");
+        this.playSound('end');
+        this.isFinished.set(true);
         this.stop();
       } else {
         this.currentRound.update(r => r + 1);
@@ -146,8 +149,8 @@ export class PerformanceTimers implements OnDestroy {
         this.playSound('rest'); // Or just start
       } else {
         if (this.currentRound() >= this.rounds()) {
-          this.playSound('bell');
-          this.speak("FELICITACIONES, FIN DEL entrenamiento de intervalo");
+          this.playSound('end');
+          this.isFinished.set(true);
           this.stop();
         } else {
           this.isWorkPhase.set(true);
@@ -157,8 +160,8 @@ export class PerformanceTimers implements OnDestroy {
         }
       }
     } else if (this.mode() === 'REST') {
-      this.playSound('bell');
-      this.speak("FELICITACIONES, FIN DEL entrenamiento de intervalo");
+      this.playSound('end');
+      this.isFinished.set(true);
       this.stop();
     }
   }
@@ -190,9 +193,9 @@ export class PerformanceTimers implements OnDestroy {
       osc.stop(this.audioContext.currentTime + 0.1);
     } else if (type === 'end') {
       osc.frequency.setValueAtTime(1200, this.audioContext.currentTime);
-      gain.gain.setValueAtTime(baseVolume * 1.2, this.audioContext.currentTime); // Even louder for final
+      gain.gain.setValueAtTime(baseVolume * 1.5, this.audioContext.currentTime); 
       osc.start();
-      osc.stop(this.audioContext.currentTime + 1.0);
+      osc.stop(this.audioContext.currentTime + 3.0); // Very long beep per request
     } else if (type === 'rest') {
       osc.frequency.setValueAtTime(660, this.audioContext.currentTime);
       gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);

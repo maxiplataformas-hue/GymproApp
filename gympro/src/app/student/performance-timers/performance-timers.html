@@ -44,7 +44,7 @@
       
       <div class="text-8xl md:text-[12rem] font-black leading-none tracking-tighter tabular-nums"
         [class.text-primary]="isWorkPhase()" [class.text-secondary]="!isWorkPhase()" [class.opacity-50]="isPaused()">
-        {{ formatTime(timeLeft()) }}
+        {{ isFinished() ? 'FIN' : formatTime(timeLeft()) }}
       </div>
       
       <div class="mt-4 flex flex-col items-center">
