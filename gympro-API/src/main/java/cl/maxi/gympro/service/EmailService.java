@@ -1,29 +1,36 @@
 package cl.maxi.gympro.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${google.script.url:}")
+    private String scriptUrl;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public void sendOtpEmail(String to, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("alumnocoachpro@gmail.com");
-        message.setTo(to);
-        message.setSubject("Código de verificación CoachPRO");
-        message.setText("Tu código de verificación para CoachPRO es: " + code + "\n\nEste código expirará en 10 minutos.");
+        if (scriptUrl == null || scriptUrl.isEmpty()) {
+            throw new RuntimeException("Google Script URL is NOT configured in properties.");
+        }
+
+        Map<String, String> body = new HashMap<>();
+        body.put("to", to);
+        body.put("code", code);
         
         try {
-            mailSender.send(message);
-            System.out.println("Email effectively sent to: " + to);
+            // Google Apps Script requires a simple POST with JSON or form-data
+            // RestTemplate handles the serialization
+            String response = restTemplate.postForObject(scriptUrl, body, String.class);
+            System.out.println("Email effectively sent via Proxy to: " + to + ". Response: " + response);
         } catch (Exception e) {
-            System.err.println("Error sending email: " + e.getMessage());
-            throw new RuntimeException("Failed to send email: " + e.getMessage());
+            System.err.println("Error sending email via Proxy: " + e.getMessage());
+            throw new RuntimeException("Failed to send email via Proxy: " + e.getMessage());
         }
     }
 }
