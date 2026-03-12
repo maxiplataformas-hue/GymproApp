@@ -53,9 +53,9 @@ export class RoutineCalendar implements OnInit {
       const ex = this.exercises().find(e => e.id === i.exerciseId);
       return {
         ...i,
-        exerciseName: ex?.name || 'Ejercicio Desconocido',
-        muscleGroup: ex?.muscleGroup || 'General',
-        equipment: ex?.equipment || 'Libre'
+        exerciseName: ex ? ex.name : i.exerciseId,
+        muscleGroup: ex ? ex.muscleGroup : 'General',
+        equipment: ex ? ex.equipment : 'Libre'
       };
     });
   });
