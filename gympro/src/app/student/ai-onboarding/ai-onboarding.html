@@ -29,7 +29,7 @@
         <p class="text-text-muted">Ingresa tu correo para vincular tu progreso y rutinas de IA.</p>
       } @else {
         <h2 class="text-3xl font-black text-text mb-3 tracking-tighter">Verifica tu correo</h2>
-        <p class="text-text-muted">Hemos enviado un código de 4 dígitos a <span class="font-bold text-primary">{{ emailField() }}</span></p>
+        <p class="text-text-muted">Hemos enviado un código de 6 dígitos a <span class="font-bold text-primary">{{ emailField() }}</span></p>
       }
     </div>
 
@@ -47,9 +47,9 @@
         </div>
       } @else {
         <div class="flex flex-col items-center gap-4">
-          <input type="text" [(ngModel)]="otpField" maxlength="4"
-                 class="w-48 bg-surface border-2 border-primary p-5 rounded-3xl text-text text-center text-4xl font-black tracking-[0.5em] focus:ring-4 focus:ring-primary/10 outline-none transition-all"
-                 placeholder="0000">
+          <input type="text" [(ngModel)]="otpField" maxlength="6"
+                 class="w-56 bg-surface border-2 border-primary p-5 rounded-3xl text-text text-center text-4xl font-black tracking-[0.2em] focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                 placeholder="000000">
           <button (click)="sendOtp(emailField())" class="text-primary font-bold text-sm hover:underline">
             No me llegó el código, reenviar
           </button>

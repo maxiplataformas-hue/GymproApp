@@ -85,6 +85,11 @@ export class AiOnboarding implements OnInit {
   }
 
   async nextStep() {
+    if (this.isWaitingForOtp()) {
+      this.verifyOtp();
+      return;
+    }
+
     const s = this.step();
     if (s === 0) {
       if (!this.emailField() || !this.emailField().includes('@')) {
@@ -121,11 +126,6 @@ export class AiOnboarding implements OnInit {
       return;
     }
 
-    if (this.isWaitingForOtp()) {
-      this.verifyOtp();
-      return;
-    }
-
     if (s === 1) { // Basic Profile Registration
       if (!this.nameField() || !this.ageField() || !this.weightField() || !this.heightField()) {
         alert('Por favor, completa todos los campos obligatorios.');
@@ -157,8 +157,8 @@ export class AiOnboarding implements OnInit {
   }
 
   verifyOtp() {
-    if (this.otpField().length < 4) {
-      alert('Ingresa el código de 4 dígitos.');
+    if (this.otpField().length < 6) {
+      alert('Ingresa el código de 6 dígitos.');
       return;
     }
     this.isBiometricLoading.set(true);
