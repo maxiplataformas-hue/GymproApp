@@ -42,7 +42,11 @@ public class AuthController {
         otpRepository.save(otp);
 
         // Send email
-        emailService.sendOtpEmail(email, code);
+        try {
+            emailService.sendOtpEmail(email, code);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("SMTP Error: " + e.getMessage());
+        }
         
         System.out.println("OTP sent to " + email + ": " + code);
         return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
