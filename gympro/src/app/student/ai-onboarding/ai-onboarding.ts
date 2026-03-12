@@ -260,6 +260,23 @@ export class AiOnboarding implements OnInit {
     this.router.navigate(['/select-mode']);
   }
 
+  translate(value: string): string {
+    const translations: { [key: string]: string } = {
+      'weight-loss': 'Perder Peso',
+      'muscle-gain': 'Ganar Músculo',
+      'endurance': 'Resistencia',
+      'health': 'Salud General',
+      'beginner': 'Principiante',
+      'intermediate': 'Intermedio',
+      'advanced': 'Avanzado',
+      'gym': 'Gimnasio',
+      'dumbbells': 'Mancuernas',
+      'bodyweight': 'Peso Corporal',
+      'home': 'Casa'
+    };
+    return translations[value] || value;
+  }
+
   setTheme(t: AppTheme) {
     this.theme.setTheme(t);
   }
@@ -276,6 +293,9 @@ export class AiOnboarding implements OnInit {
       height: this.heightField(),
       trainingDays: this.trainingDays()
     };
+
+    console.log('Generando rutina con payload:', payload);
+    this.isBiometricLoading.set(true);
 
     this.http.get(`${this.apiUrl}/users/${email}`).pipe(
       catchError((error) => {
@@ -300,12 +320,27 @@ export class AiOnboarding implements OnInit {
       age: this.ageField(),
       initialWeight: this.weightField(),
       height: this.heightField()
-    }).subscribe(() => {
-      this.auth.login(email, () => {
-        this.http.post(`${this.apiUrl}/ai-coach/generate-routine`, payload).subscribe(() => {
-          this.router.navigate(['/app/student/ai-routine']);
+    }).subscribe({
+      next: () => {
+        this.auth.login(email, () => {
+          this.http.post(`${this.apiUrl}/ai-coach/generate-routine`, payload).subscribe({
+            next: () => {
+              this.isBiometricLoading.set(false);
+              this.router.navigate(['/app/student/ai-routine']);
+            },
+            error: (err) => {
+              console.error('Error generating routine:', err);
+              this.isBiometricLoading.set(false);
+              alert('Error al generar la rutina de IA. Intenta de nuevo.');
+            }
+          });
         });
-      });
+      },
+      error: (err) => {
+        console.error('Error updating user status:', err);
+        this.isBiometricLoading.set(false);
+        alert('Error al actualizar el estado del usuario.');
+      }
     });
   }
 }

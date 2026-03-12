@@ -42,7 +42,9 @@ public class AiCoachController {
             "Objetivo: '%s', Nivel: '%s', Edad: %d años, Peso: %.1f kg, Estatura: %.1f cm. " +
             "Días de entrenamiento por semana: %d. " +
             "Equipo disponible: %s. " +
-            "IMPORTANTE: Varía los ejercicios según el día de la semana y la frecuencia de %d días para evitar repeticiones y sobreentrenamiento. " +
+            "IMPORTANTE: " +
+            "1. Responde los nombres de los ejercicios SIEMPRE en ESPAÑOL. " +
+            "2. Varía los ejercicios según el día de la semana y la frecuencia de %d días para evitar repeticiones y sobreentrenamiento. " +
             "Responde ÚNICAMENTE con un objeto JSON válido que tenga esta estructura exacta: " +
             "{ \"exercises\": [ { \"name\": \"Nombre del Ejercicio\", \"sets\": 3, \"reps\": \"12\", \"weight\": 0.0 } ] }. " +
             "Adapta el volumen e intensidad a los datos físicos y la frecuencia de entrenamiento.",
@@ -56,6 +58,9 @@ public class AiCoachController {
             request.getTrainingDays() != null ? request.getTrainingDays() : 3
         );
 
+        System.out.println("Generating Routine for: " + request.getEmail());
+        System.out.println("Prompt Sent: " + prompt);
+        
         String aiResponse = geminiService.getResponse(prompt, "CONTEXTO: Generación de rutina estructurada JSON para CoachPRO. NO USAR MARKDOWN, SOLO JSON.");
         System.out.println("AI Raw Response: " + aiResponse);
 
