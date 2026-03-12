@@ -157,10 +157,11 @@ export class AiOnboarding implements OnInit {
       error: (err) => {
         console.error('Error al enviar OTP:', err);
         this.isBiometricLoading.set(false);
+        const errorMsg = err.error || 'Error desconocido';
         if (err.status === 404) {
           alert('Error: El servidor no reconoce la ruta de envío de correos. ¿Se desplegó correctamente el Backend?');
         } else {
-          alert('Error al enviar el código de verificación. Revisa la consola.');
+          alert(`Error al enviar el código: ${errorMsg}. Revisa la consola para más detalles.`);
         }
       }
     });
