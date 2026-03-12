@@ -102,19 +102,19 @@ export class AiOnboarding implements OnInit {
       
       this.http.get(`${this.apiUrl}/users/${email}`).pipe(
         catchError((err) => {
+          this.isBiometricLoading.set(false);
           if (err.status === 404) {
             // New user: Send OTP first
             this.sendOtp(email);
             return of(null);
           } else {
             alert('Error al verificar el usuario. Reintenta.');
-            this.isBiometricLoading.set(false);
           }
           return of(null);
         })
       ).subscribe((user: any) => {
+        this.isBiometricLoading.set(false);
         if (user) {
-          this.isBiometricLoading.set(false);
           this.isNewUser.set(false);
           this.nicknameField.set(user.nickname || user.name?.split(' ')[0] || '');
           this.ageField.set(user.age || null);
