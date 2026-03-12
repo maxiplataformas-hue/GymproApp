@@ -37,6 +37,11 @@ export class AiOnboarding implements OnInit {
   goal = signal('');
   level = signal('');
   equipment = signal<string[]>([]);
+  trainingDays = signal<number | null>(null);
+  
+  // OTP related
+  otpField = signal('');
+  isWaitingForOtp = signal(false);
   isBiometricLoading = signal(false);
 
   goals = [
@@ -59,11 +64,23 @@ export class AiOnboarding implements OnInit {
     { id: 'home', label: 'Equipamiento de casa', icon: '🏠' }
   ];
 
+  trainingDaysOptions = [
+    { val: 2, label: '2 días', icon: '🥈' },
+    { val: 3, label: '3 días', icon: '🥉' },
+    { val: 4, label: '4 días', icon: '🏅' },
+    { val: 5, label: '5 días', icon: '🏆' },
+    { val: 6, label: '6 días', icon: '🔥' }
+  ];
+
   ngOnInit() {
     const user = this.auth.currentUser();
     if (user) {
       this.step.set(1);
       this.emailField.set(user.email);
+      this.nicknameField.set(user.nickname || user.name?.split(' ')[0] || '');
+      this.ageField.set(user.age || null);
+      this.weightField.set(user.initialWeight || null);
+      this.heightField.set(user.height || null);
     }
   }
 
@@ -81,20 +98,31 @@ export class AiOnboarding implements OnInit {
       this.http.get(`${this.apiUrl}/users/${email}`).pipe(
         catchError((err) => {
           if (err.status === 404) {
-            this.isNewUser.set(true);
-            this.step.set(1); // Go to Profile Form
+            // New user: Send OTP first
+            this.sendOtp(email);
+            return of(null);
           } else {
             alert('Error al verificar el usuario. Reintenta.');
+            this.isBiometricLoading.set(false);
           }
           return of(null);
         })
-      ).subscribe((user) => {
-        this.isBiometricLoading.set(false);
+      ).subscribe((user: any) => {
         if (user) {
+          this.isBiometricLoading.set(false);
           this.isNewUser.set(false);
-          this.step.set(2); // Skip Profile, go to Biometrics
+          this.nicknameField.set(user.nickname || user.name?.split(' ')[0] || '');
+          this.ageField.set(user.age || null);
+          this.weightField.set(user.initialWeight || null);
+          this.heightField.set(user.height || null);
+          this.step.set(2); 
         }
       });
+      return;
+    }
+
+    if (this.isWaitingForOtp()) {
+      this.verifyOtp();
       return;
     }
 
@@ -107,11 +135,46 @@ export class AiOnboarding implements OnInit {
       return;
     }
     
-    if (this.step() < 5) {
+    if (this.step() < 7) {
       this.step.update(s => s + 1);
     } else {
       this.completeOnboarding();
     }
+  }
+
+  sendOtp(email: string) {
+    this.http.post(`${this.apiUrl}/auth/send-otp`, { email }).subscribe({
+      next: () => {
+        this.isBiometricLoading.set(false);
+        this.isWaitingForOtp.set(true);
+        // We stay in step 0 but show OTP UI
+      },
+      error: (err) => {
+        this.isBiometricLoading.set(false);
+        alert('Error al enviar el código de verificación.');
+      }
+    });
+  }
+
+  verifyOtp() {
+    if (this.otpField().length < 4) {
+      alert('Ingresa el código de 4 dígitos.');
+      return;
+    }
+    this.isBiometricLoading.set(true);
+    const email = this.emailField().trim().toLowerCase();
+    this.http.post(`${this.apiUrl}/auth/verify-otp`, { email, code: this.otpField() }).subscribe({
+      next: () => {
+        this.isBiometricLoading.set(false);
+        this.isWaitingForOtp.set(false);
+        this.isNewUser.set(true);
+        this.step.set(1); // Proceed to Profile registration
+      },
+      error: (err) => {
+        this.isBiometricLoading.set(false);
+        alert('Código incorrecto o expirado.');
+      }
+    });
   }
 
   private registerUser() {
@@ -169,6 +232,10 @@ export class AiOnboarding implements OnInit {
     }
   }
 
+  resetOnboarding() {
+    this.step.set(3); // Go back to Goal selection
+  }
+
   toggleEquipment(id: string) {
     const current = this.equipment();
     if (current.includes(id)) {
@@ -195,17 +262,12 @@ export class AiOnboarding implements OnInit {
       equipment: this.equipment(),
       age: this.ageField(),
       weight: this.weightField(),
-      height: this.heightField()
+      height: this.heightField(),
+      trainingDays: this.trainingDays()
     };
 
-    // 1. Mark user as IA_ASSISTED and onboarded (or create if new)
-    // The backend PUT /users/{email} handles update. 
-    // If it's a new user, we should probably POST first. 
-    // Let's check user existence first.
-    // Use a more silent way to check if user exists (or just try PUT directly and catch error)
     this.http.get(`${this.apiUrl}/users/${email}`).pipe(
       catchError((error) => {
-        // If user not found (e.g., 404), create new user
         if (error.status === 404) {
           return this.http.post(`${this.apiUrl}/users`, {
             email: email,
@@ -215,8 +277,7 @@ export class AiOnboarding implements OnInit {
             isActive: true
           });
         }
-        // Re-throw other errors
-        return of(error); // Or throw error; depending on desired error handling
+        return of(error);
       })
     ).subscribe(() => this.finishOnboarding(email, payload));
   }

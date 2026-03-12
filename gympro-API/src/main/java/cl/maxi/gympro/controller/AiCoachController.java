@@ -33,23 +33,32 @@ public class AiCoachController {
 
     @PostMapping("/generate-routine")
     public ResponseEntity<Routine> generateRoutine(@RequestBody AiRoutineRequest request) {
+        // Include day and date for variety
+        String todayDate = LocalDate.now().toString();
+        String dayOfWeek = LocalDate.now().getDayOfWeek().name();
+        
         String prompt = String.format(
-            "Genera una rutina de entrenamiento para un usuario con: " +
+            "Hoy es %s (%s). Genera una rutina de entrenamiento variada para un usuario con: " +
             "Objetivo: '%s', Nivel: '%s', Edad: %d años, Peso: %.1f kg, Estatura: %.1f cm. " +
+            "Días de entrenamiento por semana: %d. " +
             "Equipo disponible: %s. " +
+            "IMPORTANTE: Varía los ejercicios según el día de la semana y la frecuencia de %d días para evitar repeticiones y sobreentrenamiento. " +
             "Responde ÚNICAMENTE con un objeto JSON válido que tenga esta estructura exacta: " +
             "{ \"exercises\": [ { \"name\": \"Nombre del Ejercicio\", \"sets\": 3, \"reps\": \"12\", \"weight\": 0.0 } ] }. " +
-            "Adapta el volumen e intensidad a los datos físicos. " +
-            "Diferencia bien los ejercicios según el equipo. Si es 'weight-loss', prioriza repeticiones altas (15+). Si es 'muscle-gain', prioriza series de fuerza (8-12).",
+            "Adapta el volumen e intensidad a los datos físicos y la frecuencia de entrenamiento.",
+            dayOfWeek, todayDate,
             request.getGoal(), request.getLevel(), 
             request.getAge() != null ? request.getAge() : 30,
             request.getWeight() != null ? request.getWeight() : 70.0,
             request.getHeight() != null ? request.getHeight() : 170.0,
-            String.join(", ", request.getEquipment())
+            request.getTrainingDays() != null ? request.getTrainingDays() : 3,
+            String.join(", ", request.getEquipment()),
+            request.getTrainingDays() != null ? request.getTrainingDays() : 3
         );
 
         String aiResponse = geminiService.getResponse(prompt, "CONTEXTO: Generación de rutina estructurada JSON para CoachPRO. NO USAR MARKDOWN, SOLO JSON.");
-        
+        System.out.println("AI Raw Response: " + aiResponse);
+
         // Clean JSON from potential markdown blocks
         String cleanJson = aiResponse.replaceAll("```json", "").replaceAll("```", "").trim();
         
@@ -73,7 +82,7 @@ public class AiCoachController {
                     physioRepository.save(newEntry);
                 }
             } catch (Exception e) {
-                // Ignore errors here, main goal is routine
+                System.err.println("Error saving physio entry: " + e.getMessage());
             }
         }
         List<RoutineItem> items = new ArrayList<>();
@@ -101,14 +110,15 @@ public class AiCoachController {
                 }
             }
         } catch (Exception e) {
+            System.err.println("Error parsing AI JSON: " + e.getMessage());
             // Fallback content if AI fails to provide JSON
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Caminata de Calentamiento", 1, 15, 0.0, false));
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Sentadillas (Peso Corporal)", 3, 12, 0.0, false));
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Flexiones o Push-ups", 3, 10, 0.0, false));
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Caminata de Calentamiento (Fallback)", 1, 15, 0.0, false));
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Sentadillas (Peso Corporal) (Fallback)", 3, 12, 0.0, false));
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Flexiones o Push-ups (Fallback)", 3, 10, 0.0, false));
         }
 
         if (items.isEmpty()) {
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Estiramiento Dinámico", 1, 10, 0.0, false));
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Estiramiento Dinámico (Fallback)", 1, 10, 0.0, false));
         }
         
         routine.setItems(items);
@@ -124,5 +134,14 @@ public class AiCoachController {
         private Integer age;
         private Double weight;
         private Double height;
+        private Integer trainingDays;
+
+        public Integer getTrainingDays() {
+            return trainingDays;
+        }
+
+        public void setTrainingDays(Integer trainingDays) {
+            this.trainingDays = trainingDays;
+        }
     }
 }

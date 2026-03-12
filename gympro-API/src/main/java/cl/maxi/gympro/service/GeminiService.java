@@ -48,9 +48,16 @@ public class GeminiService {
         contents.put("parts", Collections.singletonList(parts));
         requestBody.put("contents", Collections.singletonList(contents));
 
+        // Add generationConfig for more creativity/variety
+        Map<String, Object> generationConfig = new HashMap<>();
+        generationConfig.put("temperature", 0.8);
+        generationConfig.put("topP", 0.95);
+        generationConfig.put("topK", 40);
+        generationConfig.put("maxOutputTokens", 1024);
+        requestBody.put("generationConfig", generationConfig);
+
         try {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            // Usamos ParameterizedTypeReference para tipificar la respuesta correctamente
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
@@ -69,8 +76,11 @@ public class GeminiService {
                     Map<String, Object> firstPart = responseParts.get(0);
                     return (String) firstPart.get("text");
                 }
+            } else {
+                System.err.println("API Error Response: " + response.getBody());
             }
         } catch (Exception e) {
+            System.err.println("Exception calling Gemini: " + e.getMessage());
             return "Hubo un error al comunicar con el Coach IA (v2.5-flash): " + e.getMessage();
         }
 

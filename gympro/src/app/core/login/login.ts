@@ -14,6 +14,7 @@ import { PushNotificationService } from '../../services/push-notification';
 })
 export class Login {
   emailControl = new FormControl('', [Validators.required, Validators.email]);
+  otpControl = new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]);
 
   auth = inject(AuthService);
   themeService = inject(ThemeService);
@@ -23,6 +24,9 @@ export class Login {
 
   loginError = this.auth.loginError;
   isLoading = this.auth.isLoading;
+
+  // Login flow state
+  isWaitingForOtp = signal(false);
 
   // Post-login biometric setup
   showBiometricSetup = signal(false);
@@ -56,12 +60,27 @@ export class Login {
 
   onSubmitEmail() {
     if (this.emailControl.valid && this.emailControl.value) {
-      this.auth.login(
+      this.auth.sendLoginOtp(
         this.emailControl.value.trim().toLowerCase(),
-        (user) => this.handleLoginSuccess(user)
+        () => this.isWaitingForOtp.set(true),
+        () => {}
       );
     } else {
       this.emailControl.markAsTouched();
+    }
+  }
+
+  onVerifyOtp() {
+    const email = this.emailControl.value;
+    const code = this.otpControl.value;
+    if (email && code && this.otpControl.valid) {
+      this.auth.verifyLoginOtp(
+        email,
+        code,
+        (user) => this.handleLoginSuccess(user)
+      );
+    } else {
+      this.otpControl.markAsTouched();
     }
   }
 
