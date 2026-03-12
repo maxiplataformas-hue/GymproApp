@@ -20,8 +20,10 @@ public class EmailService {
         
         try {
             mailSender.send(message);
+            System.out.println("Email effectively sent to: " + to);
         } catch (Exception e) {
             System.err.println("Error sending email: " + e.getMessage());
+            throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
 }
