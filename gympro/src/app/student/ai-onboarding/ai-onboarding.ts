@@ -183,7 +183,8 @@ export class AiOnboarding implements OnInit {
       },
       error: (err) => {
         this.isBiometricLoading.set(false);
-        alert('Código incorrecto o expirado.');
+        const errorMsg = err.error || 'Código incorrecto o expirado.';
+        alert(errorMsg);
       }
     });
   }

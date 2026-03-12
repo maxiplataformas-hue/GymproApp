@@ -47,11 +47,13 @@
         </div>
       } @else {
         <div class="flex flex-col items-center gap-4">
-          <input type="text" [(ngModel)]="otpField" maxlength="6"
+          <input type="text" [ngModel]="otpField()" (ngModelChange)="otpField.set($event)" maxlength="6"
                  class="w-56 bg-surface border-2 border-primary p-5 rounded-3xl text-text text-center text-4xl font-black tracking-[0.2em] focus:ring-4 focus:ring-primary/10 outline-none transition-all"
                  placeholder="000000">
-          <button (click)="sendOtp(emailField())" class="text-primary font-bold text-sm hover:underline">
-            No me llegó el código, reenviar
+          <button (click)="sendOtp(emailField())" 
+                  [disabled]="isBiometricLoading()"
+                  class="text-primary font-bold text-sm hover:underline disabled:opacity-50 disabled:no-underline">
+            {{ isBiometricLoading() ? 'Enviando...' : 'No me llegó el código, reenviar' }}
           </button>
         </div>
       }

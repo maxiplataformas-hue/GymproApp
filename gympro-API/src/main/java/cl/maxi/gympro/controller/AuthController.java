@@ -38,7 +38,7 @@ public class AuthController {
         OtpEntry otp = new OtpEntry();
         otp.setEmail(email);
         otp.setCode(code);
-        otp.setExpiryTime(LocalDateTime.now().plusMinutes(10));
+        otp.setExpiryTime(LocalDateTime.now().plusMinutes(20));
         otpRepository.save(otp);
 
         // Send email
@@ -63,21 +63,28 @@ public class AuthController {
 
         Optional<OtpEntry> otpOpt = otpRepository.findByEmail(email);
         
+        System.out.println("Verifying OTP for " + email + ". Searching in DB...");
         if (otpOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("No OTP found for this email");
+            System.err.println("No OTP found for " + email);
+            return ResponseEntity.badRequest().body("No se encontró un código para este correo. Solicita uno nuevo.");
         }
 
         OtpEntry otp = otpOpt.get();
+        System.out.println("Found OTP in DB: " + otp.getCode() + ", current time: " + LocalDateTime.now() + ", expiry: " + otp.getExpiryTime());
+        
         if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
+            System.err.println("OTP expired for " + email);
             otpRepository.deleteByEmail(email);
-            return ResponseEntity.badRequest().body("OTP expired");
+            return ResponseEntity.badRequest().body("Código expirado. Solicita uno nuevo.");
         }
 
         if (!otp.getCode().equals(code)) {
-            return ResponseEntity.badRequest().body("Invalid code");
+            System.err.println("Invalid code for " + email + ". Expected: " + otp.getCode() + ", Received: " + code);
+            return ResponseEntity.badRequest().body("Código incorrecto. Verifica el correo e intenta de nuevo.");
         }
 
         // Success
+        System.out.println("OTP verified successfully for " + email);
         otpRepository.deleteByEmail(email);
         return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
     }
