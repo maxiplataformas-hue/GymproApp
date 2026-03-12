@@ -100,21 +100,23 @@ export class AiOnboarding implements OnInit {
       this.isBiometricLoading.set(true);
       const email = this.emailField().trim().toLowerCase();
       
+      console.log('Verificando usuario:', email);
       this.http.get(`${this.apiUrl}/users/${email}`).pipe(
         catchError((err) => {
-          this.isBiometricLoading.set(false);
           if (err.status === 404) {
-            // New user: Send OTP first
+            console.log('Usuario nuevo detectado (404), procediendo a enviar OTP');
             this.sendOtp(email);
-            return of(null);
           } else {
+            console.error('Error inesperado al verificar usuario:', err);
+            this.isBiometricLoading.set(false);
             alert('Error al verificar el usuario. Reintenta.');
           }
           return of(null);
         })
       ).subscribe((user: any) => {
-        this.isBiometricLoading.set(false);
         if (user) {
+          console.log('Usuario existente encontrado, saltando a perfil');
+          this.isBiometricLoading.set(false);
           this.isNewUser.set(false);
           this.nicknameField.set(user.nickname || user.name?.split(' ')[0] || '');
           this.ageField.set(user.age || null);
@@ -122,6 +124,7 @@ export class AiOnboarding implements OnInit {
           this.heightField.set(user.height || null);
           this.step.set(2); 
         }
+        // No bajamos el loading aquí si es null porque sendOtp lo está manejando
       });
       return;
     }
@@ -143,15 +146,22 @@ export class AiOnboarding implements OnInit {
   }
 
   sendOtp(email: string) {
+    console.log('Solicitando envío de OTP para:', email);
+    this.isBiometricLoading.set(true); 
     this.http.post(`${this.apiUrl}/auth/send-otp`, { email }).subscribe({
       next: () => {
+        console.log('OTP enviado correctamente');
         this.isBiometricLoading.set(false);
         this.isWaitingForOtp.set(true);
-        // We stay in step 0 but show OTP UI
       },
       error: (err) => {
+        console.error('Error al enviar OTP:', err);
         this.isBiometricLoading.set(false);
-        alert('Error al enviar el código de verificación.');
+        if (err.status === 404) {
+          alert('Error: El servidor no reconoce la ruta de envío de correos. ¿Se desplegó correctamente el Backend?');
+        } else {
+          alert('Error al enviar el código de verificación. Revisa la consola.');
+        }
       }
     });
   }

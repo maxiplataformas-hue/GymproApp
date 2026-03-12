@@ -3,7 +3,6 @@ package cl.maxi.gympro.controller;
 import cl.maxi.gympro.model.OtpEntry;
 import cl.maxi.gympro.repository.OtpRepository;
 import cl.maxi.gympro.service.EmailService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
