@@ -32,6 +32,7 @@ export interface RoutineAssignment {
   id?: string;
   studentEmail: string;
   date: string; // YYYY-MM-DD
+  createdAt?: string;
   items: RoutineItem[];
 }
 

@@ -46,6 +46,7 @@ export class AiRoutineView implements OnInit {
         const routineData = {
           title: 'Tu Rutina IA de Hoy',
           description: 'Generada específicamente para tus objetivos y equipo disponible.',
+          createdAt: data.createdAt,
           exercises: data.items.map((it: any) => ({
             name: it.exerciseId, 
             sets: it.sets,

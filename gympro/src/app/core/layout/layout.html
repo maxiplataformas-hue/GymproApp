@@ -51,9 +51,10 @@
             </a>
             } @else {
             <!-- Student Sidebar Menu -->
-            @if (auth.currentUser()?.role === 'student' && auth.currentUser()?.coachEmail !== 'IA_ASSISTED') {
+            @if (shouldShow('calendar')) {
             <a routerLink="/app/student/calendar" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('calendar')" [class.pointer-events-none]="!canAccess('calendar')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -64,9 +65,10 @@
             </a>
             }
 
-            @if (auth.currentUser()?.coachEmail === 'IA_ASSISTED') {
+            @if (shouldShow('ai-routine')) {
             <a routerLink="/app/student/ai-routine" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('ai-routine')" [class.pointer-events-none]="!canAccess('ai-routine')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -76,6 +78,7 @@
             }
             <a routerLink="/app/student" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('home')" [class.pointer-events-none]="!canAccess('home')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -84,8 +87,10 @@
                 </svg>
                 Inicio
             </a>
+            @if (shouldShow('physio')) {
             <a routerLink="/app/student/physio" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('physio')" [class.pointer-events-none]="!canAccess('physio')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -94,8 +99,11 @@
                 </svg>
                 Datos Físicos
             </a>
+            }
+            @if (shouldShow('charts')) {
             <a routerLink="/app/student/charts" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('charts')" [class.pointer-events-none]="!canAccess('charts')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -104,8 +112,11 @@
                 </svg>
                 Evolución
             </a>
+            }
+            @if (shouldShow('ai-chat')) {
             <a routerLink="/app/student/chat" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('ai-chat')" [class.pointer-events-none]="!canAccess('ai-chat')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -114,8 +125,11 @@
                 </svg>
                 Coach IA
             </a>
+            }
+            @if (shouldShow('progress')) {
             <a routerLink="/app/student/progress" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('progress')" [class.pointer-events-none]="!canAccess('progress')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -126,8 +140,10 @@
                 </svg>
                 Progreso Visual
             </a>
+            }
             <a routerLink="/app/student/timers" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('timers')" [class.pointer-events-none]="!canAccess('timers')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -137,6 +153,7 @@
             </a>
             <a routerLink="/app/student/config" routerLinkActive="bg-primary text-white"
                 [routerLinkActiveOptions]="{exact: true}"
+                [class.opacity-50]="!canAccess('config')" [class.pointer-events-none]="!canAccess('config')"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-border/50 transition-all font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -268,9 +285,10 @@
                 </a>
                 } @else {
                 <!-- Student Links -->
-                @if (auth.currentUser()?.role === 'student' && auth.currentUser()?.coachEmail !== 'IA_ASSISTED') {
+                @if (shouldShow('calendar')) {
                 <a routerLink="/app/student/calendar" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('calendar')" [class.pointer-events-none]="!canAccess('calendar')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -281,9 +299,10 @@
                 </a>
                 }
 
-                @if (auth.currentUser()?.coachEmail === 'IA_ASSISTED') {
+                @if (shouldShow('ai-routine')) {
                 <a routerLink="/app/student/ai-routine" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('ai-routine')" [class.pointer-events-none]="!canAccess('ai-routine')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -293,6 +312,7 @@
                 }
                 <a routerLink="/app/student" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('home')" [class.pointer-events-none]="!canAccess('home')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -301,8 +321,10 @@
                     </svg>
                     Inicio
                 </a>
+                @if (shouldShow('physio')) {
                 <a routerLink="/app/student/physio" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('physio')" [class.pointer-events-none]="!canAccess('physio')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -311,8 +333,11 @@
                     </svg>
                     Datos Físicos
                 </a>
+                }
+                @if (shouldShow('charts')) {
                 <a routerLink="/app/student/charts" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('charts')" [class.pointer-events-none]="!canAccess('charts')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -321,8 +346,11 @@
                     </svg>
                     Evolución
                 </a>
+                }
+                @if (shouldShow('ai-chat')) {
                 <a routerLink="/app/student/chat" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('ai-chat')" [class.pointer-events-none]="!canAccess('ai-chat')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -330,8 +358,11 @@
                     </svg>
                     Coach IA
                 </a>
+                }
+                @if (shouldShow('progress')) {
                 <a routerLink="/app/student/progress" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('progress')" [class.pointer-events-none]="!canAccess('progress')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -342,8 +373,10 @@
                     </svg>
                     Progreso Visual
                 </a>
+                }
                 <a routerLink="/app/student/timers" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('timers')" [class.pointer-events-none]="!canAccess('timers')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -353,6 +386,7 @@
                 </a>
                 <a routerLink="/app/student/config" routerLinkActive="bg-primary/10 text-primary font-bold"
                     [routerLinkActiveOptions]="{exact: true}" (click)="closeDrawer()"
+                    [class.opacity-50]="!canAccess('config')" [class.pointer-events-none]="!canAccess('config')"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-text hover:bg-border/50 transition-all font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

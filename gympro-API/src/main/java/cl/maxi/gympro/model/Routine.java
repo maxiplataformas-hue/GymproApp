@@ -18,6 +18,7 @@ public class Routine {
     
     private String studentEmail;
     private String date; // YYYY-MM-DD
+    private String createdAt; // ISO Timestamp
     
     private List<RoutineItem> items;
 }

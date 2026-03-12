@@ -60,6 +60,7 @@ public class AiCoachController {
         Routine routine = existing.orElse(new Routine());
         routine.setStudentEmail(request.getEmail());
         routine.setDate(today);
+        routine.setCreatedAt(java.time.LocalDateTime.now().toString());
         
         // Auto-save initial weight entry if not exists for today
         if (request.getWeight() != null) {

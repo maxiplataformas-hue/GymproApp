@@ -120,6 +120,10 @@
         }
         Crear Perfil y Continuar
       </button>
+
+      <button (click)="prevStep()" class="w-full text-text-muted font-bold text-sm hover:text-text transition-colors py-2">
+        Volver atrás
+      </button>
     </div>
     }
 
@@ -135,7 +139,7 @@
       <p class="text-text-muted">¿Deseas activar el acceso con FaceID o Huella Digital? Podrás entrar al instante sin escribir tu correo.</p>
     </div>
 
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-3">
       <button (click)="enableBiometrics()" 
               [disabled]="isBiometricLoading()"
               class="w-full py-5 bg-primary text-white font-black text-lg rounded-3xl shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all flex items-center justify-center gap-3">
@@ -144,8 +148,11 @@
         }
         Activar Biometría
       </button>
-      <button (click)="nextStep()" class="w-full py-4 text-text-muted font-bold hover:text-text transition-colors">
+      <button (click)="nextStep()" class="w-full py-2 text-text-muted font-bold hover:text-text transition-colors">
         Ahora no, quizás luego
+      </button>
+      <button (click)="prevStep()" class="w-full py-2 text-text-muted font-bold text-sm hover:text-text transition-colors">
+        Volver atrás
       </button>
     </div>
     }
@@ -158,7 +165,7 @@
       <p class="text-text-muted max-w-xs mx-auto">Tu entrenador personal impulsado por inteligencia artificial.</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
       @for (g of goals; track g.id) {
       <div (click)="goal.set(g.id); nextStep()" 
            [class.active-card]="goal() === g.id"
@@ -170,6 +177,10 @@
       </div>
       }
     </div>
+
+    <button (click)="prevStep()" class="w-full text-text-muted font-bold text-sm hover:text-text transition-colors py-2">
+      Volver atrás
+    </button>
     }
 
     <!-- STEP 4: LEVEL -->
@@ -195,6 +206,10 @@
         <p class="text-sm text-text-muted">{{ l.desc }}</p>
       </div>
       }
+      
+      <button (click)="prevStep()" class="w-full text-text-muted font-bold text-sm hover:text-text transition-colors py-2 mt-2">
+        Volver atrás
+      </button>
     </div>
     }
 
