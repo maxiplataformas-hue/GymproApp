@@ -199,8 +199,8 @@ export class DataService {
 
   todayExerciseCount = computed(() => {
     const today = new Date().toISOString().split('T')[0];
-    const routine = this.routines().find(r => r.date === today);
-    return routine ? routine.items.length : 0;
+    const todayRoutines = this.routines().filter(r => r.date === today);
+    return todayRoutines.reduce((sum, r) => sum + r.items.length, 0);
   });
 
   private http = inject(HttpClient);

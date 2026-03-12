@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/routines")
@@ -29,10 +28,8 @@ public class RoutineController {
     }
 
     @GetMapping("/{studentEmail}/{date}")
-    public ResponseEntity<Routine> getRoutineByDate(@PathVariable String studentEmail, @PathVariable String date) {
-        Optional<Routine> routine = routineRepository.findByStudentEmailIgnoreCaseAndDate(studentEmail, date);
-        return routine.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public List<Routine> getRoutinesByDate(@PathVariable String studentEmail, @PathVariable String date) {
+        return routineRepository.findByStudentEmailIgnoreCaseAndDate(studentEmail, date);
     }
 
     @PostMapping
@@ -42,12 +39,13 @@ public class RoutineController {
             routine.setStudentEmail(routine.getStudentEmail().trim().toLowerCase());
         }
         
-        // Find existing routine for this user and date
-        Optional<Routine> existing = routineRepository.findByStudentEmailIgnoreCaseAndDate(routine.getStudentEmail(),
+        // Human coaches usually update a single routine for the day
+        List<Routine> existing = routineRepository.findByStudentEmailIgnoreCaseAndDate(routine.getStudentEmail(),
                 routine.getDate());
 
-        if (existing.isPresent()) {
-            Routine toUpdate = existing.get();
+        if (!existing.isEmpty()) {
+            // Update the first one found (standard behavior for human coaches)
+            Routine toUpdate = existing.get(0);
             toUpdate.setItems(routine.getItems());
             Routine saved = routineRepository.save(toUpdate);
             createRoutineNotification(saved);
@@ -75,10 +73,9 @@ public class RoutineController {
             @PathVariable String date,
             @PathVariable String itemId) {
 
-        Optional<Routine> existing = routineRepository.findByStudentEmailIgnoreCaseAndDate(studentEmail, date);
+        List<Routine> existing = routineRepository.findByStudentEmailIgnoreCaseAndDate(studentEmail, date);
 
-        if (existing.isPresent()) {
-            Routine routine = existing.get();
+        for (Routine routine : existing) {
             List<RoutineItem> items = routine.getItems();
             boolean removed = items.removeIf(item -> item.getId().equals(itemId));
 

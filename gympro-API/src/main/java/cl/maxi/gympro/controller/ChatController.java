@@ -79,16 +79,20 @@ public class ChatController {
 
         // 4. Rutinas (Hoy)
         String today = java.time.LocalDate.now().toString();
-        routineRepository.findByStudentEmailAndDate(email, today)
-                .ifPresent(r -> {
-                    context.append("- Rutina para hoy (").append(today).append("):\n");
-                    r.getItems().forEach(item -> {
-                        context.append("  * Ejercicio ID: ").append(item.getExerciseId())
-                                .append(", Series: ").append(item.getSets())
-                                .append(", Reps: ").append(item.getReps())
-                                .append(", Peso: ").append(item.getWeight()).append("kg\n");
-                    });
+        List<cl.maxi.gympro.model.Routine> dailyRoutines = routineRepository.findByStudentEmailAndDate(email, today);
+        if (!dailyRoutines.isEmpty()) {
+            context.append("- Rutinas para hoy (").append(today).append("):\n");
+            for (cl.maxi.gympro.model.Routine r : dailyRoutines) {
+                String timeStr = r.getCreatedAt() != null ? " [Generada: " + r.getCreatedAt() + "]" : "";
+                context.append("  * Sesión").append(timeStr).append(":\n");
+                r.getItems().forEach(item -> {
+                    context.append("    - ").append(item.getExerciseId())
+                            .append(", Series: ").append(item.getSets())
+                            .append(", Reps: ").append(item.getReps())
+                            .append(", Peso: ").append(item.getWeight()).append("kg\n");
                 });
+            }
+        }
 
         return context.toString();
     }

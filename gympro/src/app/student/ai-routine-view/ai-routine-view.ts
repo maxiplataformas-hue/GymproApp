@@ -35,14 +35,18 @@ export class AiRoutineView implements OnInit {
 
     const today = new Date().toISOString().split('T')[0];
     console.log(`Fetching routine for ${user.email} on ${today}`);
-    this.http.get<any>(`${this.apiUrl}/routines/${user.email}/${today}`).subscribe({
-      next: (data) => {
-        console.log('Routine data received:', data);
-        if (!data || !data.items || data.items.length === 0) {
+    this.http.get<any[]>(`${this.apiUrl}/routines/${user.email}/${today}`).subscribe({
+      next: (dataList) => {
+        console.log('Routine data received:', dataList);
+        if (!dataList || dataList.length === 0) {
           this.error.set('La IA no ha generado ejercicios para hoy. Reintenta el onboarding.');
           this.isLoading.set(false);
           return;
         }
+
+        // Use the most recent routine (last in the list)
+        const data = dataList[dataList.length - 1];
+        
         const routineData = {
           title: 'Tu Rutina IA de Hoy',
           description: 'Generada específicamente para tus objetivos y equipo disponible.',

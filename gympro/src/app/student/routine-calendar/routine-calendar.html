@@ -35,73 +35,85 @@
 
     <!-- Routine Items List -->
     <section class="flex-1 overflow-y-auto">
-        @if (routineItems().length > 0) {
-        <div class="space-y-3">
-            @for (item of routineItems(); track item.id) {
-            <div class="bg-surface border border-border rounded-2xl p-4 shadow-sm hover:border-primary/40 transition-colors flex items-center gap-4"
-                [class.opacity-60]="item.completed" [class.bg-background]="item.completed">
-
-                <!-- Checkbox -->
-                <button (click)="toggleComplete(item.id)"
-                    class="shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer"
-                    [class.bg-primary]="item.completed" [class.border-primary]="item.completed"
-                    [class.border-border]="!item.completed" [class.bg-background]="!item.completed"
-                    [class.hover:border-primary/50]="!item.completed">
-                    @if (item.completed) {
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    }
-                </button>
-
-                <!-- Exercise Details -->
-                <div class="flex-1">
-                    <div class="flex justify-between items-start mb-1">
-                        <h4 class="font-bold text-text text-lg" [class.line-through]="item.completed">{{
-                            item.exerciseName }}</h4>
-                        <span class="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide"
-                            [class]="getMuscleGroupColor(item.muscleGroup)">
-                            {{ item.muscleGroup }}
-                        </span>
-                    </div>
-                    <p class="text-sm text-text-muted flex gap-3 text-sm">
-                        <span class="flex items-center gap-1 font-semibold">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                            </svg>
-                            {{ item.sets }} Series
-                        </span>
-                        <span class="flex items-center gap-1 font-semibold">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                </path>
-                            </svg>
-                            {{ item.reps }} Reps
-                        </span>
-                        <span class="flex items-center gap-1 font-semibold text-primary">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3">
-                                </path>
-                            </svg>
-                            {{ item.weight }} Kg
-                        </span>
-
-                        <!-- YouTube Search Button -->
-                        <a [href]="'https://www.youtube.com/results?search_query=' + item.exerciseName + ' tutorial tecnica gimnasio'"
-                            target="_blank"
-                            class="flex items-center gap-1 font-semibold text-red-500 hover:text-red-600 transition-colors ml-2"
-                            title="Buscar cómo hacer {{ item.exerciseName }} en YouTube"
-                            (click)="$event.stopPropagation()">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
-                            </svg>
-                        </a>
-                    </p>
+        @if (routinesWithItems().length > 0) {
+        <div class="space-y-8">
+            @for (routine of routinesWithItems(); track routine.id) {
+            <div class="space-y-3">
+                <div class="flex items-center gap-3 px-2">
+                    <div class="h-px flex-1 bg-border/50"></div>
+                    <span class="text-[10px] font-black uppercase text-text-muted tracking-widest bg-surface px-3 py-1 rounded-full border border-border/50 shadow-sm">
+                        Sesión @if(routine.createdAt){ • {{ routine.createdAt | date:'HH:mm' }} } @else { Hoy }
+                    </span>
+                    <div class="h-px flex-1 bg-border/50"></div>
                 </div>
+
+                @for (item of routine.items; track item.id) {
+                <div class="bg-surface border border-border rounded-2xl p-4 shadow-sm hover:border-primary/40 transition-colors flex items-center gap-4"
+                    [class.opacity-60]="item.completed" [class.bg-background]="item.completed">
+    
+                    <!-- Checkbox -->
+                    <button (click)="toggleComplete(routine.id || '', item.id)"
+                        class="shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer"
+                        [class.bg-primary]="item.completed" [class.border-primary]="item.completed"
+                        [class.border-border]="!item.completed" [class.bg-background]="!item.completed"
+                        [class.hover:border-primary/50]="!item.completed">
+                        @if (item.completed) {
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        }
+                    </button>
+    
+                    <!-- Exercise Details -->
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-text text-lg" [class.line-through]="item.completed">{{
+                                item.exerciseName }}</h4>
+                            <span class="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide"
+                                [class]="getMuscleGroupColor(item.muscleGroup)">
+                                {{ item.muscleGroup }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-text-muted flex gap-3 text-sm">
+                            <span class="flex items-center gap-1 font-semibold">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                                </svg>
+                                {{ item.sets }} Series
+                            </span>
+                            <span class="flex items-center gap-1 font-semibold">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                    </path>
+                                </svg>
+                                {{ item.reps }} Reps
+                            </span>
+                            <span class="flex items-center gap-1 font-semibold text-primary">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3">
+                                    </path>
+                                </svg>
+                                {{ item.weight }} Kg
+                            </span>
+    
+                            <!-- YouTube Search Button -->
+                            <a [href]="'https://www.youtube.com/results?search_query=' + item.exerciseName + ' tutorial tecnica gimnasio'"
+                                target="_blank"
+                                class="flex items-center gap-1 font-semibold text-red-500 hover:text-red-600 transition-colors ml-2"
+                                title="Buscar cómo hacer {{ item.exerciseName }} en YouTube"
+                                (click)="$event.stopPropagation()">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                                </svg>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                }
             </div>
             }
         </div>

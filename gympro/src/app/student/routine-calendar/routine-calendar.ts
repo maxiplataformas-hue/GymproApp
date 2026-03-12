@@ -41,33 +41,38 @@ export class RoutineCalendar implements OnInit {
     return dates;
   });
 
-  // Current Routine
-  routine = computed(() => this.data.getRoutinesForStudent(this.user()?.email || '', this.selectedDate()));
-  exercises = computed(() => this.data.exercises());
+  // Current Routines for the day
+  routines = computed(() => {
+    const email = this.user()?.email || '';
+    const date = this.selectedDate();
+    return this.data.routines().filter(r => r.studentEmail === email && r.date === date);
+  });
 
-  // Compute joined items for view
-  routineItems = computed(() => {
-    const r = this.routine();
-    if (!r) return [];
-    return r.items.map(i => {
-      const ex = this.exercises().find(e => e.id === i.exerciseId);
-      return {
-        ...i,
-        exerciseName: ex ? ex.name : i.exerciseId,
-        muscleGroup: ex ? ex.muscleGroup : 'General',
-        equipment: ex ? ex.equipment : 'Libre'
-      };
-    });
+  // Compute joined items for view, grouped by routine
+  routinesWithItems = computed(() => {
+    const list = this.routines();
+    return list.map(r => ({
+      id: r.id,
+      createdAt: r.createdAt,
+      items: r.items.map(i => {
+        const ex = this.data.exercises().find(e => e.id === i.exerciseId);
+        return {
+          ...i,
+          exerciseName: ex ? ex.name : i.exerciseId,
+          muscleGroup: ex ? ex.muscleGroup : 'General',
+          equipment: ex ? ex.equipment : 'Libre'
+        };
+      })
+    }));
   });
 
   selectDate(iso: string) {
     this.selectedDate.set(iso);
   }
 
-  toggleComplete(itemId: string) {
-    const r = this.routine();
-    if (r && r.id) {
-      this.data.toggleRoutineItemComplete(r.id as string, itemId);
+  toggleComplete(routineId: string, itemId: string) {
+    if (routineId) {
+      this.data.toggleRoutineItemComplete(routineId, itemId);
     }
   }
 

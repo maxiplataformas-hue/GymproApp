@@ -12,9 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -53,14 +53,12 @@ public class AiCoachController {
         // Clean JSON from potential markdown blocks
         String cleanJson = aiResponse.replaceAll("```json", "").replaceAll("```", "").trim();
         
-        // Check for existing routine to avoid NonUniqueResultException on retrieval
+        // Always create a new routine record to preserve history if used multiple times a day
         String today = LocalDate.now().toString();
-        Optional<Routine> existing = routineRepository.findByStudentEmailIgnoreCaseAndDate(request.getEmail(), today);
-        
-        Routine routine = existing.orElse(new Routine());
+        Routine routine = new Routine();
         routine.setStudentEmail(request.getEmail());
         routine.setDate(today);
-        routine.setCreatedAt(java.time.LocalDateTime.now().toString());
+        routine.setCreatedAt(LocalDateTime.now().toString());
         
         // Auto-save initial weight entry if not exists for today
         if (request.getWeight() != null) {
