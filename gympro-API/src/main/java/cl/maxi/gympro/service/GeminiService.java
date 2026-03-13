@@ -67,12 +67,12 @@ public class GeminiService {
         contents.put("parts", Collections.singletonList(parts));
         requestBody.put("contents", Collections.singletonList(contents));
 
-        // Configuration for Efficiency and Consistency (Must use snake_case for REST API)
+        // Configuration for Efficiency and Consistency (Must use camelCase for REST API)
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("temperature", 0.4);
-        generationConfig.put("top_p", 0.8);
-        generationConfig.put("max_output_tokens", 800);
-        generationConfig.put("response_mime_type", "application/json");
+        generationConfig.put("topP", 0.8);
+        generationConfig.put("maxOutputTokens", 800);
+        generationConfig.put("responseMimeType", "application/json");
 
         requestBody.put("generationConfig", generationConfig);
 
@@ -105,7 +105,7 @@ public class GeminiService {
         } catch (org.springframework.web.client.HttpClientErrorException e) {
             String errorBody = e.getResponseBodyAsString();
             System.err.println("HTTP CLIENT ERROR: " + e.getStatusCode() + " - " + errorBody);
-            return "ERROR_AI_CLIENT: " + e.getStatusCode() + " | BODY: " + errorBody;
+            return "ERROR_AI_CLIENT: " + e.getStatusCode();
         } catch (Exception e) {
             System.err.println("CRITICAL EXCEPTION CALLING GEMINI: " + e.getMessage());
             e.printStackTrace();
