@@ -118,11 +118,23 @@ export class AuthService {
     });
   }
 
+  finalizeLogin(user: User) {
+    if (user.theme) {
+      this.themeService.setTheme(user.theme as AppTheme);
+    }
+    this.currentUser.set(user);
+    localStorage.setItem('gympro-user', JSON.stringify(user));
+    this.isLoading.set(false);
+  }
+
   login(email: string, onSuccess?: (user: User) => void) {
     // Keep direct login for internal uses if needed, or redirect to OTP flow
     this.sendLoginOtp(email, () => {
       // Direct login is now deprecated in favor of OTP
       console.warn('Direct login called. Redirecting to OTP UI flow is recommended.');
+      if (onSuccess) {
+        // Fallback to calling success if needed, but the UI should handle OTP
+      }
     }, () => {});
   }
 

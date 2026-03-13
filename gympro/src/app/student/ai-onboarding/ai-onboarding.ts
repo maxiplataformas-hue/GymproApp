@@ -315,26 +315,28 @@ export class AiOnboarding implements OnInit {
   }
 
   private finishOnboarding(email: string, payload: any) {
-    this.http.put(`${this.apiUrl}/users/${email}`, {
+    this.http.put<any>(`${this.apiUrl}/users/${email}`, {
       coachEmail: 'IA_ASSISTED',
       isOnboarded: true,
       age: this.ageField(),
       initialWeight: this.weightField(),
       height: this.heightField()
     }).subscribe({
-      next: () => {
-        this.auth.login(email, () => {
-          this.http.post(`${this.apiUrl}/ai-coach/generate-routine`, payload).subscribe({
-            next: () => {
-              this.isBiometricLoading.set(false);
-              this.router.navigate(['/app/student/ai-routine']);
-            },
-            error: (err) => {
-              console.error('Error generating routine:', err);
-              this.isBiometricLoading.set(false);
-              alert('Error al generar la rutina de IA. Intenta de nuevo.');
-            }
-          });
+      next: (updatedUser) => {
+        // Log user in directly since they just verified OTP earlier
+        this.auth.finalizeLogin(updatedUser);
+        
+        // Now generate the routine
+        this.http.post(`${this.apiUrl}/ai-coach/generate-routine`, payload).subscribe({
+          next: () => {
+            this.isBiometricLoading.set(false);
+            this.router.navigate(['/app/student/ai-routine']);
+          },
+          error: (err) => {
+            console.error('Error generating routine:', err);
+            this.isBiometricLoading.set(false);
+            alert('Error al generar la rutina de IA. Intenta de nuevo.');
+          }
         });
       },
       error: (err) => {

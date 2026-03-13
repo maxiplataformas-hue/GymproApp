@@ -42,21 +42,14 @@ public class AiCoachController {
             List<Routine> history = routineRepository.findByStudentEmailIgnoreCase(request.getEmail());
             if (history != null && !history.isEmpty()) {
                 prevVol = history.stream()
-                    .sorted((r1, r2) -> {
-                        String c1 = r1.getCreatedAt() != null ? r1.getCreatedAt() : "";
-                        String c2 = r2.getCreatedAt() != null ? r2.getCreatedAt() : "";
-                        return c2.compareTo(c1);
-                    })
-                    .limit(3)
-                    .filter(r -> r.getItems() != null)
+                    .filter(r -> r.getCreatedAt() != null && r.getItems() != null)
+                    .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
+                    .limit(5)
                     .flatMap(r -> r.getItems().stream())
-                    .filter(item -> item.getCompleted() != null && item.getCompleted())
-                    .mapToDouble(item -> {
-                        int s = item.getSets() != null ? item.getSets() : 0;
-                        int r = item.getReps() != null ? item.getReps() : 0;
-                        double w = item.getWeight() != null ? item.getWeight() : 0.0;
-                        return s * r * w;
-                    })
+                    .filter(item -> Boolean.TRUE.equals(item.getCompleted()))
+                    .mapToDouble(item -> (item.getSets() != null ? item.getSets() : 0) * 
+                                         (item.getReps() != null ? item.getReps() : 0) * 
+                                         (item.getWeight() != null ? item.getWeight() : 0.0))
                     .sum();
             }
         } catch (Exception e) {
