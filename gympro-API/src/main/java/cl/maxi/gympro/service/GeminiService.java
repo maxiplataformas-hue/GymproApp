@@ -28,7 +28,12 @@ public class GeminiService {
             return "Lo siento, la API Key de Gemini no está configurada. Por favor, contacta al administrador.";
         }
 
-        RestTemplate restTemplate = new RestTemplate();
+        // Configure RestTemplate with timeouts (30 seconds)
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(30000);
+        factory.setReadTimeout(30000);
+        RestTemplate restTemplate = new RestTemplate(factory);
+        
         String url = API_URL + "?key=" + apiKey;
 
         HttpHeaders headers = new HttpHeaders();

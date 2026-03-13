@@ -43,7 +43,7 @@ public class AuthController {
 
         // Send email
         try {
-            emailService.sendOtpEmail(email, code);
+            emailService.sendOtpEmail(email, code, "Código de Verificación - CoachPro");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("SMTP Error: " + e.getMessage());
         }

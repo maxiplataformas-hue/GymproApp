@@ -398,7 +398,7 @@ export class DataService {
         // Enviar notificación nativa para el mensaje más reciente si es nuevo
         const latest = data.find(n => !n.isRead);
         if (latest) {
-          this.push.sendLocalNotification('Gympro - Nueva Rutina', latest.message);
+          this.push.sendLocalNotification('CoachPro - Nueva Rutina', latest.message);
         }
       }
       this.notifications.set(data);

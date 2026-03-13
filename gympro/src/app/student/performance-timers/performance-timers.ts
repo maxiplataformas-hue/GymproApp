@@ -89,7 +89,7 @@ export class PerformanceTimers implements OnDestroy {
     if ('mediaSession' in navigator) {
       (navigator as any).mediaSession.metadata = new (window as any).MediaMetadata({
         title: `Temporizador - ${this.mode()}`,
-        artist: 'GymproApp',
+        artist: 'CoachProApp',
         album: 'Entrenamiento de Intervalos',
         artwork: [
           { src: 'assets/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
