@@ -37,31 +37,22 @@ public class AiCoachController {
         String todayDate = LocalDate.now().toString();
         String dayOfWeek = LocalDate.now().getDayOfWeek().name();
         
+        // Optimized Shorthand Prompt Architecture for Token reduction
         String prompt = String.format(
-            "Hoy es %s (%s). Genera una rutina de entrenamiento variada para un usuario con: " +
-            "Objetivo: '%s', Nivel: '%s', Edad: %d años, Peso: %.1f kg, Estatura: %.1f cm. " +
-            "Días de entrenamiento por semana: %d. " +
-            "Equipo disponible: %s. " +
-            "IMPORTANTE: " +
-            "1. Responde los nombres de los ejercicios SIEMPRE en ESPAÑOL. " +
-            "2. Varía los ejercicios según el día de la semana y la frecuencia de %d días para evitar repeticiones y sobreentrenamiento. " +
-            "Responde ÚNICAMENTE con un objeto JSON válido que tenga esta estructura exacta: " +
-            "{ \"exercises\": [ { \"name\": \"Nombre del Ejercicio\", \"sets\": 3, \"reps\": \"12\", \"weight\": 0.0 } ] }. " +
-            "Adapta el volumen e intensidad a los datos físicos y la frecuencia de entrenamiento.",
+            "{ \"d\": \"%s\", \"dt\": \"%s\", \"e\": %d, \"p\": %.1f, \"a\": %.1f, \"obj\": \"%s\", \"niv\": \"%s\", \"frec\": %d, \"eq\": \"%s\" }",
             dayOfWeek, todayDate,
-            request.getGoal(), request.getLevel(), 
             request.getAge() != null ? request.getAge() : 30,
             request.getWeight() != null ? request.getWeight() : 70.0,
             request.getHeight() != null ? request.getHeight() : 170.0,
+            request.getGoal(), request.getLevel(), 
             request.getTrainingDays() != null ? request.getTrainingDays() : 3,
-            String.join(", ", request.getEquipment()),
-            request.getTrainingDays() != null ? request.getTrainingDays() : 3
+            String.join(",", request.getEquipment())
         );
 
         System.out.println("Generating Routine for: " + request.getEmail());
-        System.out.println("Prompt Sent: " + prompt);
+        System.out.println("Shorthand Prompt: " + prompt);
         
-        String aiResponse = geminiService.getResponse(prompt, "CONTEXTO: Generación de rutina estructurada JSON para CoachPRO. NO USAR MARKDOWN, SOLO JSON.");
+        String aiResponse = geminiService.getResponse(prompt, "CONTEXTO: Generación estructural de rutina. Seguir esquema JSON.");
         System.out.println("AI Raw Response: " + aiResponse);
 
         // Clean JSON from potential markdown blocks

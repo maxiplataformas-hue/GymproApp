@@ -14,14 +14,16 @@ public class GeminiService {
 
     private final String API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
 
-    private final String SYSTEM_PROMPT = "Eres un Entrenador Personal Profesional de la app COACHPRO. " +
-            "Tu objetivo es proveer información técnica, rutinas y datos de salud de forma ULTRA-CONCISA. " +
-            "REGLAS DE ORO (INCUMPLIMIENTO NO PERMITIDO):\n" +
-            "1. PROHIBIDO: Saludar, despedirse o usar frases de cortesía (ej: 'Hola', 'Espero que esto te ayude').\n" +
-            "2. DIRECTO AL GRANO: Responde solo lo solicitado con datos exactos y lenguaje técnico profesional.\n" +
-            "3. FORMATO: Usa viñetas para datos múltiples. Evita párrafos largos.\n" +
-            "4. SCOPE: Solo fitness y salud. Si el tema es ajeno, responde: 'Fuera de mi ámbito como CoachPRO'.\n" +
-            "5. IDIOMA: Español.";
+    private final String SYSTEM_PROMPT = "Eres el Motor de Lógica Deportiva COACHPRO. Generas rutinas técnicas optimizadas.\n" +
+            "LÓGICA DE PROGRAMACIÓN:\n" +
+            "- GANAR MÚSCULO (Muscle-Gain): Enfoque en hipertrofia mecánica. 3-4 series, 8-12 reps, RPE 8-9. Descanso 90-120s.\n" +
+            "- PERDER PESO (Weight-Loss): Enfoque en gasto calórico y densidad. Circuitos o superseries, 12-15 reps, RPE 7-8. Descanso 30-60s.\n" +
+            "- RESISTENCIA (Endurance): Enfoque en capacidad oxidativa. 2-3 series, 15-20 reps, RPE 6-7. Descanso 45s.\n" +
+            "- SALUD (Health): Enfoque en movilidad y fuerza base de bajo impacto. 2-3 series, 10-12 reps, RPE 5-6.\n" +
+            "REGLAS ESTRÍCTAS:\n" +
+            "1. Ejercicios siempre en ESPAÑOL.\n" +
+            "2. Sin texto explicativo, charla, ni bloques de código.\n" +
+            "3. Estructura la rutina según el equipo disponible.";
 
     public String getResponse(String userMessage, String studentContext) {
         if (apiKey == null || apiKey.isEmpty()) {
@@ -53,12 +55,38 @@ public class GeminiService {
         contents.put("parts", Collections.singletonList(parts));
         requestBody.put("contents", Collections.singletonList(contents));
 
-        // Add generationConfig for more creativity/variety
+        // Configuration for Efficiency and Consistency
         Map<String, Object> generationConfig = new HashMap<>();
-        generationConfig.put("temperature", 0.8);
-        generationConfig.put("topP", 0.95);
-        generationConfig.put("topK", 40);
-        generationConfig.put("maxOutputTokens", 1024);
+        generationConfig.put("temperature", 0.4);
+        generationConfig.put("topP", 0.8);
+        generationConfig.put("maxOutputTokens", 800);
+        generationConfig.put("responseMimeType", "application/json");
+
+        // Force exact JSON structure using responseSchema
+        Map<String, Object> responseSchema = new HashMap<>();
+        responseSchema.put("type", "OBJECT");
+        
+        Map<String, Object> exercisesProp = new HashMap<>();
+        exercisesProp.put("type", "ARRAY");
+        
+        Map<String, Object> itemsSchema = new HashMap<>();
+        itemsSchema.put("type", "OBJECT");
+        
+        Map<String, Object> itemProperties = new HashMap<>();
+        itemProperties.put("name", Map.of("type", "STRING", "description", "Nombre del ejercicio en español"));
+        itemProperties.put("sets", Map.of("type", "INTEGER"));
+        itemProperties.put("reps", Map.of("type", "STRING", "description", "Número o rango de repeticiones"));
+        itemProperties.put("weight", Map.of("type", "NUMBER", "description", "Peso inicial recomendado en kg"));
+        
+        itemsSchema.put("properties", itemProperties);
+        itemsSchema.put("required", List.of("name", "sets", "reps", "weight"));
+        
+        exercisesProp.put("items", itemsSchema);
+        
+        responseSchema.put("properties", Map.of("exercises", exercisesProp));
+        responseSchema.put("required", List.of("exercises"));
+        
+        generationConfig.put("responseSchema", responseSchema);
         requestBody.put("generationConfig", generationConfig);
 
         try {
