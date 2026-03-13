@@ -16,25 +16,22 @@ public class GeminiService {
 
     private final String SYSTEM_PROMPT = "Eres el Motor de Lógica Deportiva COACHPRO. Generas rutinas técnicas optimizadas.\n" +
             "DICCIONARIO DE DATOS (Input JSON):\n" +
-            "- d: Día de la semana (usar para variar ejercicios).\n" +
+            "- d: Día de la semana (ej. MONDAY).\n" +
             "- dt: Fecha actual.\n" +
-            "- e: Edad del usuario.\n" +
+            "- e: Edad.\n" +
             "- p: Peso (kg).\n" +
             "- a: Altura (cm).\n" +
             "- obj: Objetivo (muscle-gain, weight-loss, endurance, health).\n" +
             "- niv: Nivel (beginner, intermediate, advanced).\n" +
             "- frec: Días de entreno x semana.\n" +
-            "- eq: Equipamiento disponible.\n" +
-            "- pv: Volumen Anterior total (sets*reps*peso).\n\n" +
-            "LÓGICA DE PROGRAMACIÓN:\n" +
-            "- GANAR MÚSCULO (muscle-gain): Hipertrofia. Si pv > 0, asegurar que el volumen nuevo sea 2-5% superior (Sobrecarga Progresiva). 3-4 series, 8-12 reps.\n" +
-            "- PERDER PESO (weight-loss): Déficit y densidad. Circuitos, 12-15 reps, descansos cortos.\n" +
-            "- RESISTENCIA (endurance): 15-20 reps, 2-3 series.\n" +
-            "- SALUD (health): Bajo impacto, 10-12 reps.\n\n" +
+            "- eq: EQUIPO DISPONIBLE (gym, dumbbells, bodyweight, home).\n" +
+            "- pv: Volumen Anterior total.\n\n" +
             "REGLAS ESTRÍCTAS:\n" +
-            "1. Ejercicios siempre en ESPAÑOL.\n" +
-            "2. Sin texto explicativo (SOLO JSON).\n" +
-            "3. Variar rutina según el día 'd' para evitar monotonía.";
+            "1. EQUIPO: Solo usa ejercicios compatibles con 'eq'. Si eq='bodyweight', PROHIBIDO usar pesas.\n" +
+            "2. VARIEDAD: Usa el día 'd' para rotar ejercicios. No repitas la misma rutina exacta.\n" +
+            "3. LÓGICA: Para 'muscle-gain', si pv > 0, aumenta la carga un 5%.\n" +
+            "4. IDIOMA: Siempre en ESPAÑOL.\n" +
+            "5. SALIDA: Solo JSON, sin explicaciones.";
 
     public String getResponse(String userMessage, String studentContext) {
         if (apiKey == null || apiKey.isEmpty()) {
@@ -61,6 +58,10 @@ public class GeminiService {
         String fullPrompt = SYSTEM_PROMPT + "\n\n" +
                 (studentContext != null && !studentContext.isEmpty() ? studentContext + "\n\n" : "") +
                 "Usuario dice: " + userMessage;
+
+        System.out.println("--- AI REQUEST DEBUG ---");
+        System.out.println("API KEY Configured: " + (apiKey != null && !apiKey.isEmpty() ? "YES (" + apiKey.substring(0, Math.min(4, apiKey.length())) + "...)" : "NO"));
+        System.out.println("Full Prompt Sent: " + fullPrompt);
 
         parts.put("text", fullPrompt);
         contents.put("parts", Collections.singletonList(parts));
@@ -118,14 +119,21 @@ public class GeminiService {
                     Map<String, Object> content = (Map<String, Object>) firstCandidate.get("content");
                     List<Map<String, Object>> responseParts = (List<Map<String, Object>>) content.get("parts");
                     Map<String, Object> firstPart = responseParts.get(0);
-                    return (String) firstPart.get("text");
+                    String aiText = (String) firstPart.get("text");
+                    System.out.println("AI RESPONSE SUCCESS: " + aiText);
+                    return aiText;
                 }
             } else {
-                System.err.println("API Error Response: " + response.getBody());
+                System.err.println("API ERROR RESPONSE CODE: " + response.getStatusCode());
+                System.err.println("API ERROR BODY: " + response.getBody());
             }
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            System.err.println("HTTP CLIENT ERROR: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            return "ERROR_AI_CLIENT: " + e.getStatusCode();
         } catch (Exception e) {
-            System.err.println("Exception calling Gemini: " + e.getMessage());
-            return "Hubo un error al comunicar con el Coach IA (v2.5-flash): " + e.getMessage();
+            System.err.println("CRITICAL EXCEPTION CALLING GEMINI: " + e.getMessage());
+            e.printStackTrace();
+            return "ERROR_AI_CRITICAL: " + e.getMessage();
         }
 
         return "No pude generar una respuesta en este momento.";
