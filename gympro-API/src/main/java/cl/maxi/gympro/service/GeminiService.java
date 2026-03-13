@@ -105,7 +105,7 @@ public class GeminiService {
         } catch (org.springframework.web.client.HttpClientErrorException e) {
             String errorBody = e.getResponseBodyAsString();
             System.err.println("HTTP CLIENT ERROR: " + e.getStatusCode() + " - " + errorBody);
-            return "ERROR_AI_CLIENT: " + e.getStatusCode();
+            return "ERROR_AI_CLIENT: " + e.getStatusCode() + " | PROMPT: " + fullPrompt;
         } catch (Exception e) {
             System.err.println("CRITICAL EXCEPTION CALLING GEMINI: " + e.getMessage());
             e.printStackTrace();
