@@ -33,20 +33,47 @@ public class AiCoachController {
 
     @PostMapping("/generate-routine")
     public ResponseEntity<Routine> generateRoutine(@RequestBody AiRoutineRequest request) {
-        // Include day and date for variety
         String todayDate = LocalDate.now().toString();
         String dayOfWeek = LocalDate.now().getDayOfWeek().name();
-        
+
+        // Calculate previous volume summary for context (Last 3 sessions) to enable progressive overload logic
+        double prevVol = 0.0;
+        try {
+            List<Routine> history = routineRepository.findByStudentEmailIgnoreCase(request.getEmail());
+            if (history != null && !history.isEmpty()) {
+                prevVol = history.stream()
+                    .sorted((r1, r2) -> {
+                        String c1 = r1.getCreatedAt() != null ? r1.getCreatedAt() : "";
+                        String c2 = r2.getCreatedAt() != null ? r2.getCreatedAt() : "";
+                        return c2.compareTo(c1);
+                    })
+                    .limit(3)
+                    .filter(r -> r.getItems() != null)
+                    .flatMap(r -> r.getItems().stream())
+                    .filter(item -> item.getCompleted() != null && item.getCompleted())
+                    .mapToDouble(item -> {
+                        int s = item.getSets() != null ? item.getSets() : 0;
+                        int r = item.getReps() != null ? item.getReps() : 0;
+                        double w = item.getWeight() != null ? item.getWeight() : 0.0;
+                        return s * r * w;
+                    })
+                    .sum();
+            }
+        } catch (Exception e) {
+            System.err.println("Context Calc Error: " + e.getMessage());
+        }
+
         // Optimized Shorthand Prompt Architecture for Token reduction
         String prompt = String.format(
-            "{ \"d\": \"%s\", \"dt\": \"%s\", \"e\": %d, \"p\": %.1f, \"a\": %.1f, \"obj\": \"%s\", \"niv\": \"%s\", \"frec\": %d, \"eq\": \"%s\" }",
+            "{ \"d\": \"%s\", \"dt\": \"%s\", \"e\": %d, \"p\": %.1f, \"a\": %.1f, \"obj\": \"%s\", \"niv\": \"%s\", \"frec\": %d, \"eq\": \"%s\", \"pv\": %.1f }",
             dayOfWeek, todayDate,
             request.getAge() != null ? request.getAge() : 30,
             request.getWeight() != null ? request.getWeight() : 70.0,
             request.getHeight() != null ? request.getHeight() : 170.0,
             request.getGoal(), request.getLevel(), 
             request.getTrainingDays() != null ? request.getTrainingDays() : 3,
-            String.join(",", request.getEquipment())
+            String.join(",", request.getEquipment()),
+            prevVol
         );
 
         System.out.println("Generating Routine for: " + request.getEmail());
