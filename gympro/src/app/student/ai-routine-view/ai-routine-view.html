@@ -14,11 +14,19 @@
 <div class="routine-container min-h-screen w-full bg-background p-6">
   
   <header class="mb-10 animate-fade-in">
-    <div class="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em] mb-3">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-      </svg>
-      Coach IA • Generado @if(routine().createdAt){ a las {{ routine().createdAt | date:'shortTime' }} } @else { hoy }
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+        Coach IA • Generado @if(routine().createdAt){ a las {{ routine().createdAt | date:'shortTime' }} } @else { hoy }
+      </div>
+      <button (click)="goBack()" class="flex items-center gap-2 text-text-muted hover:text-primary transition-colors font-bold text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Salir
+      </button>
     </div>
     <h1 class="text-4xl font-black text-text tracking-tighter mb-4">{{ routine().title }}</h1>
     <p class="text-text-muted leading-relaxed max-w-2xl">{{ routine().description }}</p>

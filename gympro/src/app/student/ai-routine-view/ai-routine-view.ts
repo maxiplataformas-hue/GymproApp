@@ -89,4 +89,8 @@ export class AiRoutineView implements OnInit {
   shareRoutine() {
     console.log('Sharing routine...');
   }
+
+  goBack() {
+    this.router.navigate(['/select-mode']);
+  }
 }
