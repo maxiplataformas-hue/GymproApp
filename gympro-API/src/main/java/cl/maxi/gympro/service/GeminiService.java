@@ -67,14 +67,13 @@ public class GeminiService {
         contents.put("parts", Collections.singletonList(parts));
         requestBody.put("contents", Collections.singletonList(contents));
 
-        // Minimal request: Remove generationConfig to isolate 400 error
-        // Map<String, Object> generationConfig = new HashMap<>();
-        // generationConfig.put("temperature", 0.4);
-        // generationConfig.put("topP", 0.8);
-        // generationConfig.put("maxOutputTokens", 800);
-        // generationConfig.put("responseMimeType", "application/json");
+        // Configuration for Efficiency and Consistency (Stable v1 parameters)
+        Map<String, Object> generationConfig = new HashMap<>();
+        generationConfig.put("temperature", 0.4);
+        generationConfig.put("topP", 0.8);
+        generationConfig.put("maxOutputTokens", 800);
 
-        // requestBody.put("generationConfig", generationConfig);
+        requestBody.put("generationConfig", generationConfig);
 
         try {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
