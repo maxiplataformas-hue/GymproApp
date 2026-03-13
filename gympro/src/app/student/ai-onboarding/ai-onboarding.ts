@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of } from 'rxjs';
+import { catchError, of, timeout } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { BiometricService } from '../../services/biometric';
 import { ThemeService, AppTheme } from '../../services/theme';
@@ -326,8 +326,10 @@ export class AiOnboarding implements OnInit {
         // Log user in directly since they just verified OTP earlier
         this.auth.finalizeLogin(updatedUser);
         
-        // Now generate the routine
-        this.http.post(`${this.apiUrl}/ai-coach/generate-routine`, payload).subscribe({
+        // Now generate the routine with a 45s safety timeout
+        this.http.post(`${this.apiUrl}/ai-coach/generate-routine`, payload).pipe(
+          timeout(45000)
+        ).subscribe({
           next: () => {
             this.isBiometricLoading.set(false);
             this.router.navigate(['/app/student/ai-routine']);
@@ -335,7 +337,11 @@ export class AiOnboarding implements OnInit {
           error: (err) => {
             console.error('Error generating routine:', err);
             this.isBiometricLoading.set(false);
-            alert('Error al generar la rutina de IA. Intenta de nuevo.');
+            if (err.name === 'TimeoutError') {
+              alert('El servidor o la IA están tardando demasiado. Revisa tu conexión o intenta de nuevo en unos minutos.');
+            } else {
+              alert('Error al generar la rutina de IA. Intenta de nuevo.');
+            }
           }
         });
       },

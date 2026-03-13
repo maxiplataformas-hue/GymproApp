@@ -13,4 +13,6 @@ public interface RoutineRepository extends MongoRepository<Routine, String> {
 
     List<Routine> findByStudentEmailIgnoreCaseAndDate(String studentEmail, String date);
     List<Routine> findByStudentEmailAndDate(String studentEmail, String date);
+    
+    List<Routine> findTop5ByStudentEmailIgnoreCaseOrderByCreatedAtDesc(String studentEmail);
 }

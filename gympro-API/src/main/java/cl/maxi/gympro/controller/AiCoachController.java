@@ -36,21 +36,21 @@ public class AiCoachController {
         String todayDate = LocalDate.now().toString();
         String dayOfWeek = LocalDate.now().getDayOfWeek().name();
 
-        // Calculate previous volume summary for context (Last 3 sessions) to enable progressive overload logic
+        // Optimized history fetch: Only get last 5 sessions
         double prevVol = 0.0;
         try {
-            List<Routine> history = routineRepository.findByStudentEmailIgnoreCase(request.getEmail());
+            System.out.println("Processing history for context: " + request.getEmail());
+            List<Routine> history = routineRepository.findTop5ByStudentEmailIgnoreCaseOrderByCreatedAtDesc(request.getEmail());
             if (history != null && !history.isEmpty()) {
                 prevVol = history.stream()
-                    .filter(r -> r.getCreatedAt() != null && r.getItems() != null)
-                    .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
-                    .limit(5)
+                    .filter(r -> r.getItems() != null)
                     .flatMap(r -> r.getItems().stream())
                     .filter(item -> Boolean.TRUE.equals(item.getCompleted()))
                     .mapToDouble(item -> (item.getSets() != null ? item.getSets() : 0) * 
                                          (item.getReps() != null ? item.getReps() : 0) * 
                                          (item.getWeight() != null ? item.getWeight() : 0.0))
                     .sum();
+                System.out.println("History volume processed: " + prevVol);
             }
         } catch (Exception e) {
             System.err.println("Context Calc Error: " + e.getMessage());
