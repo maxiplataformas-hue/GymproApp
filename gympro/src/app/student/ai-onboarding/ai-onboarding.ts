@@ -43,6 +43,10 @@ export class AiOnboarding implements OnInit {
   otpField = signal('');
   isWaitingForOtp = signal(false);
   isBiometricLoading = signal(false);
+  
+  // Prompt Preview
+  showPromptPreview = signal(false);
+  generatedPrompt = signal('');
 
   goals = [
     { id: 'weight-loss', label: 'Perder peso', icon: '⚖️' },
@@ -296,7 +300,46 @@ export class AiOnboarding implements OnInit {
     };
 
     console.log('Generando rutina con payload:', payload);
+    
+    // Construct Prompt Preview
+    const today = new Date().toLocaleDateString('es-ES', { weekday: 'long' }).toUpperCase();
+    const promptText = `
+[CONFIGURACIÓN TÉCNICA ENVIADA AL COACHIA]
+-------------------------------------------
+DÍA: ${today}
+OBJETIVO: ${this.translate(this.goal())}
+NIVEL: ${this.translate(this.level())}
+EQUIPO: ${this.equipment().map(e => this.translate(e)).join(', ')}
+EDAD: ${this.ageField() || 'N/A'} años
+PESO: ${this.weightField() || 'N/A'} kg
+ALTURA: ${this.heightField() || 'N/A'} cm
+FRECUENCIA: ${this.trainingDays()} días/semana
+
+[REGLAS DE SEGURIDAD ACTIVADAS]
+- Restricción estricta de equipo: SI
+- Variedad basada en el día: SI
+- Lógica de sobrecarga progresiva: AUTO
+-------------------------------------------
+    `;
+    this.generatedPrompt.set(promptText.trim());
+    this.showPromptPreview.set(true);
+  }
+
+  confirmGeneration() {
+    this.showPromptPreview.set(false);
     this.isBiometricLoading.set(true);
+
+    const email = this.emailField().trim().toLowerCase();
+    const payload = {
+      email: email,
+      goal: this.goal(),
+      level: this.level(),
+      equipment: this.equipment(),
+      age: this.ageField(),
+      weight: this.weightField(),
+      height: this.heightField(),
+      trainingDays: this.trainingDays()
+    };
 
     this.http.get(`${this.apiUrl}/users/${email}`).pipe(
       catchError((error) => {

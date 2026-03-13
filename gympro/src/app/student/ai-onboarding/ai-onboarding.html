@@ -354,5 +354,50 @@
     </div>
     }
 
+    <!-- PROMPT PREVIEW MODAL -->
+    @if (showPromptPreview()) {
+    <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+        <div class="w-full max-w-sm bg-surface rounded-3xl border border-primary/20 shadow-2xl overflow-hidden animate-scale-in">
+            <div class="p-6 border-b border-border bg-primary/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-lg tracking-tight">Previsualizar Informe</h3>
+                        <p class="text-xs text-text-muted">Revisa la lógica técnica antes de generar</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="bg-black/40 rounded-2xl p-4 font-mono text-[11px] leading-relaxed text-primary/90 border border-primary/10 max-h-[40vh] overflow-y-auto whitespace-pre-wrap shadow-inner">
+                    {{ generatedPrompt() }}
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-6">
+                    <button (click)="showPromptPreview.set(false)"
+                        class="px-4 py-4 rounded-2xl bg-border/50 text-text font-bold text-sm hover:bg-border transition-colors cursor-pointer">
+                        Ajustar Datos
+                    </button>
+                    <button (click)="confirmGeneration()"
+                        class="px-4 py-4 rounded-2xl bg-primary text-white font-black text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all cursor-pointer flex items-center justify-center gap-2">
+                        <span>Diseñar Rutina</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <p class="text-[10px] text-center text-text-muted mt-4 uppercase font-bold tracking-widest opacity-50">
+                    Propulsado por Engine CoachPro v1.2
+                </p>
+            </div>
+        </div>
+    </div>
+    }
+
   </div>
 </div>
