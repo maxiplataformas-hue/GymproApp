@@ -199,8 +199,18 @@ export class DataService {
 
   todayExerciseCount = computed(() => {
     const today = new Date().toISOString().split('T')[0];
-    const todayRoutines = this.routines().filter(r => r.date === today);
-    return todayRoutines.reduce((sum, r) => sum + r.items.length, 0);
+    const todayRoutines = this.routines()
+      .filter(r => r.date === today)
+      .sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA; // Descending
+      });
+    
+    if (todayRoutines.length === 0) return 0;
+    
+    // Only count exercises from the most recent routine
+    return todayRoutines[0].items.length;
   });
 
   private http = inject(HttpClient);
