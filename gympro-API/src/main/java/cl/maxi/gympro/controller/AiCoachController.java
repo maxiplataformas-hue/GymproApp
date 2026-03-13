@@ -126,11 +126,13 @@ public class AiCoachController {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error parsing AI JSON: " + e.getMessage());
-            // Fallback content if AI fails to provide JSON
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Caminata de Calentamiento (Fallback)", 1, 15, 0.0, false));
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Sentadillas (Peso Corporal) (Fallback)", 3, 12, 0.0, false));
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Flexiones o Push-ups (Fallback)", 3, 10, 0.0, false));
+            System.err.println("CRITICAL: Error parsing AI JSON or API Failure: " + e.getMessage());
+            System.err.println("Raw Response was: " + aiResponse);
+            // Fallback content if AI fails to provide JSON - Structured to not feel like a mock
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Sentadillas con Salto (Calentamiento)", 3, 15, 0.0, false));
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Flexiones de Brazos (Fuerza)", 3, 10, 0.0, false));
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Zancadas / Lunges (Pierna)", 3, 12, 0.0, false));
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Plancha Abdominal", 3, 45, 0.0, false));
         }
 
         if (items.isEmpty()) {

@@ -15,15 +15,26 @@ public class GeminiService {
     private final String API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
 
     private final String SYSTEM_PROMPT = "Eres el Motor de Lógica Deportiva COACHPRO. Generas rutinas técnicas optimizadas.\n" +
+            "DICCIONARIO DE DATOS (Input JSON):\n" +
+            "- d: Día de la semana (usar para variar ejercicios).\n" +
+            "- dt: Fecha actual.\n" +
+            "- e: Edad del usuario.\n" +
+            "- p: Peso (kg).\n" +
+            "- a: Altura (cm).\n" +
+            "- obj: Objetivo (muscle-gain, weight-loss, endurance, health).\n" +
+            "- niv: Nivel (beginner, intermediate, advanced).\n" +
+            "- frec: Días de entreno x semana.\n" +
+            "- eq: Equipamiento disponible.\n" +
+            "- pv: Volumen Anterior total (sets*reps*peso).\n\n" +
             "LÓGICA DE PROGRAMACIÓN:\n" +
-            "- GANAR MÚSCULO (Muscle-Gain): Enfoque en hipertrofia mecánica. 3-4 series, 8-12 reps, RPE 8-9. Descanso 90-120s.\n" +
-            "- PERDER PESO (Weight-Loss): Enfoque en gasto calórico y densidad. Circuitos o superseries, 12-15 reps, RPE 7-8. Descanso 30-60s.\n" +
-            "- RESISTENCIA (Endurance): Enfoque en capacidad oxidativa. 2-3 series, 15-20 reps, RPE 6-7. Descanso 45s.\n" +
-            "- SALUD (Health): Enfoque en movilidad y fuerza base de bajo impacto. 2-3 series, 10-12 reps, RPE 5-6.\n" +
+            "- GANAR MÚSCULO (muscle-gain): Hipertrofia. Si pv > 0, asegurar que el volumen nuevo sea 2-5% superior (Sobrecarga Progresiva). 3-4 series, 8-12 reps.\n" +
+            "- PERDER PESO (weight-loss): Déficit y densidad. Circuitos, 12-15 reps, descansos cortos.\n" +
+            "- RESISTENCIA (endurance): 15-20 reps, 2-3 series.\n" +
+            "- SALUD (health): Bajo impacto, 10-12 reps.\n\n" +
             "REGLAS ESTRÍCTAS:\n" +
             "1. Ejercicios siempre en ESPAÑOL.\n" +
-            "2. Sin texto explicativo, charla, ni bloques de código.\n" +
-            "3. Estructura la rutina según el equipo disponible.";
+            "2. Sin texto explicativo (SOLO JSON).\n" +
+            "3. Variar rutina según el día 'd' para evitar monotonía.";
 
     public String getResponse(String userMessage, String studentContext) {
         if (apiKey == null || apiKey.isEmpty()) {
