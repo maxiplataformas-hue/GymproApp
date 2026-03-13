@@ -74,31 +74,8 @@ public class GeminiService {
         generationConfig.put("maxOutputTokens", 800);
         generationConfig.put("responseMimeType", "application/json");
 
-        // Force exact JSON structure using responseSchema
-        Map<String, Object> responseSchema = new HashMap<>();
-        responseSchema.put("type", "OBJECT");
-        
-        Map<String, Object> exercisesProp = new HashMap<>();
-        exercisesProp.put("type", "ARRAY");
-        
-        Map<String, Object> itemsSchema = new HashMap<>();
-        itemsSchema.put("type", "OBJECT");
-        
-        Map<String, Object> itemProperties = new HashMap<>();
-        itemProperties.put("name", Map.of("type", "STRING", "description", "Nombre del ejercicio en español"));
-        itemProperties.put("sets", Map.of("type", "INTEGER"));
-        itemProperties.put("reps", Map.of("type", "STRING", "description", "Número o rango de repeticiones"));
-        itemProperties.put("weight", Map.of("type", "NUMBER", "description", "Peso inicial recomendado en kg"));
-        
-        itemsSchema.put("properties", itemProperties);
-        itemsSchema.put("required", List.of("name", "sets", "reps", "weight"));
-        
-        exercisesProp.put("items", itemsSchema);
-        
-        responseSchema.put("properties", Map.of("exercises", exercisesProp));
-        responseSchema.put("required", List.of("exercises"));
-        
-        generationConfig.put("responseSchema", responseSchema);
+        generationConfig.put("responseMimeType", "application/json");
+
         requestBody.put("generationConfig", generationConfig);
 
         try {
