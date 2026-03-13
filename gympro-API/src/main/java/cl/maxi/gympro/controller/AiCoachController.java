@@ -128,15 +128,20 @@ public class AiCoachController {
         } catch (Exception e) {
             System.err.println("CRITICAL: Error parsing AI JSON or API Failure: " + e.getMessage());
             System.err.println("Raw Response was: " + aiResponse);
-            // Fallback content if AI fails to provide JSON - Structured to not feel like a mock
+            
+            // Helpful Diagnostic Fallback: Surface the error message so the user can fix it
+            String diagnosticMsg = (aiResponse != null && aiResponse.startsWith("ERROR")) 
+                ? "Error de IA: " + aiResponse 
+                : "Error de Formato JSON: " + e.getMessage();
+                
+            items.add(new RoutineItem(UUID.randomUUID().toString(), diagnosticMsg + " (Sigue las sentadillas de emergencia)", 3, 15, 0.0, false));
             items.add(new RoutineItem(UUID.randomUUID().toString(), "Sentadillas con Salto (Calentamiento)", 3, 15, 0.0, false));
             items.add(new RoutineItem(UUID.randomUUID().toString(), "Flexiones de Brazos (Fuerza)", 3, 10, 0.0, false));
             items.add(new RoutineItem(UUID.randomUUID().toString(), "Zancadas / Lunges (Pierna)", 3, 12, 0.0, false));
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Plancha Abdominal", 3, 45, 0.0, false));
         }
 
         if (items.isEmpty()) {
-            items.add(new RoutineItem(UUID.randomUUID().toString(), "Estiramiento Dinámico (Fallback)", 1, 10, 0.0, false));
+            items.add(new RoutineItem(UUID.randomUUID().toString(), "Error: Rutina vacía. Reintenta.", 1, 10, 0.0, false));
         }
         
         routine.setItems(items);
