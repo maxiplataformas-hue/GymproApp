@@ -67,14 +67,12 @@ public class GeminiService {
         contents.put("parts", Collections.singletonList(parts));
         requestBody.put("contents", Collections.singletonList(contents));
 
-        // Configuration for Efficiency and Consistency
+        // Configuration for Efficiency and Consistency (Must use snake_case for REST API)
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("temperature", 0.4);
-        generationConfig.put("topP", 0.8);
-        generationConfig.put("maxOutputTokens", 800);
-        generationConfig.put("responseMimeType", "application/json");
-
-        generationConfig.put("responseMimeType", "application/json");
+        generationConfig.put("top_p", 0.8);
+        generationConfig.put("max_output_tokens", 800);
+        generationConfig.put("response_mime_type", "application/json");
 
         requestBody.put("generationConfig", generationConfig);
 
