@@ -217,7 +217,18 @@ export class DataService {
   private push = inject(PushNotificationService);
   private apiBase = 'https://gymproapp.onrender.com/api';
 
-  constructor() { }
+  constructor() {
+    this.startHeartbeat();
+  }
+
+  private startHeartbeat() {
+    // Send a pulse every 30 seconds to keep the backend alive on free hosting (Render/Vercel)
+    setInterval(() => {
+      this.http.get(`${this.apiBase}/status`).subscribe({
+        error: (err) => console.log('Heartbeat error:', err)
+      });
+    }, 30000);
+  }
 
   loadAllStudents(coachEmail?: string) {
     const url = coachEmail
