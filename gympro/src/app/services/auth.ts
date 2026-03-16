@@ -47,6 +47,15 @@ export class AuthService {
     }
   }
 
+  private getDeviceId(): string {
+    let deviceId = localStorage.getItem('gympro-device-id');
+    if (!deviceId) {
+      deviceId = crypto.randomUUID();
+      localStorage.setItem('gympro-device-id', deviceId);
+    }
+    return deviceId;
+  }
+
   sendLoginOtp(email: string, onSuccess: () => void, onError: (msg: string) => void) {
     this.loginError.set(null);
     this.isLoading.set(true);
@@ -73,10 +82,18 @@ export class AuthService {
         }
 
         // Send OTP via backend
-        this.http.post(`${this.usersUrl.replace('/users', '/auth')}/send-otp`, { email: normalizedEmail }).subscribe({
-          next: () => {
+        this.http.post<any>(`${this.usersUrl.replace('/users', '/auth')}/send-otp`, { 
+          email: normalizedEmail,
+          deviceId: this.getDeviceId() 
+        }).subscribe({
+          next: (res) => {
             this.isLoading.set(false);
-            onSuccess();
+            if (res.otpSkipped && res.user) {
+              this.finalizeLogin(res.user);
+              onSuccess(); // The UI will check isLoggedIn and navigate
+            } else {
+              onSuccess();
+            }
           },
           error: () => {
             this.loginError.set('Error al enviar el código.');
@@ -98,7 +115,11 @@ export class AuthService {
     this.isLoading.set(true);
 
     const normalizedEmail = email.trim().toLowerCase();
-    this.http.post(`${this.usersUrl.replace('/users', '/auth')}/verify-otp`, { email: normalizedEmail, code }).subscribe({
+    this.http.post(`${this.usersUrl.replace('/users', '/auth')}/verify-otp`, { 
+      email: normalizedEmail, 
+      code,
+      deviceId: this.getDeviceId()
+    }).subscribe({
       next: () => {
         // OTP verified, now fetch user details to complete login
         this.http.get<User>(`${this.usersUrl}/${normalizedEmail}`).subscribe(user => {
