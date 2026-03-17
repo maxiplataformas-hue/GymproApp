@@ -15,8 +15,9 @@ export type Equipment = 'Barra' | 'Mancuerna' | 'Máquina' | 'Libre';
 export interface Exercise {
   id: string;
   name: string;
-  muscleGroup: MuscleGroup;
-  equipment: Equipment;
+  muscleGroup: MuscleGroup | string;
+  equipment: Equipment | string;
+  category: string;
 }
 
 export interface RoutineItem {
@@ -92,104 +93,7 @@ export interface Notification {
   isRead: boolean;
 }
 
-// Initial Mock Exercises
-const MOCK_EXERCISES: Exercise[] = [
-  // Pecho
-  { id: '1', name: 'Press de Banca Plano', muscleGroup: 'Pecho', equipment: 'Barra' },
-  { id: '2', name: 'Press de Banca Inclinado', muscleGroup: 'Pecho', equipment: 'Barra' },
-  { id: '3', name: 'Press de Banca Declinado', muscleGroup: 'Pecho', equipment: 'Barra' },
-  { id: '4', name: 'Press con Mancuernas Plano', muscleGroup: 'Pecho', equipment: 'Mancuerna' },
-  { id: '5', name: 'Press con Mancuernas Inclinado', muscleGroup: 'Pecho', equipment: 'Mancuerna' },
-  { id: '6', name: 'Aperturas Planas', muscleGroup: 'Pecho', equipment: 'Mancuerna' },
-  { id: '7', name: 'Aperturas Inclinadas', muscleGroup: 'Pecho', equipment: 'Mancuerna' },
-  { id: '8', name: 'Peck Deck (Mariposa)', muscleGroup: 'Pecho', equipment: 'Máquina' },
-  { id: '9', name: 'Cruces en Polea', muscleGroup: 'Pecho', equipment: 'Máquina' },
-  { id: '10', name: 'Press de Pecho en Máquina', muscleGroup: 'Pecho', equipment: 'Máquina' },
-  { id: '11', name: 'Pullover', muscleGroup: 'Pecho', equipment: 'Mancuerna' },
-  { id: '12', name: 'Flexiones (Push-ups)', muscleGroup: 'Pecho', equipment: 'Libre' },
-  { id: '13', name: 'Fondos en Paralelas (Pecho)', muscleGroup: 'Pecho', equipment: 'Libre' },
-
-  // Espalda
-  { id: '14', name: 'Peso Muerto Convencional', muscleGroup: 'Espalda', equipment: 'Barra' },
-  { id: '15', name: 'Remo con Barra (Pendlay)', muscleGroup: 'Espalda', equipment: 'Barra' },
-  { id: '16', name: 'Remo con Barra (Yates)', muscleGroup: 'Espalda', equipment: 'Barra' },
-  { id: '17', name: 'Remo con Mancuerna a 1 Mano', muscleGroup: 'Espalda', equipment: 'Mancuerna' },
-  { id: '18', name: 'Remo en Polea Baja (Gironda)', muscleGroup: 'Espalda', equipment: 'Máquina' },
-  { id: '19', name: 'Jalón al Pecho', muscleGroup: 'Espalda', equipment: 'Máquina' },
-  { id: '20', name: 'Jalón Tras Nuca', muscleGroup: 'Espalda', equipment: 'Máquina' },
-  { id: '21', name: 'Remo en T', muscleGroup: 'Espalda', equipment: 'Máquina' },
-  { id: '22', name: 'Pullover en Polea Alta', muscleGroup: 'Espalda', equipment: 'Máquina' },
-  { id: '23', name: 'Dominadas Prontas (Pull-ups)', muscleGroup: 'Espalda', equipment: 'Libre' },
-  { id: '24', name: 'Dominadas Supinas (Chin-ups)', muscleGroup: 'Espalda', equipment: 'Libre' },
-  { id: '25', name: 'Extensiones Lumbares', muscleGroup: 'Espalda', equipment: 'Máquina' },
-
-  // Pierna
-  { id: '26', name: 'Sentadilla Libre (Back Squat)', muscleGroup: 'Pierna', equipment: 'Barra' },
-  { id: '27', name: 'Sentadilla Frontal', muscleGroup: 'Pierna', equipment: 'Barra' },
-  { id: '28', name: 'Peso Muerto Rumano', muscleGroup: 'Pierna', equipment: 'Barra' },
-  { id: '29', name: 'Peso Muerto Sumo', muscleGroup: 'Pierna', equipment: 'Barra' },
-  { id: '30', name: 'Zancadas (Lunges) con Barra', muscleGroup: 'Pierna', equipment: 'Barra' },
-  { id: '31', name: 'Hip Thrust con Barra', muscleGroup: 'Pierna', equipment: 'Barra' },
-  { id: '32', name: 'Sentadilla Búlgara con Mancuernas', muscleGroup: 'Pierna', equipment: 'Mancuerna' },
-  { id: '33', name: 'Zancadas con Mancuernas', muscleGroup: 'Pierna', equipment: 'Mancuerna' },
-  { id: '34', name: 'Peso Muerto Rumano con Mancuernas', muscleGroup: 'Pierna', equipment: 'Mancuerna' },
-  { id: '35', name: 'Prensa Inclinada (Leg Press)', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '36', name: 'Extensión de Cuádriceps', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '37', name: 'Curl de Isquios Tumbado', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '38', name: 'Curl de Isquios Sentado', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '39', name: 'Máquina de Abductores', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '40', name: 'Máquina de Adductores', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '41', name: 'Sentadilla Hack (Hack Squat)', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '42', name: 'Sentadilla en Máquina Smith', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '43', name: 'Elevación de Talones de Pie', muscleGroup: 'Pierna', equipment: 'Máquina' },
-  { id: '44', name: 'Elevación de Talones Sentado', muscleGroup: 'Pierna', equipment: 'Máquina' },
-
-  // Hombro
-  { id: '46', name: 'Press Militar de Pie', muscleGroup: 'Hombro', equipment: 'Barra' },
-  { id: '47', name: 'Press Militar Sentado', muscleGroup: 'Hombro', equipment: 'Barra' },
-  { id: '48', name: 'Remo al Mentón', muscleGroup: 'Hombro', equipment: 'Barra' },
-  { id: '49', name: 'Press Arnold', muscleGroup: 'Hombro', equipment: 'Mancuerna' },
-  { id: '50', name: 'Press de Hombros Sentado', muscleGroup: 'Hombro', equipment: 'Mancuerna' },
-  { id: '51', name: 'Elevaciones Laterales', muscleGroup: 'Hombro', equipment: 'Mancuerna' },
-  { id: '52', name: 'Elevaciones Frontales', muscleGroup: 'Hombro', equipment: 'Mancuerna' },
-  { id: '53', name: 'Pájaros (Deltoides Posterior)', muscleGroup: 'Hombro', equipment: 'Mancuerna' },
-  { id: '54', name: 'Encogimientos (Trapecios)', muscleGroup: 'Hombro', equipment: 'Mancuerna' },
-  { id: '55', name: 'Elevaciones Laterales en Polea', muscleGroup: 'Hombro', equipment: 'Máquina' },
-  { id: '56', name: 'Press de Hombros en Máquina', muscleGroup: 'Hombro', equipment: 'Máquina' },
-  { id: '57', name: 'Pájaros en Pec Deck', muscleGroup: 'Hombro', equipment: 'Máquina' },
-
-  // Brazo
-  { id: '58', name: 'Curl con Barra Recta', muscleGroup: 'Brazo', equipment: 'Barra' },
-  { id: '59', name: 'Curl con Barra EZ', muscleGroup: 'Brazo', equipment: 'Barra' },
-  { id: '60', name: 'Press Francés', muscleGroup: 'Brazo', equipment: 'Barra' },
-  { id: '61', name: 'Curl Alterno con Mancuernas', muscleGroup: 'Brazo', equipment: 'Mancuerna' },
-  { id: '62', name: 'Curl Martillo', muscleGroup: 'Brazo', equipment: 'Mancuerna' },
-  { id: '63', name: 'Curl Concentrado', muscleGroup: 'Brazo', equipment: 'Mancuerna' },
-  { id: '64', name: 'Patada de Tríceps', muscleGroup: 'Brazo', equipment: 'Mancuerna' },
-  { id: '65', name: 'Extensión Tríceps Tras Nuca', muscleGroup: 'Brazo', equipment: 'Mancuerna' },
-  { id: '66', name: 'Curl en Polea Baja', muscleGroup: 'Brazo', equipment: 'Máquina' },
-  { id: '67', name: 'Extensión de Tríceps en Polea', muscleGroup: 'Brazo', equipment: 'Máquina' },
-  { id: '68', name: 'Extensión Tríceps con Cuerda', muscleGroup: 'Brazo', equipment: 'Máquina' },
-  { id: '69', name: 'Curl en Banco Scott (Máquina)', muscleGroup: 'Brazo', equipment: 'Máquina' },
-  { id: '70', name: 'Fondos en Paralelas (Tríceps)', muscleGroup: 'Brazo', equipment: 'Libre' },
-
-  // Core
-  { id: '71', name: 'Rueda Abdominal (Ab Roller)', muscleGroup: 'Core', equipment: 'Libre' },
-  { id: '72', name: 'Crunch Abdominal', muscleGroup: 'Core', equipment: 'Libre' },
-  { id: '73', name: 'Elevación de Piernas Colgado', muscleGroup: 'Core', equipment: 'Libre' },
-  { id: '74', name: 'Plancha (Plank)', muscleGroup: 'Core', equipment: 'Libre' },
-  { id: '75', name: 'Russian Twists', muscleGroup: 'Core', equipment: 'Libre' },
-  { id: '76', name: 'Crunch en Polea Alta', muscleGroup: 'Core', equipment: 'Máquina' },
-  { id: '77', name: 'Máquina de Abdomen', muscleGroup: 'Core', equipment: 'Máquina' }
-];
-
-export interface Exercise {
-  id: string;
-  name: string;
-  muscleGroup: string;
-  equipment: string;
-  category: string;
-}
+// Exercises loaded from backend
 
 @Injectable({
   providedIn: 'root'
@@ -251,6 +155,8 @@ export class DataService {
     return this.http.delete(`${this.apiBase}/exercises/${id}`).pipe(
       tap(() => this.loadExercises())
     );
+  }
+
   private startHeartbeat() {
     // Send a pulse every 30 seconds to keep the backend alive on free hosting (Render/Vercel)
     setInterval(() => {
