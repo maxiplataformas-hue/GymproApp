@@ -9,7 +9,7 @@ export interface CoachMetric extends User {
   activityLevel: number;
 }
 
-export type MuscleGroup = 'Pecho' | 'Espalda' | 'Pierna' | 'Hombro' | 'Brazo' | 'Core';
+export type MuscleGroup = 'Pecho' | 'Espalda' | 'Pierna' | 'Hombro' | 'Brazo' | 'Core' | 'Todos';
 export type Equipment = 'Barra' | 'Mancuerna' | 'Máquina' | 'Libre';
 
 export interface Exercise {

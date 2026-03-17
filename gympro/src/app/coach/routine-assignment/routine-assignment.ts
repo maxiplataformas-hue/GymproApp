@@ -18,7 +18,7 @@ export class RoutineAssignment {
 
   // Available Exercises
   allExercises = computed(() => this.data.exercises());
-  muscleGroups: MuscleGroup[] = ['Pecho', 'Espalda', 'Pierna', 'Hombro', 'Brazo', 'Core'];
+  muscleGroups: MuscleGroup[] = ['Pecho', 'Espalda', 'Pierna', 'Hombro', 'Brazo', 'Core', 'Todos'];
   equipmentTypes: Equipment[] = ['Barra', 'Mancuerna', 'Máquina', 'Libre'];
 
   selectedMuscle = signal<MuscleGroup | ''>('');

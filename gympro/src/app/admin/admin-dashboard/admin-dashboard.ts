@@ -18,7 +18,7 @@ export class AdminDashboard {
     isCreating = signal(false);
     saveError = signal<string | null>(null);
 
-    muscleGroups = ['Pecho', 'Espalda', 'Pierna', 'Hombro', 'Brazo', 'Core'];
+    muscleGroups = ['Pecho', 'Espalda', 'Pierna', 'Hombro', 'Brazo', 'Core', 'Todos'];
     equipmentTypes = ['Barra', 'Mancuerna', 'Máquina', 'Libre'];
 
     newCoachForm = new FormGroup({
