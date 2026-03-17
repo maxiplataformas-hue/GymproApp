@@ -2,6 +2,7 @@ package cl.maxi.gympro;
 
 import cl.maxi.gympro.model.User;
 import cl.maxi.gympro.repository.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
@@ -10,6 +11,9 @@ import java.util.Optional;
 public class AdminSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    
+    @Value("${app.admin.email}")
+    private String adminEmail;
 
     public AdminSeeder(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -17,27 +21,35 @@ public class AdminSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. CONFIGURACIÓN DE ADMIN
-        String adminEmail = "maxiplataformas@gmail.com";
-        Optional<User> existingUser = userRepository.findByEmail(adminEmail);
+        // 1. CONFIGURACIÓN DE ADMIN DINÁMICO
+        if (adminEmail == null || adminEmail.isBlank()) {
+            System.err.println("No admin email configured. Skipping seeder.");
+            return;
+        }
+
+        String normalizedAdminEmail = adminEmail.trim().toLowerCase();
+        Optional<User> existingUser = userRepository.findByEmailIgnoreCase(normalizedAdminEmail);
 
         if (existingUser.isPresent()) {
             User user = existingUser.get();
-            user.setRole("admin");
-            user.setIsActive(true);
-            user.setIsDeleted(false);
-            userRepository.save(user);
-            System.out.println("User " + adminEmail + " updated to admin.");
+            // Solo lo forzamos a admin si no lo es, para evitar sobreescribir otros cambios si el seeder corre siempre
+            if (!"admin".equals(user.getRole())) {
+                user.setRole("admin");
+                user.setIsActive(true);
+                user.setIsDeleted(false);
+                userRepository.save(user);
+                System.out.println("User " + normalizedAdminEmail + " updated to admin.");
+            }
         } else {
             User admin = new User();
-            admin.setEmail(adminEmail);
-            admin.setName("Administrador");
+            admin.setEmail(normalizedAdminEmail);
+            admin.setName("Administrador Raíz");
             admin.setRole("admin");
             admin.setIsActive(true);
             admin.setIsDeleted(false);
             admin.setIsOnboarded(true);
             userRepository.save(admin);
-            System.out.println("User " + adminEmail + " created as admin.");
+            System.out.println("User " + normalizedAdminEmail + " created as root admin.");
         }
 
         System.out.println("Cleanup and seeding finished successfully.");
