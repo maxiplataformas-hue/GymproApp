@@ -15,8 +15,9 @@ public class EmailService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public void sendOtpEmail(String to, String code, String subject) {
-        if (scriptUrl == null || scriptUrl.isEmpty()) {
-            throw new RuntimeException("Google Script URL is NOT configured in properties.");
+        if (scriptUrl == null || scriptUrl.trim().isEmpty()) {
+            System.err.println("CRITICAL: google.script.url is not configured!");
+            throw new RuntimeException("Configuración de correo (Google Script URL) no encontrada. Verifica las variables de entorno.");
         }
 
         Map<String, String> body = new HashMap<>();
@@ -25,11 +26,18 @@ public class EmailService {
         body.put("subject", subject != null ? subject : "Código de Verificación - CoachPro");
         
         try {
+            System.out.println("Attempting to send OTP to " + to + " via " + scriptUrl);
             String response = restTemplate.postForObject(scriptUrl, body, String.class);
             System.out.println("Email effectively sent via Proxy to: " + to + ". Response: " + response);
         } catch (Exception e) {
-            System.err.println("Error sending email via Proxy: " + e.getMessage());
-            throw new RuntimeException("Failed to send email via Proxy: " + e.getMessage());
+            String errorMsg = "Error llamando al Proxy de Email: " + e.getMessage();
+            System.err.println(errorMsg);
+            if (e.getMessage().contains("404")) {
+                errorMsg = "URL de Script no encontrada (404). Verifica GOOGLE_SCRIPT_URL.";
+            } else if (e.getMessage().contains("Connection refused")) {
+                errorMsg = "No se pudo conectar con el Proxy de correo. Revisa la conexión.";
+            }
+            throw new RuntimeException(errorMsg);
         }
     }
 }
