@@ -1,4 +1,4 @@
-import { Component, signal, effect, OnDestroy, inject } from '@angular/core';
+import { Component, signal, effect, OnDestroy, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth';
@@ -36,6 +36,7 @@ export class PerformanceTimers implements OnDestroy {
   private audioContext: AudioContext | null = null;
   private wakeLock: any = null;
   private authService = inject(AuthService);
+  private ngZone = inject(NgZone);
   private silentAudio: HTMLAudioElement | null = null;
   private phaseStartTime: number = 0;
   private activeOscillators: any[] = [];
@@ -50,18 +51,24 @@ export class PerformanceTimers implements OnDestroy {
     });
 
     // Handle ESC to exit fullscreen
-    document.onfullscreenchange = () => {
-      this.isFullscreen.set(!!document.fullscreenElement);
-    };
-
-    // Auto-fullscreen on landscape (Robust detection)
+    document.addEventListener('fullscreenchange', () => {
+      this.ngZone.run(() => {
+        this.isFullscreen.set(!!document.fullscreenElement);
+      });
+    });
+    
+    // Auto-fullscreen on landscape
     const orientationQuery = window.matchMedia('(orientation: landscape)');
     const handleOrientation = (e: MediaQueryListEvent | MediaQueryList) => {
-      if (e.matches) {
-        this.isFullscreen.set(true);
-      } else if (!document.fullscreenElement) {
-        this.isFullscreen.set(false);
-      }
+      this.ngZone.run(() => {
+        if (e.matches) {
+          if (!document.fullscreenElement) {
+            this.isFullscreen.set(true);
+          }
+        } else if (document.fullscreenElement) {
+          this.isFullscreen.set(false);
+        }
+      });
     };
     
     orientationQuery.addEventListener('change', handleOrientation);
@@ -69,9 +76,9 @@ export class PerformanceTimers implements OnDestroy {
     handleOrientation(orientationQuery);
 
     // Re-request wake lock if tab becomes visible again
-    document.addEventListener('visibilitychange', async () => {
+    document.addEventListener('visibilitychange', () => {
       if (this.wakeLock !== null && document.visibilityState === 'visible' && this.isRunning()) {
-        await this.requestWakeLock();
+        this.requestWakeLock();
       }
     });
 
@@ -107,7 +114,7 @@ export class PerformanceTimers implements OnDestroy {
       this.worker = new Worker(new URL('./timer.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (data === 'tick' && !this.isPaused()) {
-          this.tick();
+          this.ngZone.run(() => this.tick());
         }
       };
     }
