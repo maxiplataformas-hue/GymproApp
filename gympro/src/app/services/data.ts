@@ -183,11 +183,19 @@ const MOCK_EXERCISES: Exercise[] = [
   { id: '77', name: 'Máquina de Abdomen', muscleGroup: 'Core', equipment: 'Máquina' }
 ];
 
+export interface Exercise {
+  id: string;
+  name: string;
+  muscleGroup: string;
+  equipment: string;
+  category: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
-  exercises = signal<Exercise[]>(MOCK_EXERCISES);
+  exercises = signal<Exercise[]>([]);
   routines = signal<RoutineAssignment[]>([]);
   physioEntries = signal<PhysiologicalEntry[]>([]);
   allStudents = signal<User[]>([]);
@@ -196,6 +204,11 @@ export class DataService {
   currentProfiles = signal<StudentProfile[]>([]);
   notifications = signal<Notification[]>([]);
   unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
+
+  uniqueCategories = computed(() => {
+    const cats = this.exercises().map(e => e.category).filter(Boolean);
+    return [...new Set(cats)];
+  });
 
   todayExerciseCount = computed(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -219,8 +232,25 @@ export class DataService {
 
   constructor() {
     this.startHeartbeat();
+    this.loadExercises();
   }
 
+  loadExercises() {
+    this.http.get<Exercise[]>(`${this.apiBase}/exercises`).subscribe(data => {
+      this.exercises.set(data);
+    });
+  }
+
+  saveExercise(exercise: Partial<Exercise>) {
+    return this.http.post<Exercise>(`${this.apiBase}/exercises`, exercise).pipe(
+      tap(() => this.loadExercises())
+    );
+  }
+
+  deleteExercise(id: string) {
+    return this.http.delete(`${this.apiBase}/exercises/${id}`).pipe(
+      tap(() => this.loadExercises())
+    );
   private startHeartbeat() {
     // Send a pulse every 30 seconds to keep the backend alive on free hosting (Render/Vercel)
     setInterval(() => {
