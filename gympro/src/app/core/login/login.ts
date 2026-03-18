@@ -100,9 +100,14 @@ export class Login {
     this.isBiometricLoading.set(true);
     const email = await this.biometric.authenticate();
     if (email) {
-      this.auth.login(email); // validates against API, navigates on success
+      // Use sendLoginOtp - it will skip OTP if device is trusted and navigate directly
+      this.auth.sendLoginOtp(
+        email,
+        () => this.isWaitingForOtp.set(true), // Only shown if device is NOT trusted
+        () => this.biometricError.set('Error al verificar. Usa tu correo.')
+      );
     } else {
-      this.biometricError.set('Verificación fallida. Usa tu correo.');
+      this.biometricError.set('Verificación biométrica fallida. Usa tu correo.');
     }
     this.isBiometricLoading.set(false);
   }

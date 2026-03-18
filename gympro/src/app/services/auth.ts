@@ -89,10 +89,11 @@ export class AuthService {
           next: (res) => {
             this.isLoading.set(false);
             if (res.otpSkipped && res.user) {
+              // Trusted device: log in directly, no OTP needed
               this.finalizeLogin(res.user);
-              onSuccess(); // The UI will check isLoggedIn and navigate
+              this.router.navigate(['/app', res.user.role]);
             } else {
-              onSuccess();
+              onSuccess(); // Show OTP screen
             }
           },
           error: () => {
@@ -172,6 +173,6 @@ export class AuthService {
   logout() {
     this.currentUser.set(null);
     localStorage.removeItem('gympro-user');
-    this.router.navigate(['/login']);
+    this.router.navigate(['/select-mode']);
   }
 }
