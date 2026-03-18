@@ -9,8 +9,8 @@ export interface CoachMetric extends User {
   activityLevel: number;
 }
 
-export type MuscleGroup = 'Pecho' | 'Espalda' | 'Pierna' | 'Hombro' | 'Brazo' | 'Core' | 'Todos';
-export type Equipment = 'Barra' | 'Mancuerna' | 'Máquina' | 'Libre';
+export type MuscleGroup = 'Pecho' | 'Espalda' | 'Pierna' | 'Hombro' | 'Brazo' | 'Core' | 'Glúteo' | 'Todos';
+export type Equipment = 'Barra' | 'Mancuerna' | 'Máquina' | 'Libre' | 'Kettlebell' | 'Polea' | 'Ninguno' | 'Barra fija' | 'Paralelas' | 'Banco' | 'Cajón' | 'Cuerda' | 'Cuerdas' | 'Trineo' | 'Ballón medicinal' | 'Cinta' | 'Silla' | 'Escalera' | 'Escalera' | 'Mesa / Barra baja' | 'Escalera' | 'Escalera' | 'Silla' | 'Escalera';
 
 export interface Exercise {
   id: string;

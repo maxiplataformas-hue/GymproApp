@@ -18,17 +18,20 @@ export class RoutineAssignment {
 
   // Available Exercises
   allExercises = computed(() => this.data.exercises());
-  muscleGroups: MuscleGroup[] = ['Pecho', 'Espalda', 'Pierna', 'Hombro', 'Brazo', 'Core', 'Todos'];
-  equipmentTypes: Equipment[] = ['Barra', 'Mancuerna', 'Máquina', 'Libre'];
+  muscleGroups: MuscleGroup[] = ['Pecho', 'Espalda', 'Pierna', 'Hombro', 'Brazo', 'Core', 'Glúteo', 'Todos'];
+  equipmentTypes: Equipment[] = ['Barra', 'Mancuerna', 'Máquina', 'Libre', 'Kettlebell', 'Polea', 'Ninguno'];
+  categories = ['Gimnasio', 'Calistenia', 'HIIT', 'CrossFit', 'Running', 'Casa'];
 
   selectedMuscle = signal<MuscleGroup | ''>('');
   selectedEquipment = signal<Equipment | ''>('');
+  selectedCategory = signal<string>('');
 
   filteredExercises = computed(() => {
     return this.allExercises().filter(e => {
       const matchM = this.selectedMuscle() === '' || e.muscleGroup === this.selectedMuscle();
       const matchE = this.selectedEquipment() === '' || e.equipment === this.selectedEquipment();
-      return matchM && matchE;
+      const matchC = this.selectedCategory() === '' || e.category === this.selectedCategory();
+      return matchM && matchE && matchC;
     });
   });
 
@@ -60,6 +63,7 @@ export class RoutineAssignment {
       this.selectedExercise.set(null);
       this.selectedMuscle.set('');
       this.selectedEquipment.set('');
+      this.selectedCategory.set('');
       this.assignmentSets.set(null);
       this.assignmentReps.set(null);
       this.assignmentWeight.set(null);
