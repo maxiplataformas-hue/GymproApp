@@ -115,9 +115,15 @@ public class UserController {
     /** DELETE /api/users/{email} → soft delete (isDeleted = true) */
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteUser(@PathVariable String email) {
-        Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(email);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
+        String normalizedEmail = email.trim().toLowerCase();
+        // Use stream to be resilient to null/missing fields in existing Mongo documents
+        List<User> matches = userRepository.findAll()
+                .stream()
+                .filter(u -> normalizedEmail.equalsIgnoreCase(u.getEmail()))
+                .collect(Collectors.toList());
+
+        if (!matches.isEmpty()) {
+            User user = matches.get(0);
             user.setIsDeleted(true);
             user.setIsActive(false);
             userRepository.save(user);
@@ -125,6 +131,7 @@ public class UserController {
         }
         return ResponseEntity.notFound().build();
     }
+
 
     /** GET /api/users/coaches/metrics → get coaches with student count and activity level */
     @GetMapping("/coaches/metrics")
