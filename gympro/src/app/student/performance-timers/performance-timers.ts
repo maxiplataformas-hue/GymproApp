@@ -297,9 +297,9 @@ export class PerformanceTimers implements OnDestroy {
   }
 
   private handleCompletion() {
-    this.playSound('bell');
-    setTimeout(() => this.playSound('bell'), 800);
-    setTimeout(() => this.playSound('bell'), 1600);
+    this.playSound('start');
+    setTimeout(() => this.playSound('start'), 250);
+    setTimeout(() => this.playSound('start'), 500);
     
     this.isFinished.set(true);
     this.stop();
@@ -311,7 +311,6 @@ export class PerformanceTimers implements OnDestroy {
     }, 4500); 
   }
 
-
   private async scheduleUpcomingAudio(duration: number, nextType: string, offset: number = 0) {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -322,7 +321,7 @@ export class PerformanceTimers implements OnDestroy {
     }
 
     const now = this.audioContext.currentTime;
-    const vol = this.volume() / 100;
+    const vol = this.volume();
 
     // Schedule 5 warning beeps
     for (let i = 1; i <= 5; i++) {
@@ -335,7 +334,7 @@ export class PerformanceTimers implements OnDestroy {
     // Schedule end beep (longer)
     const timeToEnd = duration - offset;
     if (timeToEnd > 0) {
-        this.scheduleBeep(now + timeToEnd, 0.8, 880, vol);
+        this.scheduleBeep(now + timeToEnd, 0.4, 880, vol);
     }
   }
 
@@ -384,7 +383,7 @@ export class PerformanceTimers implements OnDestroy {
       osc.frequency.setValueAtTime(880, this.audioContext.currentTime);
       gain.gain.setValueAtTime(baseVolume, this.audioContext.currentTime);
       osc.start();
-      osc.stop(this.audioContext.currentTime + 0.8);
+      osc.stop(this.audioContext.currentTime + 0.2); // Made it shorter for fast beeps
     } else if (type === 'warning') {
       osc.frequency.setValueAtTime(440, this.audioContext.currentTime);
       gain.gain.setValueAtTime(baseVolume * 0.4, this.audioContext.currentTime);
