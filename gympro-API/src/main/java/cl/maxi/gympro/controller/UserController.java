@@ -119,7 +119,7 @@ public class UserController {
         // Use stream to be resilient to null/missing fields in existing Mongo documents
         List<User> matches = userRepository.findAll()
                 .stream()
-                .filter(u -> normalizedEmail.equalsIgnoreCase(u.getEmail()))
+                .filter(u -> u.getEmail() != null && normalizedEmail.equalsIgnoreCase(u.getEmail()))
                 .collect(Collectors.toList());
 
         if (!matches.isEmpty()) {
