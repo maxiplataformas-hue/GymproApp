@@ -32,10 +32,20 @@
                     [class.text-green-700]="bmiStatus() === 'Normal'"
                     [class.bg-yellow-100]="bmiStatus() === 'Sobrepeso'"
                     [class.text-yellow-700]="bmiStatus() === 'Sobrepeso'"
-                    [class.bg-red-100]="bmiStatus() === 'Obesidad'" [class.text-red-700]="bmiStatus() === 'Obesidad'">
+                    [class.bg-red-100]="bmiStatus() === 'Obesidad'" [class.text-red-700]="bmiStatus() === 'Obesidad'"
+                    [class.bg-blue-100]="bmiStatus() === 'Bajo Peso'"
+                    [class.text-blue-700]="bmiStatus() === 'Bajo Peso'">
                     {{ bmiStatus() }}
                 </span>
             </div>
+            @if(weightDelta() !== null) {
+            <p class="text-xs mt-3 font-medium"
+                [class.text-green-500]="weightDelta()! < 0"
+                [class.text-red-400]="weightDelta()! > 0"
+                [class.text-text-muted]="weightDelta() === 0">
+                {{ weightDelta()! > 0 ? '+' : '' }}{{ weightDelta() }} kg desde la medición anterior
+            </p>
+            }
         </div>
 
         <!-- IGC Card -->
@@ -60,7 +70,59 @@
                     pliegues).</span>
                 }
             </div>
+            @if(igcDelta() !== null) {
+            <p class="text-xs mt-3 font-medium"
+                [class.text-green-500]="igcDelta()! < 0"
+                [class.text-red-400]="igcDelta()! > 0"
+                [class.text-text-muted]="igcDelta() === 0">
+                {{ igcDelta()! > 0 ? '+' : '' }}{{ igcDelta() }}% desde la medición anterior
+            </p>
+            }
         </div>
+
+        <!-- Fat Mass Card -->
+        @if(fatMassKg() !== null) {
+        <div class="bg-surface border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
+            <div
+                class="absolute -right-10 -bottom-10 w-36 h-36 bg-orange-500/5 rounded-full blur-3xl group-hover:bg-orange-500/10 transition-colors">
+            </div>
+            <h3 class="text-text-muted font-medium mb-1 flex items-center gap-2">
+                <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0">
+                    </path>
+                </svg>
+                Masa Grasa
+            </h3>
+            <div class="flex items-end gap-2 mt-4">
+                <span class="text-5xl font-black text-text">{{ fatMassKg() }}</span>
+                <span class="text-xl text-text-muted font-bold mb-1">kg</span>
+            </div>
+            <p class="text-xs text-text-muted mt-2">Calculado: {{ latestIgc() }}% IGC × {{ currentWeight() }} kg</p>
+        </div>
+        }
+
+        <!-- Lean Mass Card -->
+        @if(leanMassKg() !== null) {
+        <div class="bg-surface border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
+            <div
+                class="absolute -left-10 -top-10 w-36 h-36 bg-green-500/5 rounded-full blur-3xl group-hover:bg-green-500/10 transition-colors">
+            </div>
+            <h3 class="text-text-muted font-medium mb-1 flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z">
+                    </path>
+                </svg>
+                Masa Magra (Músculo + Hueso)
+            </h3>
+            <div class="flex items-end gap-2 mt-4">
+                <span class="text-5xl font-black text-text">{{ leanMassKg() }}</span>
+                <span class="text-xl text-text-muted font-bold mb-1">kg</span>
+            </div>
+            <p class="text-xs text-text-muted mt-2">{{ currentWeight() }} kg total − {{ fatMassKg() }} kg grasa</p>
+        </div>
+        }
     </section>
 
     <!-- Karvonen Zones -->

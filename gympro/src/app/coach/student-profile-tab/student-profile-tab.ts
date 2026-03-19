@@ -1,6 +1,6 @@
 import { Component, inject, input, effect, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormGroup, FormControl } from '@angular/forms';
 import { DataService, StudentProfile } from '../../services/data';
 import { jsPDF } from 'jspdf';
 import { BaseChartDirective } from 'ng2-charts';
@@ -9,7 +9,7 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
 @Component({
     selector: 'app-student-profile-tab',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, BaseChartDirective],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, BaseChartDirective],
     templateUrl: './student-profile-tab.html'
 })
 export class StudentProfileTab {
@@ -20,9 +20,16 @@ export class StudentProfileTab {
     selectedProfile = signal<StudentProfile | null>(null);
     isCreatingNew = signal<boolean>(false);
 
+    // --- Quick Measurement (IGC + Peso) ---
+    quickWeight = signal<number | null>(null);
+    quickIgc = signal<number | null>(null);
+    quickDate = signal<string>(new Date().toISOString().split('T')[0]);
+    quickSaved = signal<boolean>(false);
+
     profileForm = new FormGroup({
         objective: new FormControl(''),
         biotype: new FormControl(''),
+        activityLevel: new FormControl(''),
 
         // Bioimpedance
         bodyFatPercentage: new FormControl<number | null>(null),
@@ -33,6 +40,7 @@ export class StudentProfileTab {
         // Anthropometry
         chestCircumference: new FormControl<number | null>(null),
         waistCircumference: new FormControl<number | null>(null),
+        hipCircumference: new FormControl<number | null>(null),
         leftArmCircumference: new FormControl<number | null>(null),
         rightArmCircumference: new FormControl<number | null>(null),
         leftLegCircumference: new FormControl<number | null>(null),
@@ -47,13 +55,45 @@ export class StudentProfileTab {
 
     showChartModal = signal<boolean>(false);
 
+    // --- Derived Calculations ---
+    latestWeight = computed(() => {
+        const history = this.data.physioEntries()
+            .filter(p => p.studentEmail === this.studentEmail())
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return history.length > 0 ? history[0].weight : null;
+    });
+
+    fatMassKg = computed(() => {
+        const profile = this.selectedProfile();
+        const weight = this.latestWeight();
+        if (!profile?.bodyFatPercentage || !weight) return null;
+        return +((profile.bodyFatPercentage / 100) * weight).toFixed(1);
+    });
+
+    leanMassKg = computed(() => {
+        const fat = this.fatMassKg();
+        const weight = this.latestWeight();
+        if (fat === null || !weight) return null;
+        return +(weight - fat).toFixed(1);
+    });
+
+    waistHipRatio = computed(() => {
+        const profile = this.selectedProfile();
+        if (!profile?.waistCircumference || !profile?.hipCircumference) return null;
+        return +(profile.waistCircumference / profile.hipCircumference).toFixed(2);
+    });
+
     constructor() {
         // Whenever the selected studentEmail changes, load their profile history.
         effect(() => {
             const email = this.studentEmail();
             if (email) {
                 this.data.loadProfile(email);
+                this.data.loadPhysio(email);
                 this.profileForm.reset();
+                this.quickWeight.set(null);
+                this.quickIgc.set(null);
+                this.quickDate.set(new Date().toISOString().split('T')[0]);
             }
         }, { allowSignalWrites: true });
 
@@ -78,6 +118,7 @@ export class StudentProfileTab {
                 this.profileForm.patchValue({
                     objective: profile.objective || '',
                     biotype: profile.biotype || '',
+                    activityLevel: profile.activityLevel || '',
                     bodyFatPercentage: profile.bodyFatPercentage ?? null,
                     muscleMassPercentage: profile.muscleMassPercentage ?? null,
                     visceralFat: profile.visceralFat ?? null,
@@ -85,6 +126,7 @@ export class StudentProfileTab {
 
                     chestCircumference: profile.chestCircumference ?? null,
                     waistCircumference: profile.waistCircumference ?? null,
+                    hipCircumference: profile.hipCircumference ?? null,
                     leftArmCircumference: profile.leftArmCircumference ?? null,
                     rightArmCircumference: profile.rightArmCircumference ?? null,
                     leftLegCircumference: profile.leftLegCircumference ?? null,
@@ -125,6 +167,28 @@ export class StudentProfileTab {
             this.profileForm.reset();
             this.profileForm.enable();
         }
+    }
+
+    // ---- Quick Measurement: Save IGC + Peso from the Ficha Técnica ----
+    saveQuickMeasurement() {
+        const weight = this.quickWeight();
+        const igc = this.quickIgc();
+        const date = this.quickDate();
+
+        if (!weight || weight <= 0) return;
+
+        this.data.addPhysioEntry({
+            studentEmail: this.studentEmail(),
+            date: date,
+            weight: weight,
+            igc: igc ?? undefined,
+            measuredBy: 'coach'
+        });
+
+        this.quickWeight.set(null);
+        this.quickIgc.set(null);
+        this.quickSaved.set(true);
+        setTimeout(() => this.quickSaved.set(false), 3000);
     }
 
     public radarChartOptions: ChartOptions<'radar'> = {
@@ -195,6 +259,7 @@ export class StudentProfileTab {
             studentEmail: this.studentEmail(),
             objective: formVals.objective || '',
             biotype: formVals.biotype || '',
+            activityLevel: formVals.activityLevel || '',
 
             bodyFatPercentage: formVals.bodyFatPercentage ?? undefined,
             muscleMassPercentage: formVals.muscleMassPercentage ?? undefined,
@@ -203,6 +268,7 @@ export class StudentProfileTab {
 
             chestCircumference: formVals.chestCircumference ?? undefined,
             waistCircumference: formVals.waistCircumference ?? undefined,
+            hipCircumference: formVals.hipCircumference ?? undefined,
             leftArmCircumference: formVals.leftArmCircumference ?? undefined,
             rightArmCircumference: formVals.rightArmCircumference ?? undefined,
             leftLegCircumference: formVals.leftLegCircumference ?? undefined,
@@ -268,10 +334,12 @@ export class StudentProfileTab {
 
         addSection('Objetivo Declarado', formVals.objective);
         addSection('Biotipo', formVals.biotype);
+        addSection('Nivel de Actividad', formVals.activityLevel);
 
         let antropometriaStr = '';
         if (formVals.chestCircumference) antropometriaStr += `Pecho: ${formVals.chestCircumference}cm | `;
         if (formVals.waistCircumference) antropometriaStr += `Cintura: ${formVals.waistCircumference}cm | `;
+        if (formVals.hipCircumference) antropometriaStr += `Cadera: ${formVals.hipCircumference}cm | `;
         if (formVals.leftArmCircumference) antropometriaStr += `Brazo Izq: ${formVals.leftArmCircumference}cm | `;
         if (formVals.rightArmCircumference) antropometriaStr += `Brazo Der: ${formVals.rightArmCircumference}cm | `;
         if (formVals.leftLegCircumference) antropometriaStr += `Pierna Izq: ${formVals.leftLegCircumference}cm | `;

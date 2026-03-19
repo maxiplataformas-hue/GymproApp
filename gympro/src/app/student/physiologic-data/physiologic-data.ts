@@ -16,15 +16,32 @@ export class PhysiologicData {
   user = computed(() => this.auth.currentUser());
   history = computed(() => this.data.getStudentHistory(this.user()?.email || '')());
 
+  // Current and previous weights
+  currentWeight = computed(() => {
+    const hList = this.history();
+    const u = this.user();
+    return hList.length > 0 ? hList[hList.length - 1].weight : (u?.initialWeight ?? null);
+  });
+
+  previousWeight = computed(() => {
+    const hList = this.history();
+    return hList.length > 1 ? hList[hList.length - 2].weight : null;
+  });
+
+  weightDelta = computed(() => {
+    const curr = this.currentWeight();
+    const prev = this.previousWeight();
+    if (curr === null || prev === null) return null;
+    return +(curr - prev).toFixed(1);
+  });
+
   // Calculate BMI
   bmi = computed(() => {
     const u = this.user();
-    if (!u || !u.height || !u.initialWeight) return 0;
-    // Current weight or initial
-    const hList = this.history();
-    const currentWeight = hList.length > 0 ? hList[hList.length - 1].weight : u.initialWeight;
+    const weight = this.currentWeight();
+    if (!u || !u.height || !weight) return 0;
     const heightInM = u.height / 100;
-    return +(currentWeight / (heightInM * heightInM)).toFixed(1);
+    return +(weight / (heightInM * heightInM)).toFixed(1);
   });
 
   bmiStatus = computed(() => {
@@ -38,9 +55,36 @@ export class PhysiologicData {
   // Latest IGC (Body Fat) if coach measured it
   latestIgc = computed(() => {
     const hList = this.history();
-    const withIgc = hList.filter(h => h.igc !== undefined);
-    if (withIgc.length > 0) return withIgc[withIgc.length - 1].igc;
-    return null;
+    const withIgc = hList.filter(h => h.igc !== undefined && h.igc !== null);
+    return withIgc.length > 0 ? withIgc[withIgc.length - 1].igc! : null;
+  });
+
+  previousIgc = computed(() => {
+    const hList = this.history();
+    const withIgc = hList.filter(h => h.igc !== undefined && h.igc !== null);
+    return withIgc.length > 1 ? withIgc[withIgc.length - 2].igc! : null;
+  });
+
+  igcDelta = computed(() => {
+    const curr = this.latestIgc();
+    const prev = this.previousIgc();
+    if (curr === null || prev === null) return null;
+    return +(curr - prev).toFixed(1);
+  });
+
+  // Derived body composition
+  fatMassKg = computed(() => {
+    const igc = this.latestIgc();
+    const weight = this.currentWeight();
+    if (igc === null || weight === null) return null;
+    return +((igc / 100) * weight).toFixed(1);
+  });
+
+  leanMassKg = computed(() => {
+    const fat = this.fatMassKg();
+    const weight = this.currentWeight();
+    if (fat === null || weight === null) return null;
+    return +(weight - fat).toFixed(1);
   });
 
   // Karvonen Zones (Assuming Resting HR = 60 for mock if unknown)

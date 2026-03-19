@@ -71,6 +71,7 @@ export interface StudentProfile {
   // Advanced Anthropometry
   chestCircumference?: number;
   waistCircumference?: number;
+  hipCircumference?: number;
   leftArmCircumference?: number;
   rightArmCircumference?: number;
   leftLegCircumference?: number;
@@ -81,6 +82,7 @@ export interface StudentProfile {
   dietPlan?: string;
   supplements?: string;
   adjuncts?: string;
+  activityLevel?: string; // Sedentario | Ligero | Moderado | Activo | Muy Activo
 }
 
 export interface Notification {

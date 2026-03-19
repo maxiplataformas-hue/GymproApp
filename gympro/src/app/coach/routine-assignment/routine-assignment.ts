@@ -41,9 +41,6 @@ export class RoutineAssignment {
   assignmentReps = signal<number | null>(null);
   assignmentWeight = signal<number | null>(null);
 
-  // New physio entry
-  newIgc = signal<number | null>(null);
-
   // Existing routines for this student/date
   currentRoutine = computed(() => this.data.getRoutinesForStudent(this.student().email, this.assignmentDate()));
 
@@ -67,31 +64,15 @@ export class RoutineAssignment {
       this.assignmentSets.set(null);
       this.assignmentReps.set(null);
       this.assignmentWeight.set(null);
-      this.newIgc.set(null);
 
       if (s) {
         this.data.loadRoutines(s.email);
-        this.data.loadPhysio(s.email);
       }
     });
   }
 
   selectDate(d: string) {
     this.assignmentDate.set(d);
-  }
-
-  saveIgc() {
-    const igc = this.newIgc();
-    if (igc !== null && igc > 0) {
-      this.data.addPhysioEntry({
-        studentEmail: this.student().email,
-        date: this.assignmentDate(),
-        weight: this.student().initialWeight || 0, // Fallback if no history exists
-        igc: igc,
-        measuredBy: 'coach'
-      });
-      this.newIgc.set(null);
-    }
   }
 
   addExercise() {

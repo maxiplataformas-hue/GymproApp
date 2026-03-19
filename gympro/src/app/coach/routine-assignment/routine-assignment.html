@@ -32,79 +32,52 @@
 
     <div class="p-6 space-y-8 overflow-x-hidden">
 
-        <!-- Top Row: IGC & Existing Routine -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-            <!-- IGC Registration Form -->
-            <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+        <!-- Assigned Routines Preview (full-width now that IGC moved to profile tab) -->
+        <section class="bg-surface border border-border border-dashed rounded-3xl p-6 shadow-sm flex flex-col">
+            <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h3 class="font-bold text-text text-lg flex items-center gap-2">
-                        <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5">
-                            </path>
-                        </svg>
-                        Registrar IGC (Caliper)
-                    </h3>
-                    <p class="text-xs text-text-muted mt-1">Ingresa el % de grasa calculado por pliegues.</p>
+                    <h3 class="font-bold text-text text-lg">Ejercicios Programados</h3>
+                    <p class="text-xs text-text-muted mt-0.5">Rutina asignada para la fecha seleccionada.</p>
                 </div>
+                <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">{{
+                    currentRoutineJoined().length }} items</span>
+            </div>
 
-                <div class="flex flex-col sm:flex-row gap-3 items-start">
-                    <div class="flex-1 relative w-full">
-                        <input type="number" step="0.1" [(ngModel)]="newIgc" placeholder="Ej: 15.4"
-                            class="w-full pl-5 pr-10 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-secondary outline-none transition-all">
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">%</span>
+            <div
+                class="flex-1 bg-background rounded-2xl border border-border overflow-y-auto max-h-[160px] p-2 space-y-2">
+                @if (currentRoutineJoined().length === 0) {
+                <p class="text-text-muted text-sm text-center p-4">No hay ejercicios para esta fecha.</p>
+                }
+                @for (item of currentRoutineJoined(); track item.id) {
+                <div class="flex items-center justify-between p-3 bg-surface border border-border rounded-xl">
+                    <div>
+                        <p class="font-bold text-sm text-text">{{ item.name }}</p>
+                        <div class="flex items-center gap-2">
+                            <p class="text-xs text-text-muted">{{ item.sets }}x{{ item.reps }} @ {{ item.weight }}kg
+                            </p>
+                            <a [href]="'https://www.youtube.com/results?search_query=' + item.name + ' tutorial tecnica gimnasio'"
+                                target="_blank" class="text-red-500 hover:text-red-600 transition-colors"
+                                title="Ver en YouTube">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                                </svg>
+                            </a>
+                        </div>
                     </div>
-                    <button (click)="saveIgc()" [disabled]="!newIgc()"
-                        class="w-full sm:w-auto bg-secondary text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transition-transform disabled:opacity-50 cursor-pointer h-[50px]">
-                        Guardar
+                    <button (click)="deleteItem(item.id)"
+                        class="text-red-500 hover:text-red-700 transition-colors p-2 cursor-pointer"
+                        title="Eliminar ejercicio">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                     </button>
                 </div>
-            </section>
+                }
+            </div>
+        </section>
 
-            <!-- Assigned Routines Preview -->
-            <section class="bg-surface border border-border border-dashed rounded-3xl p-6 shadow-sm flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-text text-lg">Ejercicios Programados</h3>
-                    <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">{{
-                        currentRoutineJoined().length }} items</span>
-                </div>
-
-                <div
-                    class="flex-1 bg-background rounded-2xl border border-border overflow-y-auto max-h-[160px] p-2 space-y-2">
-                    @if (currentRoutineJoined().length === 0) {
-                    <p class="text-text-muted text-sm text-center p-4">No hay ejercicios para esta fecha.</p>
-                    }
-                    @for (item of currentRoutineJoined(); track item.id) {
-                    <div class="flex items-center justify-between p-3 bg-surface border border-border rounded-xl">
-                        <div>
-                            <p class="font-bold text-sm text-text">{{ item.name }}</p>
-                            <div class="flex items-center gap-2">
-                                <p class="text-xs text-text-muted">{{ item.sets }}x{{ item.reps }} @ {{ item.weight }}kg
-                                </p>
-                                <a [href]="'https://www.youtube.com/results?search_query=' + item.name + ' tutorial tecnica gimnasio'"
-                                    target="_blank" class="text-red-500 hover:text-red-600 transition-colors"
-                                    title="Ver en YouTube">
-                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                        <button (click)="deleteItem(item.id)"
-                            class="text-red-500 hover:text-red-700 transition-colors p-2 cursor-pointer"
-                            title="Eliminar ejercicio">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    </div>
-                    }
-                </div>
-            </section>
-        </div>
 
         <hr class="border-border">
 
