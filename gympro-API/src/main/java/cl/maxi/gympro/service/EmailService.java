@@ -81,11 +81,47 @@ public class EmailService {
                     throw new IOException("Redirect without Location header. Status: " + status);
                 }
                 currentUrl = location;
-                postData = json.getBytes("UTF-8"); // Keep the body for re-post (handles 307/308)
-                conn.disconnect();
+                
+                // For 301, 302, 303: switch to GET as per HTTP spec for "found" redirects
+                boolean isMethodPreservation = (status == 307 || status == 308);
+                
+                HttpURLConnection nextConn = (HttpURLConnection) new URL(currentUrl).openConnection();
+                nextConn.setConnectTimeout(15000);
+                nextConn.setReadTimeout(15000);
+                
+                if (isMethodPreservation) {
+                    nextConn.setRequestMethod("POST");
+                    nextConn.setDoOutput(true);
+                    nextConn.setRequestProperty("Content-Type", "application/json");
+                    nextConn.setRequestProperty("Content-Length", String.valueOf(postData.length));
+                    try (OutputStream os = nextConn.getOutputStream()) {
+                        os.write(postData);
+                    }
+                } else {
+                    nextConn.setRequestMethod("GET");
+                }
+                
+                int nextStatus = nextConn.getResponseCode();
+                if (nextStatus == 200 || nextStatus == 201) {
+                    try (BufferedReader br = new BufferedReader(
+                            new InputStreamReader(nextConn.getInputStream(), "UTF-8"))) {
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) sb.append(line);
+                        return sb.toString();
+                    }
+                } else if (nextStatus >= 300 && nextStatus < 400 && i < maxRedirects) {
+                    // It's another redirect, let the loop handle it
+                    currentUrl = nextConn.getHeaderField("Location");
+                    conn.disconnect();
+                    continue; 
+                } else {
+                    throw new IOException("Unexpected HTTP status after redirect: " + nextStatus + " for URL: " + currentUrl);
+                }
             } else {
                 throw new IOException("Unexpected HTTP status: " + status + " for URL: " + currentUrl);
             }
+
         }
 
         throw new IOException("Too many redirects (max " + maxRedirects + ") for URL: " + urlString);
