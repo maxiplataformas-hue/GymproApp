@@ -125,13 +125,10 @@ public class UserController {
                 .collect(Collectors.toList());
 
         if (!matches.isEmpty()) {
-            for (User user : matches) {
-                user.setIsDeleted(true);
-                user.setIsActive(false);
-                userRepository.save(user);
-            }
+            userRepository.deleteAll(matches);
             return ResponseEntity.ok().build();
         }
+
         return ResponseEntity.notFound().build();
     }
 
