@@ -136,11 +136,23 @@ export class CoachDashboard {
           }
         });
       } else {
-        this.data.createStudent(studentData, this.coachEmail()).subscribe(() => {
-          this.isCreatingStudent.set(false);
-          this.data.loadAllStudents(this.coachEmail());
+        this.data.createStudent(studentData, this.coachEmail()).subscribe({
+          next: () => {
+            this.isCreatingStudent.set(false);
+            this.data.loadAllStudents(this.coachEmail());
+            alert('Alumno registrado exitosamente.');
+          },
+          error: (err) => {
+            console.error('Error al crear alumno:', err);
+            if (err.status === 409) {
+              alert('No se pudo registrar: El correo electrónico ya está en uso por otro usuario.');
+            } else {
+              alert('Error al registrar alumno. Por favor intentalo de nuevo.');
+            }
+          }
         });
       }
+
     } else {
       this.newStudentForm.markAllAsTouched();
     }
