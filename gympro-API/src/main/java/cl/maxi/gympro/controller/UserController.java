@@ -61,18 +61,29 @@ public class UserController {
     /** POST /api/users → create user */
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
-        if (user.getEmail() != null) {
-            String email = user.getEmail().trim().toLowerCase();
-            user.setEmail(email);
+        try {
+            if (user.getEmail() != null) {
+                String email = user.getEmail().trim().toLowerCase();
+                user.setEmail(email);
 
-            // Prevent duplicates
-            Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
-            if (existing.isPresent() && !Boolean.TRUE.equals(existing.get().getIsDeleted())) {
-                return ResponseEntity.status(409).body("El correo ya está registrado.");
+                // Use the same resilient search as in delete/update to avoid 500s from findByEmailIgnoreCase
+                List<User> matches = userRepository.findAll().stream()
+                        .filter(u -> u.getEmail() != null && email.equalsIgnoreCase(u.getEmail()))
+                        .collect(Collectors.toList());
+
+                if (!matches.isEmpty()) {
+                    boolean hasNonDeleted = matches.stream().anyMatch(u -> !Boolean.TRUE.equals(u.getIsDeleted()));
+                    if (hasNonDeleted) {
+                        return ResponseEntity.status(409).body("El correo ya está registrado.");
+                    }
+                }
             }
+            return ResponseEntity.ok(userRepository.save(user));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
         }
-        return ResponseEntity.ok(userRepository.save(user));
     }
+
 
     /** PUT /api/users/{email:.+} → update fields */
     @PutMapping("/{email:.+}")
