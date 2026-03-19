@@ -16,12 +16,12 @@ public class NotificationController {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    @GetMapping("/{studentEmail}")
+    @GetMapping("/{studentEmail:.+}")
     public List<Notification> getNotifications(@PathVariable String studentEmail) {
         return notificationRepository.findByStudentEmailIgnoreCaseOrderByCreatedAtDesc(studentEmail);
     }
 
-    @GetMapping("/{studentEmail}/unread-count")
+    @GetMapping("/{studentEmail:.+}/unread-count")
     public long getUnreadCount(@PathVariable String studentEmail) {
         return notificationRepository.countByStudentEmailIgnoreCaseAndIsReadFalse(studentEmail);
     }
@@ -36,7 +36,7 @@ public class NotificationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/read-all/{studentEmail}")
+    @PutMapping("/read-all/{studentEmail:.+}")
     public ResponseEntity<Void> markAllAsRead(@PathVariable String studentEmail) {
         List<Notification> unread = notificationRepository.findByStudentEmailIgnoreCaseOrderByCreatedAtDesc(studentEmail);
         unread.forEach(n -> n.setIsRead(true));

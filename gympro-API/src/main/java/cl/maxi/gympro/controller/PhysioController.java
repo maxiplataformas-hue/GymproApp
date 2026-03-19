@@ -15,7 +15,7 @@ public class PhysioController {
     @Autowired
     private PhysioRepository physioRepository;
 
-    @GetMapping("/{studentEmail}")
+    @GetMapping("/{studentEmail:.+}")
     public List<PhysioEntry> getPhysioHistory(@PathVariable String studentEmail) {
         return physioRepository.findByStudentEmailIgnoreCase(studentEmail);
     }

@@ -22,12 +22,12 @@ public class RoutineController {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    @GetMapping("/{studentEmail}")
+    @GetMapping("/{studentEmail:.+}")
     public List<Routine> getRoutinesByStudent(@PathVariable String studentEmail) {
         return routineRepository.findByStudentEmailIgnoreCase(studentEmail);
     }
 
-    @GetMapping("/{studentEmail}/{date}")
+    @GetMapping("/{studentEmail:.+}/{date}")
     public List<Routine> getRoutinesByDate(@PathVariable String studentEmail, @PathVariable String date) {
         return routineRepository.findByStudentEmailIgnoreCaseAndDate(studentEmail, date);
     }
@@ -67,7 +67,7 @@ public class RoutineController {
         notificationRepository.save(notif);
     }
 
-    @DeleteMapping("/{studentEmail}/{date}/{itemId}")
+    @DeleteMapping("/{studentEmail:.+}/{date}/{itemId}")
     public ResponseEntity<Routine> deleteRoutineItem(
             @PathVariable String studentEmail,
             @PathVariable String date,

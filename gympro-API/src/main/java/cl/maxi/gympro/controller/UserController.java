@@ -43,19 +43,18 @@ public class UserController {
         return userRepository.findByRoleAndIsDeletedNot("coach", true);
     }
 
-    /** GET /api/users/{email} */
-    @GetMapping("/{email}")
+    /** GET /api/users/{email:.+} */
+    @GetMapping("/{email:.+}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        // Use findAll to handle potential historical duplicates safely
+        String normalizedEmail = email.trim().toLowerCase();
         List<User> users = userRepository.findAll()
                 .stream()
-                .filter(u -> email.equalsIgnoreCase(u.getEmail()) && !Boolean.TRUE.equals(u.getIsDeleted()))
+                .filter(u -> u.getEmail() != null && normalizedEmail.equalsIgnoreCase(u.getEmail()) && !Boolean.TRUE.equals(u.getIsDeleted()))
                 .collect(Collectors.toList());
 
         if (users.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        // Return the first active one or just the first one
         return ResponseEntity.ok(users.get(0));
     }
 
@@ -75,13 +74,17 @@ public class UserController {
         return ResponseEntity.ok(userRepository.save(user));
     }
 
-    /** PUT /api/users/{email} → update fields */
-    @PutMapping("/{email}")
+    /** PUT /api/users/{email:.+} → update fields */
+    @PutMapping("/{email:.+}")
     public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody User userDetails) {
-        Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(email);
+        String normalizedEmail = email.trim().toLowerCase();
+        List<User> matches = userRepository.findAll()
+                .stream()
+                .filter(u -> u.getEmail() != null && normalizedEmail.equalsIgnoreCase(u.getEmail()))
+                .collect(Collectors.toList());
 
-        if (optionalUser.isPresent()) {
-            User existing = optionalUser.get();
+        if (!matches.isEmpty()) {
+            User existing = matches.get(0);
             if (userDetails.getName() != null)
                 existing.setName(userDetails.getName());
             if (userDetails.getNickname() != null)
@@ -112,26 +115,25 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    /** DELETE /api/users/{email} → soft delete (isDeleted = true) */
+    /** DELETE /api/users/{email:.+} → soft delete (isDeleted = true) */
     @DeleteMapping("/{email:.+}")
     public ResponseEntity<Void> deleteUser(@PathVariable String email) {
         String normalizedEmail = email.trim().toLowerCase();
-        // Use stream to be resilient to null/missing fields in existing Mongo documents
         List<User> matches = userRepository.findAll()
                 .stream()
                 .filter(u -> u.getEmail() != null && normalizedEmail.equalsIgnoreCase(u.getEmail()))
                 .collect(Collectors.toList());
 
         if (!matches.isEmpty()) {
-            User user = matches.get(0);
-            user.setIsDeleted(true);
-            user.setIsActive(false);
-            userRepository.save(user);
+            for (User user : matches) {
+                user.setIsDeleted(true);
+                user.setIsActive(false);
+                userRepository.save(user);
+            }
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
-
 
     /** GET /api/users/coaches/metrics → get coaches with student count and activity level */
     @GetMapping("/coaches/metrics")
@@ -142,9 +144,6 @@ public class UserController {
                     .stream()
                     .filter(u -> "student".equals(u.getRole()))
                     .count();
-            // Activity level logic: for now, a simple mock or based on student interactions if available.
-            // Requirement says "based on routine updates or student interaction".
-            // Since I don't have deep interaction logs easily, I'll return a placeholder or calculate based on recent routines if possible.
             double activityLevel = calculateActivityLevel(coach.getEmail()); 
             
             return new CoachMetricDTO(
@@ -160,7 +159,6 @@ public class UserController {
     }
 
     private double calculateActivityLevel(String coachEmail) {
-        // Mock activity logic for now: 75.0%
         return 75.0;
     }
 

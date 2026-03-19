@@ -17,14 +17,14 @@ public class ProfileController {
     @Autowired
     private StudentProfileRepository repository;
 
-    @GetMapping("/{email}")
+    @GetMapping("/{email:.+}")
     public ResponseEntity<List<StudentProfile>> getProfileHistoryByEmail(@PathVariable String email) {
         // Orden descendente por ID o Fecha para traer el más nuevo primero
         List<StudentProfile> history = repository.findByStudentEmailIgnoreCase(email, Sort.by(Sort.Direction.DESC, "recordDate"));
         return ResponseEntity.ok(history);
     }
 
-    @PostMapping("/{email}")
+    @PostMapping("/{email:.+}")
     public ResponseEntity<StudentProfile> createNewProfileSnapshot(@PathVariable String email,
             @RequestBody StudentProfile dto) {
         String normalizedEmail = email.trim().toLowerCase();
