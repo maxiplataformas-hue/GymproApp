@@ -11,13 +11,11 @@
         <h1 class="text-2xl font-bold text-text">Mis Datos Fisiológicos</h1>
     </header>
 
-    <!-- Metrics Grid -->
+    <!-- ── Summary Cards ─────────────────────────────────────────────────── -->
     <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- BMI Card -->
         <div class="bg-surface border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
-            <div
-                class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors">
-            </div>
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
             <h3 class="text-text-muted font-medium mb-1 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -28,13 +26,11 @@
             </h3>
             <div class="flex items-end gap-3 mt-4">
                 <span class="text-5xl font-black text-text">{{ bmi() }}</span>
-                <span class="px-3 py-1 rounded-full text-xs font-bold" [class.bg-green-100]="bmiStatus() === 'Normal'"
-                    [class.text-green-700]="bmiStatus() === 'Normal'"
-                    [class.bg-yellow-100]="bmiStatus() === 'Sobrepeso'"
-                    [class.text-yellow-700]="bmiStatus() === 'Sobrepeso'"
+                <span class="px-3 py-1 rounded-full text-xs font-bold mb-1"
+                    [class.bg-green-100]="bmiStatus() === 'Normal'" [class.text-green-700]="bmiStatus() === 'Normal'"
+                    [class.bg-yellow-100]="bmiStatus() === 'Sobrepeso'" [class.text-yellow-700]="bmiStatus() === 'Sobrepeso'"
                     [class.bg-red-100]="bmiStatus() === 'Obesidad'" [class.text-red-700]="bmiStatus() === 'Obesidad'"
-                    [class.bg-blue-100]="bmiStatus() === 'Bajo Peso'"
-                    [class.text-blue-700]="bmiStatus() === 'Bajo Peso'">
+                    [class.bg-blue-100]="bmiStatus() === 'Bajo Peso'" [class.text-blue-700]="bmiStatus() === 'Bajo Peso'">
                     {{ bmiStatus() }}
                 </span>
             </div>
@@ -50,9 +46,7 @@
 
         <!-- IGC Card -->
         <div class="bg-surface border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
-            <div
-                class="absolute -left-10 -top-10 w-40 h-40 bg-secondary/5 rounded-full blur-3xl group-hover:bg-secondary/10 transition-colors">
-            </div>
+            <div class="absolute -left-10 -top-10 w-40 h-40 bg-secondary/5 rounded-full blur-3xl group-hover:bg-secondary/10 transition-colors"></div>
             <h3 class="text-text-muted font-medium mb-1 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -66,8 +60,7 @@
                 <span class="text-5xl font-black text-text">{{ latestIgc() }}</span>
                 <span class="text-xl text-text-muted font-bold mb-1">%</span>
                 } @else {
-                <span class="text-sm font-medium text-text-muted mt-2">Pendiente de medición por tu Coach (Caliper - 5
-                    pliegues).</span>
+                <span class="text-sm font-medium text-text-muted mt-2">Pendiente de medición por tu Coach.</span>
                 }
             </div>
             @if(igcDelta() !== null) {
@@ -83,9 +76,7 @@
         <!-- Fat Mass Card -->
         @if(fatMassKg() !== null) {
         <div class="bg-surface border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
-            <div
-                class="absolute -right-10 -bottom-10 w-36 h-36 bg-orange-500/5 rounded-full blur-3xl group-hover:bg-orange-500/10 transition-colors">
-            </div>
+            <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-orange-500/5 rounded-full blur-3xl group-hover:bg-orange-500/10 transition-colors"></div>
             <h3 class="text-text-muted font-medium mb-1 flex items-center gap-2">
                 <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -98,21 +89,17 @@
                 <span class="text-5xl font-black text-text">{{ fatMassKg() }}</span>
                 <span class="text-xl text-text-muted font-bold mb-1">kg</span>
             </div>
-            <p class="text-xs text-text-muted mt-2">Calculado: {{ latestIgc() }}% IGC × {{ currentWeight() }} kg</p>
+            <p class="text-xs text-text-muted mt-2">{{ latestIgc() }}% IGC × {{ currentWeight() }} kg</p>
         </div>
         }
 
         <!-- Lean Mass Card -->
         @if(leanMassKg() !== null) {
         <div class="bg-surface border border-border rounded-3xl p-6 shadow-sm relative overflow-hidden group">
-            <div
-                class="absolute -left-10 -top-10 w-36 h-36 bg-green-500/5 rounded-full blur-3xl group-hover:bg-green-500/10 transition-colors">
-            </div>
+            <div class="absolute -left-10 -top-10 w-36 h-36 bg-green-500/5 rounded-full blur-3xl group-hover:bg-green-500/10 transition-colors"></div>
             <h3 class="text-text-muted font-medium mb-1 flex items-center gap-2">
                 <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13 10V3L4 14h7v7l9-11h-7z">
-                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
                 Masa Magra (Músculo + Hueso)
             </h3>
@@ -120,12 +107,143 @@
                 <span class="text-5xl font-black text-text">{{ leanMassKg() }}</span>
                 <span class="text-xl text-text-muted font-bold mb-1">kg</span>
             </div>
-            <p class="text-xs text-text-muted mt-2">{{ currentWeight() }} kg total − {{ fatMassKg() }} kg grasa</p>
+            <p class="text-xs text-text-muted mt-2">{{ currentWeight() }} kg − {{ fatMassKg() }} kg grasa</p>
         </div>
         }
     </section>
 
-    <!-- Karvonen Zones -->
+    <!-- ── Evolution Charts ───────────────────────────────────────────────── -->
+    <section class="space-y-4">
+        <h2 class="text-xl font-bold text-text flex items-center gap-2">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+            Evolución Histórica
+        </h2>
+        <p class="text-sm text-text-muted -mt-2">Las gráficas aparecen cuando hay 2 o más mediciones registradas.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+            <!-- Chart: Peso -->
+            @if(weightChartData()) {
+            <div class="bg-surface border border-border rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></span>
+                    <h3 class="font-bold text-text text-sm">Peso Corporal (kg)</h3>
+                </div>
+                <div class="h-52">
+                    <canvas baseChart
+                        [data]="weightChartData()!"
+                        [options]="sharedLineOptions"
+                        type="line">
+                    </canvas>
+                </div>
+            </div>
+            }
+
+            <!-- Chart: IMC -->
+            @if(bmiChartData()) {
+            <div class="bg-surface border border-border rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-3 h-3 rounded-full bg-purple-500 flex-shrink-0"></span>
+                    <h3 class="font-bold text-text text-sm">Índice de Masa Corporal (IMC)</h3>
+                    <!-- Reference lines note -->
+                    <span class="ml-auto text-[10px] text-text-muted">Normal: 18.5–24.9</span>
+                </div>
+                <div class="h-52">
+                    <canvas baseChart
+                        [data]="bmiChartData()!"
+                        [options]="sharedLineOptions"
+                        type="line">
+                    </canvas>
+                </div>
+            </div>
+            }
+
+            <!-- Chart: IGC % -->
+            @if(igcChartData()) {
+            <div class="bg-surface border border-border rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-3 h-3 rounded-full bg-orange-500 flex-shrink-0"></span>
+                    <h3 class="font-bold text-text text-sm">% Grasa Corporal (IGC)</h3>
+                </div>
+                <div class="h-52">
+                    <canvas baseChart
+                        [data]="igcChartData()!"
+                        [options]="sharedLineOptions"
+                        type="line">
+                    </canvas>
+                </div>
+            </div>
+            }
+
+            <!-- Chart: Masa Grasa kg -->
+            @if(fatMassChartData()) {
+            <div class="bg-surface border border-border rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-3 h-3 rounded-full bg-red-500 flex-shrink-0"></span>
+                    <h3 class="font-bold text-text text-sm">Masa Grasa (kg)</h3>
+                </div>
+                <div class="h-52">
+                    <canvas baseChart
+                        [data]="fatMassChartData()!"
+                        [options]="sharedLineOptions"
+                        type="line">
+                    </canvas>
+                </div>
+            </div>
+            }
+
+            <!-- Chart: Masa Magra kg -->
+            @if(leanMassChartData()) {
+            <div class="bg-surface border border-border rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-3 h-3 rounded-full bg-green-500 flex-shrink-0"></span>
+                    <h3 class="font-bold text-text text-sm">Masa Magra (kg)</h3>
+                </div>
+                <div class="h-52">
+                    <canvas baseChart
+                        [data]="leanMassChartData()!"
+                        [options]="sharedLineOptions"
+                        type="line">
+                    </canvas>
+                </div>
+            </div>
+            }
+
+            <!-- Chart: Composición Corporal Apilada (full width) -->
+            @if(compositionChartData()) {
+            <div class="bg-surface border border-border rounded-3xl p-5 shadow-sm lg:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-3 h-3 rounded-full bg-gradient-to-r from-red-500 to-green-500 flex-shrink-0"></span>
+                    <h3 class="font-bold text-text text-sm">Composición Corporal — Grasa vs. Magra (kg)</h3>
+                </div>
+                <div class="h-56">
+                    <canvas baseChart
+                        [data]="compositionChartData()!"
+                        [options]="compositionChartOptions"
+                        type="bar">
+                    </canvas>
+                </div>
+            </div>
+            }
+
+        </div>
+
+        <!-- Empty state -->
+        @if (!weightChartData() && !igcChartData()) {
+        <div class="bg-surface border border-border border-dashed rounded-3xl p-10 text-center">
+            <svg class="w-12 h-12 text-text-muted mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+            <p class="text-text-muted font-medium">Las gráficas aparecerán cuando tu coach registre al menos 2 mediciones.</p>
+        </div>
+        }
+    </section>
+
+    <!-- ── Karvonen Zones ──────────────────────────────────────────────────── -->
     <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm">
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div>
@@ -137,26 +255,22 @@
                     </svg>
                     Zonas de Entrenamiento (Karvonen)
                 </h2>
-                <p class="text-sm text-text-muted mt-1">Calculadas basado en tu edad ({{ age() }} años) y una FC de
-                    reposo estimada.</p>
+                <p class="text-sm text-text-muted mt-1">Calculadas con edad {{ age() }} años y FC de reposo estimada.</p>
             </div>
             <div class="px-4 py-2 bg-background rounded-xl text-center border border-border">
                 <span class="block text-xs text-text-muted font-bold uppercase tracking-wider">FC Máxima</span>
-                <span class="text-lg font-black text-text">{{ maxHr() }} <span
-                        class="text-xs font-medium">ppm</span></span>
+                <span class="text-lg font-black text-text">{{ maxHr() }} <span class="text-xs font-medium">ppm</span></span>
             </div>
         </div>
 
         <div class="space-y-3 p-1">
             @for (zone of zones(); track zone.name) {
-            <div
-                class="p-4 rounded-2xl border border-border bg-background flex flex-col md:flex-row md:items-center gap-4 hover:border-primary/40 transition-colors">
+            <div class="p-4 rounded-2xl border border-border bg-background flex flex-col md:flex-row md:items-center gap-4 hover:border-primary/40 transition-colors">
                 <div class="flex-1">
                     <h4 class="font-bold text-text">{{ zone.name }}</h4>
                     <p class="text-sm text-text-muted">{{ zone.desc }}</p>
                 </div>
-                <div
-                    class="shrink-0 flex items-center gap-2 bg-surface px-4 py-2 rounded-xl border border-border shadow-inner">
+                <div class="shrink-0 flex items-center gap-2 bg-surface px-4 py-2 rounded-xl border border-border shadow-inner">
                     <span class="font-black text-primary">{{ zone.minHr }}</span>
                     <span class="text-text-muted text-xs">-</span>
                     <span class="font-black text-secondary">{{ zone.maxHr }}</span>
