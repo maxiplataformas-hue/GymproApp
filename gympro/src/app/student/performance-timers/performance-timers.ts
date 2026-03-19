@@ -282,14 +282,14 @@ export class PerformanceTimers implements OnDestroy {
       }
     } else if (this.mode() === 'TABATA') {
       if (this.isWorkPhase()) {
-        this.startPhase('rest');
-      } else {
         if (this.currentRound() >= this.rounds()) {
           this.handleCompletion();
         } else {
-          this.currentRound.update(r => r + 1);
-          this.startPhase('work');
+          this.startPhase('rest');
         }
+      } else {
+        this.currentRound.update(r => r + 1);
+        this.startPhase('work');
       }
     } else if (this.mode() === 'REST') {
       this.handleCompletion();
@@ -297,7 +297,10 @@ export class PerformanceTimers implements OnDestroy {
   }
 
   private handleCompletion() {
-    this.playSound('end');
+    this.playSound('bell');
+    setTimeout(() => this.playSound('bell'), 800);
+    setTimeout(() => this.playSound('bell'), 1600);
+    
     this.isFinished.set(true);
     this.stop();
     
@@ -305,8 +308,9 @@ export class PerformanceTimers implements OnDestroy {
       const user = this.authService.currentUser();
       const alias = user?.nickname || user?.name || 'atleta';
       this.speak(`Bien hecho ${alias}, sigue así`);
-    }, 3500); 
+    }, 4500); 
   }
+
 
   private async scheduleUpcomingAudio(duration: number, nextType: string, offset: number = 0) {
     if (!this.audioContext) {
