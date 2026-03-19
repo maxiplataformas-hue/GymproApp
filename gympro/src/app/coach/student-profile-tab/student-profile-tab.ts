@@ -26,6 +26,71 @@ export class StudentProfileTab {
     quickDate = signal<string>(new Date().toISOString().split('T')[0]);
     quickSaved = signal<boolean>(false);
 
+    // --- Caliper Calculator ---
+    caliperProtocol = signal<'JP3' | 'JP7'>('JP3');
+    caliperGender = signal<'M' | 'F'>('M');
+
+    // JP3 pliegues
+    p_chest   = signal<number | null>(null); // Pecho (M)
+    p_abd     = signal<number | null>(null); // Abdomen (M)
+    p_thigh   = signal<number | null>(null); // Muslo (M y F)
+    p_triceps = signal<number | null>(null); // Tríceps (F)
+    p_supra   = signal<number | null>(null); // Suprailíaco (F, JP3) y (JP7 M y F)
+
+    // JP7 pliegues adicionales
+    p_axil    = signal<number | null>(null); // Axilar
+    p_subscp  = signal<number | null>(null); // Subescapular
+    p_biceps  = signal<number | null>(null); // Bíceps (no en JP standard pero útil)
+
+    studentAge = computed(() => {
+        const student = this.data.allStudents().find(s => s.email === this.studentEmail());
+        return student?.age ?? 25;
+    });
+
+    // Jackson-Pollock formula (Siri): % BF = (495 / bodyDensity) - 450
+    caliperIgcResult = computed<number | null>(() => {
+        const protocol = this.caliperProtocol();
+        const gender = this.caliperGender();
+        const age = this.studentAge();
+
+        let S = 0;
+        let density = 0;
+
+        if (protocol === 'JP3') {
+            if (gender === 'M') {
+                const chest = this.p_chest(), abd = this.p_abd(), thigh = this.p_thigh();
+                if (!chest || !abd || !thigh) return null;
+                S = chest + abd + thigh;
+                density = 1.10938 - (0.0008267 * S) + (0.0000016 * S * S) - (0.0002574 * age);
+            } else {
+                const tricep = this.p_triceps(), supra = this.p_supra(), thigh = this.p_thigh();
+                if (!tricep || !supra || !thigh) return null;
+                S = tricep + supra + thigh;
+                density = 1.0994921 - (0.0009929 * S) + (0.0000023 * S * S) - (0.0001392 * age);
+            }
+        } else { // JP7
+            const chest  = this.p_chest();
+            const axil   = this.p_axil();
+            const tricep = this.p_triceps();
+            const subscp = this.p_subscp();
+            const abd    = this.p_abd();
+            const supra  = this.p_supra();
+            const thigh  = this.p_thigh();
+            if (!chest || !axil || !tricep || !subscp || !abd || !supra || !thigh) return null;
+            S = chest + axil + tricep + subscp + abd + supra + thigh;
+            if (gender === 'M') {
+                density = 1.112 - (0.00043499 * S) + (0.00000055 * S * S) - (0.00028826 * age);
+            } else {
+                density = 1.097 - (0.00046971 * S) + (0.00000056 * S * S) - (0.00012828 * age);
+            }
+        }
+
+        if (density <= 0) return null;
+        const pct = (495 / density) - 450;
+        return Math.max(0, +pct.toFixed(1));
+    });
+
+
     profileForm = new FormGroup({
         objective: new FormControl(''),
         biotype: new FormControl(''),
@@ -94,6 +159,13 @@ export class StudentProfileTab {
                 this.quickWeight.set(null);
                 this.quickIgc.set(null);
                 this.quickDate.set(new Date().toISOString().split('T')[0]);
+                // Reset caliper calculator
+                this.caliperProtocol.set('JP3');
+                this.caliperGender.set('M');
+                this.p_chest.set(null);   this.p_abd.set(null);
+                this.p_thigh.set(null);   this.p_triceps.set(null);
+                this.p_supra.set(null);   this.p_axil.set(null);
+                this.p_subscp.set(null);
             }
         }, { allowSignalWrites: true });
 

@@ -70,17 +70,17 @@
     <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-8">
 
         <!-- 0. Medición Rápida del Coach -->
-        <section class="bg-secondary/5 border border-secondary/20 rounded-2xl p-5 flex flex-col gap-4">
+        <section class="bg-secondary/5 border border-secondary/20 rounded-2xl p-5 flex flex-col gap-5">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-secondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5">
                     </path>
                 </svg>
-                <h4 class="font-bold text-text">Medición Rápida del Coach (Caliper / Báscula)</h4>
+                <h4 class="font-bold text-text">Medición Rápida del Coach</h4>
             </div>
-            <p class="text-xs text-text-muted -mt-2">Registra el peso y el % de grasa corporal por calíper. Estos datos alimentan las gráficas de evolución del alumno.</p>
 
+            <!-- Peso + IGC Manual + Fecha -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <label class="flex flex-col gap-1">
                     <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Peso (kg)</span>
@@ -92,7 +92,7 @@
                     </div>
                 </label>
                 <label class="flex flex-col gap-1">
-                    <span class="text-xs font-bold text-text-muted uppercase tracking-wider">IGC % (Caliper)</span>
+                    <span class="text-xs font-bold text-text-muted uppercase tracking-wider">IGC % (manual o caliper)</span>
                     <div class="relative">
                         <input type="number" step="0.1" [(ngModel)]="quickIgc" [ngModelOptions]="{standalone: true}"
                             placeholder="Ej: 15.4"
@@ -107,6 +107,131 @@
                 </label>
             </div>
 
+            <!-- Caliper Calculator -->
+            <div class="border border-dashed border-secondary/40 rounded-xl p-4 space-y-4 bg-background/50">
+                <div class="flex flex-wrap items-center gap-3 justify-between">
+                    <span class="text-xs font-bold text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M12 14h.01M15 14h.01M9 14h.01M5 20h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v11a2 2 0 002 2z" />
+                        </svg>
+                        Calculadora Calíper (Jackson-Pollock)
+                    </span>
+                    <!-- Protocol selector -->
+                    <div class="flex rounded-xl overflow-hidden border border-secondary/30 text-xs font-bold">
+                        <button type="button" (click)="caliperProtocol.set('JP3')"
+                            [class.bg-secondary]="caliperProtocol() === 'JP3'"
+                            [class.text-white]="caliperProtocol() === 'JP3'"
+                            [class.text-secondary]="caliperProtocol() !== 'JP3'"
+                            class="px-4 py-1.5 transition-colors cursor-pointer">JP3</button>
+                        <button type="button" (click)="caliperProtocol.set('JP7')"
+                            [class.bg-secondary]="caliperProtocol() === 'JP7'"
+                            [class.text-white]="caliperProtocol() === 'JP7'"
+                            [class.text-secondary]="caliperProtocol() !== 'JP7'"
+                            class="px-4 py-1.5 transition-colors cursor-pointer border-l border-secondary/30">JP7</button>
+                    </div>
+                    <!-- Gender selector -->
+                    <div class="flex rounded-xl overflow-hidden border border-border text-xs font-bold">
+                        <button type="button" (click)="caliperGender.set('M')"
+                            [class.bg-blue-500]="caliperGender() === 'M'"
+                            [class.text-white]="caliperGender() === 'M'"
+                            [class.text-text-muted]="caliperGender() !== 'M'"
+                            class="px-4 py-1.5 transition-colors cursor-pointer">&#9794; Masc.</button>
+                        <button type="button" (click)="caliperGender.set('F')"
+                            [class.bg-pink-500]="caliperGender() === 'F'"
+                            [class.text-white]="caliperGender() === 'F'"
+                            [class.text-text-muted]="caliperGender() !== 'F'"
+                            class="px-4 py-1.5 transition-colors cursor-pointer border-l border-border">&#9792; Fem.</button>
+                    </div>
+                </div>
+
+                <!-- Skinfold inputs -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <!-- Pecho: JP7 ambos + JP3 Masc -->
+                    @if (caliperProtocol() === 'JP7' || (caliperProtocol() === 'JP3' && caliperGender() === 'M')) {
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-text-muted">Pecho (mm)</span>
+                        <input type="number" step="0.5" [(ngModel)]="p_chest" [ngModelOptions]="{standalone: true}"
+                            placeholder="0"
+                            class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
+                    </label>
+                    }
+                    <!-- Axil: solo JP7 -->
+                    @if (caliperProtocol() === 'JP7') {
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-text-muted">Axilar (mm)</span>
+                        <input type="number" step="0.5" [(ngModel)]="p_axil" [ngModelOptions]="{standalone: true}"
+                            placeholder="0"
+                            class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
+                    </label>
+                    }
+                    <!-- Tríceps: JP7 ambos + JP3 Fem -->
+                    @if (caliperProtocol() === 'JP7' || (caliperProtocol() === 'JP3' && caliperGender() === 'F')) {
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-text-muted">Tríceps (mm)</span>
+                        <input type="number" step="0.5" [(ngModel)]="p_triceps" [ngModelOptions]="{standalone: true}"
+                            placeholder="0"
+                            class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
+                    </label>
+                    }
+                    <!-- Subescapular: solo JP7 -->
+                    @if (caliperProtocol() === 'JP7') {
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-text-muted">Subescapular (mm)</span>
+                        <input type="number" step="0.5" [(ngModel)]="p_subscp" [ngModelOptions]="{standalone: true}"
+                            placeholder="0"
+                            class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
+                    </label>
+                    }
+                    <!-- Abdomen: JP7 ambos + JP3 Masc -->
+                    @if (caliperProtocol() === 'JP7' || (caliperProtocol() === 'JP3' && caliperGender() === 'M')) {
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-text-muted">Abdomen (mm)</span>
+                        <input type="number" step="0.5" [(ngModel)]="p_abd" [ngModelOptions]="{standalone: true}"
+                            placeholder="0"
+                            class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
+                    </label>
+                    }
+                    <!-- Suprailíaco: JP7 y JP3 Fem -->
+                    @if (caliperProtocol() === 'JP7' || (caliperProtocol() === 'JP3' && caliperGender() === 'F')) {
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-text-muted">Suprailíaco (mm)</span>
+                        <input type="number" step="0.5" [(ngModel)]="p_supra" [ngModelOptions]="{standalone: true}"
+                            placeholder="0"
+                            class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
+                    </label>
+                    }
+                    <!-- Muslo: siempre -->
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-text-muted">Muslo (mm)</span>
+                        <input type="number" step="0.5" [(ngModel)]="p_thigh" [ngModelOptions]="{standalone: true}"
+                            placeholder="0"
+                            class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
+                    </label>
+                </div>
+
+                <!-- Result + Transfer button -->
+                <div class="flex items-center gap-4 pt-1">
+                    @if (caliperIgcResult() !== null) {
+                    <div class="flex items-center gap-3 bg-secondary/10 border border-secondary/30 px-4 py-2 rounded-xl">
+                        <span class="text-xs text-secondary font-bold uppercase">IGC Calculado</span>
+                        <span class="text-2xl font-black text-text">{{ caliperIgcResult() }}%</span>
+                        <button type="button" (click)="quickIgc.set(caliperIgcResult())"
+                            class="ml-2 text-xs bg-secondary text-white font-bold px-3 py-1 rounded-lg hover:bg-secondary/80 transition-colors cursor-pointer flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                            Usar este %
+                        </button>
+                    </div>
+                    } @else {
+                    <p class="text-xs text-text-muted italic">Completa los pliegues requeridos para calcular el IGC.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Save button -->
             <div class="flex items-center gap-3">
                 <button type="button" (click)="saveQuickMeasurement()" [disabled]="!quickWeight()"
                     class="bg-secondary text-white font-bold px-6 py-2.5 rounded-xl hover:shadow-lg hover:shadow-secondary/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2">
@@ -116,7 +241,7 @@
                     Registrar Medición
                 </button>
                 @if(quickSaved()) {
-                <span class="text-green-500 text-sm font-bold flex items-center gap-1 animate-fade-in-up">
+                <span class="text-green-500 text-sm font-bold flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
