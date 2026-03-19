@@ -161,9 +161,20 @@ public class UserController {
     }
 
 
+    /** DELETE /api/users/id/{id} → HARD delete by Mongo ID */
+    @DeleteMapping("/id/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable String id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     /** GET /api/users/coaches/metrics → get coaches with student count and activity level */
     @GetMapping("/coaches/metrics")
     public List<CoachMetricDTO> getCoachMetrics() {
+
         List<User> coaches = userRepository.findByRoleAndIsDeletedNot("coach", true);
         return coaches.stream().map(coach -> {
             long studentCount = userRepository.findByCoachEmailAndIsDeletedNot(coach.getEmail(), true)
