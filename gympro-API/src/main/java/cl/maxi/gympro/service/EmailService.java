@@ -77,24 +77,25 @@ public class EmailService {
                     while ((line = br.readLine()) != null) sb.append(line);
                     return sb.toString();
                 }
-            } else if (status >= 300 && status < 400) {
+            } else if (status == 301 || status == 302 || status == 303) {
+                // For Google Scripts, a redirect usually means the execution was successful
+                // and it's trying to take us to a result page.
+                System.out.println("Success (implicit) via redirect: " + status + " for URL: " + currentUrl);
+                return "{\"status\":\"success\",\"message\":\"Redirected success\"}";
+            } else if (status == 307 || status == 308) {
+                // Must preserve method and body (very rare for Google macros, usually 302)
                 String location = conn.getHeaderField("Location");
                 if (location == null || location.isBlank()) {
                     throw new IOException("Redirect without Location header. Status: " + status);
                 }
                 currentUrl = location;
-                
-                // If 301, 302, 303: switch to GET as per HTTP spec
-                if (status == 301 || status == 302 || status == 303) {
-                    method = "GET";
-                }
-                // For 307, 308: keep POST
-                
                 conn.disconnect();
-                System.out.println("Redirecting (" + status + ") to: " + currentUrl + " using " + method);
+                System.out.println("Retrying POST (307/308) to: " + currentUrl);
+                continue; 
             } else {
                 throw new IOException("Unexpected HTTP status: " + status + " for URL: " + currentUrl);
             }
+
         }
 
 
