@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface PhysioRepository extends MongoRepository<PhysioEntry, String> {
+    // Índice compuesto en @Document de PhysioEntry (studentEmail + date)
+    List<PhysioEntry> findByStudentEmailIgnoreCaseOrderByDateAsc(String studentEmail);
     List<PhysioEntry> findByStudentEmailIgnoreCase(String studentEmail);
     List<PhysioEntry> findByStudentEmail(String studentEmail);
 }

@@ -15,6 +15,7 @@ public class StudentProfile {
 
     private String objective;
     private String biotype;
+    private String activityLevel; // Sedentario | Ligero | Moderado | Activo | Muy Activo
 
     // Advanced Numeric Bioimpedance
     private Double bodyFatPercentage;
@@ -24,6 +25,7 @@ public class StudentProfile {
     // Advanced Numeric Anthropometry (Growth)
     private Double chestCircumference;
     private Double waistCircumference;
+    private Double hipCircumference;
     private Double leftArmCircumference;
     private Double rightArmCircumference;
     private Double leftLegCircumference;
@@ -167,6 +169,14 @@ public class StudentProfile {
         this.rightLegCircumference = rightLegCircumference;
     }
 
+    public Double getHipCircumference() {
+        return hipCircumference;
+    }
+
+    public void setHipCircumference(Double hipCircumference) {
+        this.hipCircumference = hipCircumference;
+    }
+
     public String getAnthropometry() {
         return anthropometry;
     }
@@ -213,5 +223,13 @@ public class StudentProfile {
 
     public void setAdjuncts(String adjuncts) {
         this.adjuncts = adjuncts;
+    }
+
+    public String getActivityLevel() {
+        return activityLevel;
+    }
+
+    public void setActivityLevel(String activityLevel) {
+        this.activityLevel = activityLevel;
     }
 }
