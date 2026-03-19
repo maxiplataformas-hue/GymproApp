@@ -46,83 +46,55 @@ public class EmailService {
      */
     private String postWithRedirect(String urlString, String json, int maxRedirects) throws IOException {
         String currentUrl = urlString;
+        String method = "POST";
         byte[] postData = json.getBytes("UTF-8");
 
         for (int i = 0; i <= maxRedirects; i++) {
             URL url = new URL(currentUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setInstanceFollowRedirects(false); // We handle redirects manually
+            conn.setInstanceFollowRedirects(false);
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
+            conn.setRequestMethod(method);
             conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Content-Length", String.valueOf(postData.length));
 
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(postData);
+            if ("POST".equals(method)) {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Length", String.valueOf(postData.length));
+                try (OutputStream os = conn.getOutputStream()) {
+                    os.write(postData);
+                }
             }
 
             int status = conn.getResponseCode();
 
             if (status == 200 || status == 201) {
-                // Success — read body
-                try (BufferedReader br = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
                     StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = br.readLine()) != null) sb.append(line);
                     return sb.toString();
                 }
-            } else if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308) {
-                // Follow redirect
+            } else if (status >= 300 && status < 400) {
                 String location = conn.getHeaderField("Location");
                 if (location == null || location.isBlank()) {
                     throw new IOException("Redirect without Location header. Status: " + status);
                 }
                 currentUrl = location;
                 
-                // For 301, 302, 303: switch to GET as per HTTP spec for "found" redirects
-                boolean isMethodPreservation = (status == 307 || status == 308);
-                
-                HttpURLConnection nextConn = (HttpURLConnection) new URL(currentUrl).openConnection();
-                nextConn.setConnectTimeout(15000);
-                nextConn.setReadTimeout(15000);
-                
-                if (isMethodPreservation) {
-                    nextConn.setRequestMethod("POST");
-                    nextConn.setDoOutput(true);
-                    nextConn.setRequestProperty("Content-Type", "application/json");
-                    nextConn.setRequestProperty("Content-Length", String.valueOf(postData.length));
-                    try (OutputStream os = nextConn.getOutputStream()) {
-                        os.write(postData);
-                    }
-                } else {
-                    nextConn.setRequestMethod("GET");
+                // If 301, 302, 303: switch to GET as per HTTP spec
+                if (status == 301 || status == 302 || status == 303) {
+                    method = "GET";
                 }
+                // For 307, 308: keep POST
                 
-                int nextStatus = nextConn.getResponseCode();
-                if (nextStatus == 200 || nextStatus == 201) {
-                    try (BufferedReader br = new BufferedReader(
-                            new InputStreamReader(nextConn.getInputStream(), "UTF-8"))) {
-                        StringBuilder sb = new StringBuilder();
-                        String line;
-                        while ((line = br.readLine()) != null) sb.append(line);
-                        return sb.toString();
-                    }
-                } else if (nextStatus >= 300 && nextStatus < 400 && i < maxRedirects) {
-                    // It's another redirect, let the loop handle it
-                    currentUrl = nextConn.getHeaderField("Location");
-                    conn.disconnect();
-                    continue; 
-                } else {
-                    throw new IOException("Unexpected HTTP status after redirect: " + nextStatus + " for URL: " + currentUrl);
-                }
+                conn.disconnect();
+                System.out.println("Redirecting (" + status + ") to: " + currentUrl + " using " + method);
             } else {
                 throw new IOException("Unexpected HTTP status: " + status + " for URL: " + currentUrl);
             }
-
         }
+
 
         throw new IOException("Too many redirects (max " + maxRedirects + ") for URL: " + urlString);
     }
