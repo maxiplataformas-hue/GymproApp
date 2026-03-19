@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -18,17 +17,6 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private cl.maxi.gympro.repository.RoutineRepository routineRepository;
-
-    @Autowired
-    private cl.maxi.gympro.repository.PhysioRepository physioRepository;
-
-    @Autowired
-    private cl.maxi.gympro.repository.StudentProfileRepository profileRepository;
-
-    @Autowired
-    private cl.maxi.gympro.repository.NotificationRepository notificationRepository;
 
     /**
      * GET /api/users?coachEmail=xxx → students of that coach (not deleted)
@@ -73,27 +61,23 @@ public class UserController {
     /** POST /api/users → create user */
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
-        try {
-            if (user.getEmail() != null) {
-                String email = user.getEmail().trim().toLowerCase();
-                user.setEmail(email);
+        if (user.getEmail() != null) {
+            String email = user.getEmail().trim().toLowerCase();
+            user.setEmail(email);
 
-                // Use the same resilient search as in delete/update to avoid 500s from findByEmailIgnoreCase
-                List<User> matches = userRepository.findAll().stream()
-                        .filter(u -> u.getEmail() != null && email.equalsIgnoreCase(u.getEmail()))
-                        .collect(Collectors.toList());
+            // Resilient duplicate check
+            List<User> matches = userRepository.findAll().stream()
+                    .filter(u -> u.getEmail() != null && email.equalsIgnoreCase(u.getEmail()))
+                    .collect(Collectors.toList());
 
-                if (!matches.isEmpty()) {
-                    boolean hasNonDeleted = matches.stream().anyMatch(u -> !Boolean.TRUE.equals(u.getIsDeleted()));
-                    if (hasNonDeleted) {
-                        return ResponseEntity.status(409).body("El correo ya está registrado.");
-                    }
+            if (!matches.isEmpty()) {
+                boolean hasNonDeleted = matches.stream().anyMatch(u -> !Boolean.TRUE.equals(u.getIsDeleted()));
+                if (hasNonDeleted) {
+                    return ResponseEntity.status(409).body("El correo ya está registrado.");
                 }
             }
-            return ResponseEntity.ok(userRepository.save(user));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
         }
+        return ResponseEntity.ok(userRepository.save(user));
     }
 
 
@@ -155,39 +139,6 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    /** DELETE /api/users/purge/{email:.+} → HARD delete from ALL collections */
-    @DeleteMapping("/purge/{email:.+}")
-    public ResponseEntity<String> purgeUser(@PathVariable String email) {
-        try {
-            String normalizedEmail = email.trim().toLowerCase();
-            
-            // 1. Delete from Users
-            List<User> users = userRepository.findAll().stream()
-                    .filter(u -> u.getEmail() != null && normalizedEmail.equalsIgnoreCase(u.getEmail()))
-                    .collect(Collectors.toList());
-            userRepository.deleteAll(users);
-
-            // 2. Delete from Routines
-            List<cl.maxi.gympro.model.Routine> routines = routineRepository.findByStudentEmailIgnoreCase(normalizedEmail);
-            routineRepository.deleteAll(routines);
-
-            // 3. Delete from Physio
-            List<cl.maxi.gympro.model.PhysioEntry> physio = physioRepository.findByStudentEmailIgnoreCase(normalizedEmail);
-            physioRepository.deleteAll(physio);
-
-            // 4. Delete from Profiles
-            List<cl.maxi.gympro.model.StudentProfile> profiles = profileRepository.findByStudentEmailIgnoreCase(normalizedEmail, org.springframework.data.domain.Sort.unsorted());
-            profileRepository.deleteAll(profiles);
-
-            // 5. Delete from Notifications
-            List<cl.maxi.gympro.model.Notification> notifs = notificationRepository.findByStudentEmailIgnoreCaseOrderByCreatedAtDesc(normalizedEmail);
-            notificationRepository.deleteAll(notifs);
-
-            return ResponseEntity.ok("Purga completa para: " + normalizedEmail + ". Se eliminaron " + users.size() + " usuarios.");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error en purga: " + e.getMessage());
-        }
-    }
 
     /** GET /api/users/coaches/metrics → get coaches with student count and activity level */
     @GetMapping("/coaches/metrics")
