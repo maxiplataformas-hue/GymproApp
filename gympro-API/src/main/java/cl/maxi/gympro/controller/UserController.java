@@ -113,7 +113,7 @@ public class UserController {
     }
 
     /** DELETE /api/users/{email} → soft delete (isDeleted = true) */
-    @DeleteMapping("/{email}")
+    @DeleteMapping("/{email:.+}")
     public ResponseEntity<Void> deleteUser(@PathVariable String email) {
         String normalizedEmail = email.trim().toLowerCase();
         // Use stream to be resilient to null/missing fields in existing Mongo documents
