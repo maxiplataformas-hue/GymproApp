@@ -56,15 +56,17 @@ public class EmailService {
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);
             conn.setRequestMethod(method);
-            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
             if ("POST".equals(method)) {
+                conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length));
                 try (OutputStream os = conn.getOutputStream()) {
                     os.write(postData);
                 }
             }
+
 
             int status = conn.getResponseCode();
 
