@@ -51,7 +51,7 @@ export class Layout {
     if (this.auth.isAdmin() || this.auth.isCoach()) return true;
     
     // Core menus always accessible
-    if (['ai-chat', 'config', 'home'].includes(menuId)) return true;
+    if (['ai-chat', 'config', 'home', 'timers', 'ai-routine'].includes(menuId)) return true;
     
     // Others require at least one routine
     return this.hasRoutines();
