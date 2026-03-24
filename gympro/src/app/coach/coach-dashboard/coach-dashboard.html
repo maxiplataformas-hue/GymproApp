@@ -181,6 +181,35 @@
                                 <span class="text-[10px] text-red-500 font-bold ml-1">Mínimo 100cm.</span>
                             }
                         </div>
+
+                        <!-- Sex Selector -->
+                        <div class="flex flex-col gap-2 md:col-span-3">
+                            <label class="text-sm font-semibold text-text">Sexo Biológico</label>
+                            <div class="flex gap-2" formControlName="sex">
+                                <button type="button"
+                                    (click)="newStudentForm.get('sex')?.setValue('male')"
+                                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-bold transition-all cursor-pointer text-sm"
+                                    [class.bg-primary]="newStudentForm.get('sex')?.value === 'male'"
+                                    [class.text-white]="newStudentForm.get('sex')?.value === 'male'"
+                                    [class.border-primary]="newStudentForm.get('sex')?.value === 'male'"
+                                    [class.bg-background]="newStudentForm.get('sex')?.value !== 'male'"
+                                    [class.text-text-muted]="newStudentForm.get('sex')?.value !== 'male'"
+                                    [class.border-border]="newStudentForm.get('sex')?.value !== 'male'">
+                                    ♂ Hombre
+                                </button>
+                                <button type="button"
+                                    (click)="newStudentForm.get('sex')?.setValue('female')"
+                                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-bold transition-all cursor-pointer text-sm"
+                                    [class.bg-primary]="newStudentForm.get('sex')?.value === 'female'"
+                                    [class.text-white]="newStudentForm.get('sex')?.value === 'female'"
+                                    [class.border-primary]="newStudentForm.get('sex')?.value === 'female'"
+                                    [class.bg-background]="newStudentForm.get('sex')?.value !== 'female'"
+                                    [class.text-text-muted]="newStudentForm.get('sex')?.value !== 'female'"
+                                    [class.border-border]="newStudentForm.get('sex')?.value !== 'female'">
+                                    ♀ Mujer
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-border">

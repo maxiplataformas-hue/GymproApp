@@ -116,6 +116,8 @@ public class UserController {
                 existing.setSpecialty(userDetails.getSpecialty());
             if (userDetails.getAvatarUrl() != null)
                 existing.setAvatarUrl(userDetails.getAvatarUrl());
+            if (userDetails.getSex() != null)
+                existing.setSex(userDetails.getSex());
 
             return ResponseEntity.ok(userRepository.save(existing));
         }

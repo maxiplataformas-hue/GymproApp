@@ -50,7 +50,8 @@ export class CoachDashboard {
     nickname: new FormControl(''),
     age: new FormControl<number | null>(null, [Validators.required, Validators.min(10)]),
     initialWeight: new FormControl<number | null>(null, [Validators.required, Validators.min(30)]),
-    height: new FormControl<number | null>(null, [Validators.required, Validators.min(100)])
+    height: new FormControl<number | null>(null, [Validators.required, Validators.min(100)]),
+    sex: new FormControl<'male' | 'female'>('male', Validators.required)
   });
 
   isEditingStudent = signal(false);
@@ -95,7 +96,8 @@ export class CoachDashboard {
       nickname: student.nickname,
       age: student.age,
       initialWeight: student.initialWeight,
-      height: student.height
+      height: student.height,
+      sex: student.sex ?? 'male'
     });
   }
 
@@ -109,6 +111,7 @@ export class CoachDashboard {
         age: formValue.age!,
         initialWeight: formValue.initialWeight!,
         height: formValue.height!,
+        sex: formValue.sex as 'male' | 'female',
         role: 'student',
         isOnboarded: true
       };
@@ -119,7 +122,8 @@ export class CoachDashboard {
           nickname: formValue.nickname || undefined,
           age: formValue.age!,
           initialWeight: formValue.initialWeight!,
-          height: formValue.height!
+          height: formValue.height!,
+          sex: formValue.sex as 'male' | 'female'
         };
         this.data.updateUser(formValue.email!, updateData, this.coachEmail()).subscribe({
           next: () => {

@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, effect } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
@@ -32,6 +32,15 @@ Chart.register(
 export class PhysiologicData {
   auth = inject(AuthService);
   data = inject(DataService);
+
+  constructor() {
+    effect(() => {
+      const profileSex = this.user()?.sex;
+      if (profileSex === 'male' || profileSex === 'female') {
+        this.sex.set(profileSex);
+      }
+    }, { allowSignalWrites: true });
+  }
 
   user = computed(() => this.auth.currentUser());
   history = computed(() => this.data.getStudentHistory(this.user()?.email || '')());
@@ -131,6 +140,7 @@ export class PhysiologicData {
 
   // ─── BMR / TDEE / Caloric Deficit ────────────────────────────────────────
   sex = signal<'male' | 'female'>('male');
+
   activityLevel = signal<1 | 2 | 3 | 4 | 5>(2);
   deficitType = signal<'light' | 'moderate' | 'aggressive' | 'custom'>('moderate');
   customDeficit = signal<number>(300);

@@ -15,6 +15,7 @@ export interface User {
   age?: number;
   initialWeight?: number;
   height?: number;
+  sex?: 'male' | 'female';
   isOnboarded?: boolean;
   isActive?: boolean;
   isDeleted?: boolean;

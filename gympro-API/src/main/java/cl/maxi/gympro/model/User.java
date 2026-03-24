@@ -33,5 +33,6 @@ public class User {
     private String password;
     private String specialty; // for coaches
     private String avatarUrl; // for profile photos
+    private String sex; // "male" | "female"
     private List<String> trustedDeviceIds = new ArrayList<>();
 }
