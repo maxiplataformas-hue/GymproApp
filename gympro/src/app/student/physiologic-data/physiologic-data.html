@@ -130,15 +130,9 @@
                 </p>
             </div>
             <!-- Sex toggle -->
-            <div class="flex bg-background rounded-xl border border-border p-1 gap-1 shrink-0">
-                <button (click)="setSex('male')"
-                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                    [class.bg-primary]="sex() === 'male'" [class.text-white]="sex() === 'male'"
-                    [class.text-text-muted]="sex() !== 'male'">♂ Hombre</button>
-                <button (click)="setSex('female')"
-                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                    [class.bg-primary]="sex() === 'female'" [class.text-white]="sex() === 'female'"
-                    [class.text-text-muted]="sex() !== 'female'">♀ Mujer</button>
+            <!-- Sex indicator (READ ONLY) -->
+            <div class="px-3 py-1.5 rounded-xl bg-background border border-border text-xs font-bold text-text-muted flex items-center gap-2">
+                {{ sex() === 'male' ? '♂ Hombre' : '♀ Mujer' }}
             </div>
         </div>
 
@@ -190,18 +184,11 @@
         </div>
         } @else {
 
-        <!-- Sex selector -->
+        <!-- Sex (READ ONLY) -->
         <div class="flex items-center gap-3 mb-5">
-            <span class="text-xs font-black uppercase tracking-wider text-text-muted shrink-0">Sexo</span>
-            <div class="flex bg-background rounded-xl border border-border p-1 gap-1">
-                <button (click)="setSex('male')"
-                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                    [class.bg-primary]="sex() === 'male'" [class.text-white]="sex() === 'male'"
-                    [class.text-text-muted]="sex() !== 'male'">♂ Hombre</button>
-                <button (click)="setSex('female')"
-                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                    [class.bg-primary]="sex() === 'female'" [class.text-white]="sex() === 'female'"
-                    [class.text-text-muted]="sex() !== 'female'">♀ Mujer</button>
+            <span class="text-xs font-black uppercase tracking-wider text-text-muted shrink-0">Sexo (Cargado de Perfil)</span>
+            <div class="px-3 py-1.5 rounded-xl bg-background border border-border text-xs font-bold text-text-muted">
+                {{ sex() === 'male' ? '♂ Hombre' : '♀ Mujer' }}
             </div>
         </div>
 
