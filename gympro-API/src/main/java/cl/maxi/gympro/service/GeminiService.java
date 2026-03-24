@@ -12,7 +12,7 @@ public class GeminiService {
     @Value("${gemini.api.key:}")
     private String apiKey;
 
-    private final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    private final String API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
 
     private final String SYSTEM_PROMPT = "Eres el Motor de Lógica Deportiva COACHPRO. Generas rutinas técnicas optimizadas.\n" +
             "DICCIONARIO DE DATOS (Input JSON):\n" +
@@ -104,7 +104,7 @@ public class GeminiService {
         } catch (org.springframework.web.client.HttpClientErrorException e) {
             String errorBody = e.getResponseBodyAsString();
             System.err.println("HTTP CLIENT ERROR: " + e.getStatusCode() + " - " + errorBody);
-            return "ERROR_AI_CLIENT: " + e.getStatusCode() + " | PROMPT: " + fullPrompt;
+            return "ERROR_AI_CLIENT: " + e.getStatusCode() + " | INFO: " + errorBody + " | PROMPT: " + fullPrompt;
         } catch (Exception e) {
             System.err.println("CRITICAL EXCEPTION CALLING GEMINI: " + e.getMessage());
             e.printStackTrace();
