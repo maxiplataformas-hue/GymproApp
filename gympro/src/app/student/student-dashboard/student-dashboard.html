@@ -2,8 +2,7 @@
     <!-- Header -->
     <header class="flex justify-between items-center mb-8">
         <div>
-            <h2 class="text-text-muted text-sm font-semibold uppercase tracking-widest mb-1">{{ today | date:'fullDate'
-                }}</h2>
+            <h2 class="text-text-muted text-sm font-semibold uppercase tracking-widest mb-1">{{ todayFormatted }}</h2>
             <h1 class="text-3xl font-bold text-text">Hola, <span class="text-primary">{{ userName() }}</span> 👋</h1>
         </div>
         <a routerLink="/app/student/config"

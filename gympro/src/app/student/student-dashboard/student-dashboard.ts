@@ -22,6 +22,14 @@ export class StudentDashboard {
   // Today's date YYYY-MM-DD
   today = new Date().toISOString().split('T')[0];
 
+  // Today's date in Spanish for display
+  todayFormatted = new Date().toLocaleDateString('es-ES', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  }).toUpperCase();
+
   // Get today's routine assignment
   todayRoutine = computed(() => this.data.getRoutinesForStudent(this.user()?.email || '', this.today));
 
