@@ -51,4 +51,8 @@ export class StudentDashboard {
     if (total === 0) return 0;
     return Math.round((this.completedItemsCount() / total) * 100);
   });
+
+  alert(msg: string) {
+    window.alert(msg);
+  }
 }

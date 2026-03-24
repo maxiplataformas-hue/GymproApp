@@ -118,9 +118,9 @@
             <p class="text-xs text-text-muted line-clamp-2">Mis rutinas diarias</p>
         </a>
 
-        <!-- AI Coach -->
-        <a routerLink="/app/student/chat"
-            class="bg-surface border border-border rounded-2xl p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer flex flex-col items-center text-center">
+        <!-- AI Coach (Mocked) -->
+        <div (click)="alert('Próximamente habilitado para tu uso')"
+            class="bg-surface border border-border rounded-2xl p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer flex flex-col items-center text-center opacity-80">
             <div
                 class="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform relative overflow-hidden">
                 <div
@@ -132,8 +132,8 @@
                 </svg>
             </div>
             <h3 class="font-bold text-text text-sm mb-1">Coach IA</h3>
-            <p class="text-xs text-text-muted line-clamp-2">Asistente Inteligente</p>
-        </a>
+            <p class="text-[10px] text-primary font-bold uppercase tracking-tighter">Próximamente</p>
+        </div>
 
         <!-- Herramientas -->
         <a routerLink="/app/student/timers"
