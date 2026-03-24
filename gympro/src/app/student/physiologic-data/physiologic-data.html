@@ -112,6 +112,192 @@
         }
     </section>
 
+    <!-- ── IGC Color Bar (Gauge) ─────────────────────────────────────────── -->
+    @if (latestIgc() !== null) {
+    <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+            <div>
+                <h2 class="text-xl font-bold text-text flex items-center gap-2">
+                    <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Nivel de Grasa Corporal
+                </h2>
+                <p class="text-sm text-text-muted mt-1">
+                    Tu IGC actual: <strong class="text-text">{{ latestIgc() }}%</strong> —
+                    Categoría: <strong class="text-primary">{{ igcCategory() }}</strong>
+                </p>
+            </div>
+            <!-- Sex toggle -->
+            <div class="flex bg-background rounded-xl border border-border p-1 gap-1 shrink-0">
+                <button (click)="setSex('male')"
+                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    [class.bg-primary]="sex() === 'male'" [class.text-white]="sex() === 'male'"
+                    [class.text-text-muted]="sex() !== 'male'">♂ Hombre</button>
+                <button (click)="setSex('female')"
+                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    [class.bg-primary]="sex() === 'female'" [class.text-white]="sex() === 'female'"
+                    [class.text-text-muted]="sex() !== 'female'">♀ Mujer</button>
+            </div>
+        </div>
+
+        <!-- Gradient Bar -->
+        <div class="relative px-2">
+            <div class="h-7 rounded-full w-full shadow-inner"
+                style="background: linear-gradient(to right, #22c55e 0%, #84cc16 25%, #facc15 50%, #f97316 75%, #ef4444 100%);"></div>
+
+            <!-- Arrow indicator -->
+            @if (igcBarPosition() !== null) {
+            <div class="absolute bottom-0 transition-all duration-700 ease-out"
+                [style.left]="'calc(' + igcBarPosition() + '% + 8px)'">
+                <svg width="18" height="14" viewBox="0 0 18 14" class="text-text fill-current -mb-1">
+                    <polygon points="9,0 18,14 0,14"/>
+                </svg>
+            </div>
+            }
+        </div>
+
+        <!-- Labels under bar -->
+        <div class="flex justify-between mt-5 text-[10px] font-bold text-text-muted uppercase tracking-wide px-2">
+            <span>Atlético</span>
+            <span>Fitness</span>
+            <span>Aceptable</span>
+            <span>Sobrepeso</span>
+            <span>Obesidad</span>
+        </div>
+    </section>
+    }
+
+    <!-- ── BMR / TDEE / Caloric Deficit Calculator ───────────────────────── -->
+    <section class="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div class="flex items-center gap-2 mb-1">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 20h16a2 2 0 002-2V6a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h2 class="text-xl font-bold text-text">Calculadora Calórica</h2>
+        </div>
+        <p class="text-sm text-text-muted mb-5">Metabolismo Basal (BMR), Gasto Total (TDEE) y objetivo calórico con déficit. Datos tomados de tu perfil.</p>
+
+        @if (bmr() === null) {
+        <div class="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl text-sm text-yellow-700">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Tu perfil requiere <strong class="mx-1">peso, altura y edad</strong> para calcular el BMR. Pedile a tu Coach que actualice tus datos.
+        </div>
+        } @else {
+
+        <!-- Sex selector -->
+        <div class="flex items-center gap-3 mb-5">
+            <span class="text-xs font-black uppercase tracking-wider text-text-muted shrink-0">Sexo</span>
+            <div class="flex bg-background rounded-xl border border-border p-1 gap-1">
+                <button (click)="setSex('male')"
+                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    [class.bg-primary]="sex() === 'male'" [class.text-white]="sex() === 'male'"
+                    [class.text-text-muted]="sex() !== 'male'">♂ Hombre</button>
+                <button (click)="setSex('female')"
+                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    [class.bg-primary]="sex() === 'female'" [class.text-white]="sex() === 'female'"
+                    [class.text-text-muted]="sex() !== 'female'">♀ Mujer</button>
+            </div>
+        </div>
+
+        <!-- Activity Level Buttons -->
+        <p class="text-xs font-black uppercase tracking-wider text-text-muted mb-2">Nivel de Actividad</p>
+        <div class="flex flex-wrap gap-2 mb-6">
+            @for (opt of activityOptions; track opt.level) {
+            <button (click)="setActivityLevel(opt.level)"
+                class="flex flex-col items-center px-4 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-[80px]"
+                [class.bg-primary]="activityLevel() === opt.level"
+                [class.text-white]="activityLevel() === opt.level"
+                [class.border-primary]="activityLevel() === opt.level"
+                [class.shadow-md]="activityLevel() === opt.level"
+                [class.bg-background]="activityLevel() !== opt.level"
+                [class.text-text-muted]="activityLevel() !== opt.level"
+                [class.border-border]="activityLevel() !== opt.level">
+                <span class="font-black">{{ opt.label }}</span>
+                <span class="font-normal opacity-70 text-[10px] mt-0.5">{{ opt.desc }}</span>
+            </button>
+            }
+        </div>
+
+        <!-- Result Cards: BMR / TDEE / Target -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-background rounded-2xl border border-border p-4 text-center">
+                <p class="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">BMR — En Reposo</p>
+                <p class="text-3xl font-black text-text">{{ bmr() | number:'1.0-0' }}</p>
+                <p class="text-xs text-text-muted font-medium mt-1">kcal / día</p>
+            </div>
+            <div class="bg-primary/5 border border-primary/20 rounded-2xl p-4 text-center">
+                <p class="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-2">TDEE — Gasto Total</p>
+                <p class="text-3xl font-black text-primary">{{ tdee() | number:'1.0-0' }}</p>
+                <p class="text-xs text-primary/60 font-medium mt-1">kcal / día con actividad</p>
+            </div>
+            <div class="bg-green-500/5 border border-green-500/20 rounded-2xl p-4 text-center">
+                <p class="text-[10px] font-black uppercase tracking-widest text-green-600/70 mb-2">Objetivo Calórico</p>
+                <p class="text-3xl font-black text-green-600">{{ targetCalories() | number:'1.0-0' }}</p>
+                <p class="text-xs text-green-600/60 font-medium mt-1">kcal / día (déficit −{{ deficitKcal() }})</p>
+            </div>
+        </div>
+
+        <!-- Deficit Type -->
+        <p class="text-xs font-black uppercase tracking-wider text-text-muted mb-2">Tipo de Déficit Calórico</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <button (click)="setDeficitType('light')"
+                class="flex flex-col items-start p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer"
+                [class.bg-primary]="deficitType() === 'light'" [class.text-white]="deficitType() === 'light'"
+                [class.border-primary]="deficitType() === 'light'"
+                [class.bg-surface]="deficitType() !== 'light'" [class.text-text]="deficitType() !== 'light'"
+                [class.border-border]="deficitType() !== 'light'">
+                <span class="text-sm font-black">Suave</span>
+                <span class="font-normal opacity-80 mt-0.5">−200 kcal/día</span>
+                <span class="font-normal opacity-60 text-[10px]">≈ 0,25 kg/sem</span>
+            </button>
+            <button (click)="setDeficitType('moderate')"
+                class="flex flex-col items-start p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer"
+                [class.bg-primary]="deficitType() === 'moderate'" [class.text-white]="deficitType() === 'moderate'"
+                [class.border-primary]="deficitType() === 'moderate'"
+                [class.bg-surface]="deficitType() !== 'moderate'" [class.text-text]="deficitType() !== 'moderate'"
+                [class.border-border]="deficitType() !== 'moderate'">
+                <span class="text-sm font-black">Moderado</span>
+                <span class="font-normal opacity-80 mt-0.5">−350 kcal/día</span>
+                <span class="font-normal opacity-60 text-[10px]">≈ 0,35 kg/sem</span>
+            </button>
+            <button (click)="setDeficitType('aggressive')"
+                class="flex flex-col items-start p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer"
+                [class.bg-primary]="deficitType() === 'aggressive'" [class.text-white]="deficitType() === 'aggressive'"
+                [class.border-primary]="deficitType() === 'aggressive'"
+                [class.bg-surface]="deficitType() !== 'aggressive'" [class.text-text]="deficitType() !== 'aggressive'"
+                [class.border-border]="deficitType() !== 'aggressive'">
+                <span class="text-sm font-black">Agresivo</span>
+                <span class="font-normal opacity-80 mt-0.5">−500 kcal/día</span>
+                <span class="font-normal opacity-60 text-[10px]">≈ 0,5 kg/sem</span>
+            </button>
+            <button (click)="setDeficitType('custom')"
+                class="flex flex-col items-start p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer"
+                [class.bg-primary]="deficitType() === 'custom'" [class.text-white]="deficitType() === 'custom'"
+                [class.border-primary]="deficitType() === 'custom'"
+                [class.bg-surface]="deficitType() !== 'custom'" [class.text-text]="deficitType() !== 'custom'"
+                [class.border-border]="deficitType() !== 'custom'">
+                <span class="text-sm font-black">Personalizado</span>
+                <span class="font-normal opacity-80 mt-0.5">Tú decides</span>
+                <span class="font-normal opacity-60 text-[10px]">kcal / día</span>
+            </button>
+        </div>
+
+        @if (deficitType() === 'custom') {
+        <div class="mt-3 flex items-center gap-3">
+            <label class="text-xs font-black uppercase tracking-wider text-text-muted shrink-0">Déficit (kcal/día)</label>
+            <input type="number" [(ngModel)]="customDeficit" min="50" max="1000" step="50"
+                class="max-w-[160px] bg-background border border-border rounded-xl px-4 py-2 text-text font-bold focus:ring-2 focus:ring-primary outline-none text-sm">
+        </div>
+        }
+        }
+    </section>
+
     <!-- ── Evolution Charts ───────────────────────────────────────────────── -->
     <section class="space-y-4">
         <h2 class="text-xl font-bold text-text flex items-center gap-2">
@@ -133,11 +319,7 @@
                     <h3 class="font-bold text-text text-sm">Peso Corporal (kg)</h3>
                 </div>
                 <div class="h-52">
-                    <canvas baseChart
-                        [data]="weightChartData()!"
-                        [options]="sharedLineOptions"
-                        type="line">
-                    </canvas>
+                    <canvas baseChart [data]="weightChartData()!" [options]="sharedLineOptions" type="line"></canvas>
                 </div>
             </div>
             }
@@ -148,15 +330,10 @@
                 <div class="flex items-center gap-2 mb-4">
                     <span class="w-3 h-3 rounded-full bg-purple-500 flex-shrink-0"></span>
                     <h3 class="font-bold text-text text-sm">Índice de Masa Corporal (IMC)</h3>
-                    <!-- Reference lines note -->
                     <span class="ml-auto text-[10px] text-text-muted">Normal: 18.5–24.9</span>
                 </div>
                 <div class="h-52">
-                    <canvas baseChart
-                        [data]="bmiChartData()!"
-                        [options]="sharedLineOptions"
-                        type="line">
-                    </canvas>
+                    <canvas baseChart [data]="bmiChartData()!" [options]="sharedLineOptions" type="line"></canvas>
                 </div>
             </div>
             }
@@ -169,11 +346,7 @@
                     <h3 class="font-bold text-text text-sm">% Grasa Corporal (IGC)</h3>
                 </div>
                 <div class="h-52">
-                    <canvas baseChart
-                        [data]="igcChartData()!"
-                        [options]="sharedLineOptions"
-                        type="line">
-                    </canvas>
+                    <canvas baseChart [data]="igcChartData()!" [options]="sharedLineOptions" type="line"></canvas>
                 </div>
             </div>
             }
@@ -186,11 +359,7 @@
                     <h3 class="font-bold text-text text-sm">Masa Grasa (kg)</h3>
                 </div>
                 <div class="h-52">
-                    <canvas baseChart
-                        [data]="fatMassChartData()!"
-                        [options]="sharedLineOptions"
-                        type="line">
-                    </canvas>
+                    <canvas baseChart [data]="fatMassChartData()!" [options]="sharedLineOptions" type="line"></canvas>
                 </div>
             </div>
             }
@@ -203,16 +372,12 @@
                     <h3 class="font-bold text-text text-sm">Masa Magra (kg)</h3>
                 </div>
                 <div class="h-52">
-                    <canvas baseChart
-                        [data]="leanMassChartData()!"
-                        [options]="sharedLineOptions"
-                        type="line">
-                    </canvas>
+                    <canvas baseChart [data]="leanMassChartData()!" [options]="sharedLineOptions" type="line"></canvas>
                 </div>
             </div>
             }
 
-            <!-- Chart: Composición Corporal Apilada (full width) -->
+            <!-- Chart: Composición Corporal Apilada -->
             @if(compositionChartData()) {
             <div class="bg-surface border border-border rounded-3xl p-5 shadow-sm lg:col-span-2">
                 <div class="flex items-center gap-3 mb-4">
@@ -220,15 +385,10 @@
                     <h3 class="font-bold text-text text-sm">Composición Corporal — Grasa vs. Magra (kg)</h3>
                 </div>
                 <div class="h-56">
-                    <canvas baseChart
-                        [data]="compositionChartData()!"
-                        [options]="compositionChartOptions"
-                        type="bar">
-                    </canvas>
+                    <canvas baseChart [data]="compositionChartData()!" [options]="compositionChartOptions" type="bar"></canvas>
                 </div>
             </div>
             }
-
         </div>
 
         <!-- Empty state -->
@@ -280,4 +440,5 @@
             }
         </div>
     </section>
+
 </div>

@@ -1,5 +1,7 @@
-import { Component, inject, computed, OnInit, effect } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import { DataService } from '../../services/data';
 import { BaseChartDirective } from 'ng2-charts';
@@ -24,7 +26,7 @@ Chart.register(
 @Component({
   selector: 'app-physiologic-data',
   standalone: true,
-  imports: [RouterLink, BaseChartDirective],
+  imports: [RouterLink, BaseChartDirective, FormsModule, DecimalPipe],
   templateUrl: './physiologic-data.html'
 })
 export class PhysiologicData {
@@ -97,6 +99,88 @@ export class PhysiologicData {
     if (fat === null || w === null) return null;
     return +(w - fat).toFixed(1);
   });
+
+  // ─── IGC Color Bar (Gauge) ────────────────────────────────────────────────
+  // Position 0% = verde (atlético), 100% = rojo (obeso)
+  igcBarPosition = computed(() => {
+    const igc = this.latestIgc();
+    if (igc === null) return null;
+    const isMale = this.sex() === 'male';
+    const min = isMale ? 3 : 10;
+    const max = isMale ? 35 : 42;
+    return Math.min(100, Math.max(0, Math.round(((igc - min) / (max - min)) * 100)));
+  });
+
+  igcCategory = computed(() => {
+    const igc = this.latestIgc();
+    if (igc === null) return '';
+    if (this.sex() === 'male') {
+      if (igc < 6)  return 'Atlético';
+      if (igc < 14) return 'Fitness';
+      if (igc < 18) return 'Aceptable';
+      if (igc < 25) return 'Sobrepeso';
+      return 'Obesidad';
+    } else {
+      if (igc < 14) return 'Atlético';
+      if (igc < 21) return 'Fitness';
+      if (igc < 26) return 'Aceptable';
+      if (igc < 32) return 'Sobrepeso';
+      return 'Obesidad';
+    }
+  });
+
+  // ─── BMR / TDEE / Caloric Deficit ────────────────────────────────────────
+  sex = signal<'male' | 'female'>('male');
+  activityLevel = signal<1 | 2 | 3 | 4 | 5>(2);
+  deficitType = signal<'light' | 'moderate' | 'aggressive' | 'custom'>('moderate');
+  customDeficit = signal<number>(300);
+
+  readonly activityOptions: { level: 1|2|3|4|5, label: string, desc: string }[] = [
+    { level: 1, label: 'Sedentario',  desc: 'Sin ejercicio' },
+    { level: 2, label: 'Ligero',      desc: '1–3 días/sem' },
+    { level: 3, label: 'Moderado',    desc: '3–5 días/sem' },
+    { level: 4, label: 'Activo',      desc: '6–7 días/sem' },
+    { level: 5, label: 'Muy Activo',  desc: 'Doble turno' },
+  ];
+
+  readonly activityFactors: Record<number, number> = {
+    1: 1.2, 2: 1.375, 3: 1.55, 4: 1.725, 5: 1.9
+  };
+
+  bmr = computed(() => {
+    const u = this.user();
+    const w = this.currentWeight();
+    const h = u?.height ?? null;
+    const age = u?.age ?? null;
+    if (!w || !h || !age) return null;
+    // Mifflin-St Jeor formula
+    const base = 10 * w + 6.25 * h - 5 * age;
+    return Math.round(this.sex() === 'male' ? base + 5 : base - 161);
+  });
+
+  tdee = computed(() => {
+    const b = this.bmr();
+    if (b === null) return null;
+    return Math.round(b * this.activityFactors[this.activityLevel()]);
+  });
+
+  deficitKcal = computed(() => {
+    const t = this.deficitType();
+    if (t === 'light')      return 200;
+    if (t === 'moderate')   return 350;
+    if (t === 'aggressive') return 500;
+    return this.customDeficit();
+  });
+
+  targetCalories = computed(() => {
+    const t = this.tdee();
+    if (t === null) return null;
+    return Math.max(1000, t - this.deficitKcal());
+  });
+
+  setActivityLevel(level: 1|2|3|4|5) { this.activityLevel.set(level); }
+  setDeficitType(t: 'light'|'moderate'|'aggressive'|'custom') { this.deficitType.set(t); }
+  setSex(s: 'male'|'female') { this.sex.set(s); }
 
   // ─── Karvonen Zones ──────────────────────────────────────────────────────
   age    = computed(() => this.user()?.age || 25);
