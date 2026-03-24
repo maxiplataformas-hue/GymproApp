@@ -34,6 +34,7 @@ export class PhysiologicData {
   data = inject(DataService);
 
   constructor() {
+    this.auth.refreshCurrentUser();
     effect(() => {
       const profileSex = this.user()?.sex;
       if (profileSex === 'male' || profileSex === 'female') {

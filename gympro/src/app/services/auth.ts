@@ -171,6 +171,17 @@ export class AuthService {
     }
   }
 
+  refreshCurrentUser() {
+    const user = this.currentUser();
+    if (user?.email) {
+      const normalizedEmail = user.email.trim().toLowerCase();
+      this.http.get<User>(`${this.usersUrl}/${normalizedEmail}`).subscribe(updated => {
+        this.currentUser.set(updated);
+        localStorage.setItem('gympro-user', JSON.stringify(updated));
+      });
+    }
+  }
+
   logout() {
     this.currentUser.set(null);
     localStorage.removeItem('gympro-user');
