@@ -3,7 +3,7 @@
 
     <!-- Left Panel: Student List -->
     <aside
-        class="w-full md:w-80 flex flex-col bg-surface md:border md:border-border md:rounded-3xl md:shadow-sm overflow-hidden shrink-0 transition-opacity"
+        class="w-full md:w-80 flex-1 min-h-0 md:flex-none flex flex-col bg-surface md:border md:border-border md:rounded-3xl md:shadow-sm overflow-hidden transition-opacity"
         [class.hidden]="selectedStudent() !== null || isCreatingStudent()" [class.md:flex]="true">
         <div class="p-5 border-b border-border bg-gradient-to-r from-background to-surface">
             <h2 class="text-xl font-bold text-text flex items-center justify-between">
