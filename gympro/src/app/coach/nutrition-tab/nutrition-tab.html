@@ -1,0 +1,64 @@
+<div class="h-full flex flex-col bg-surface shadow-sm rounded-3xl animate-fade-in-up">
+    <!-- Header -->
+    <div class="px-6 md:px-8 py-5 border-b border-border bg-gradient-to-r from-background to-surface rounded-t-3xl flex justify-between items-center">
+        <div>
+            <h2 class="text-xl md:text-2xl font-black text-text flex items-center gap-2">
+                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"></path>
+                </svg>
+                Plan Nutricional y Farmacología
+            </h2>
+            <p class="text-xs text-text-muted mt-1">Configura la dieta de este periodo y suplementación del alumno.</p>
+        </div>
+        <button type="button" (click)="saveNutrition()" [disabled]="isSaving"
+            class="hidden md:flex bg-green-500 hover:bg-green-600 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:-translate-y-0.5 transition-all cursor-pointer items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+            </svg>
+            {{ isSaving ? 'Guardando...' : 'Guardar Plan' }}
+        </button>
+    </div>
+
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 bg-background/50">
+        <form [formGroup]="nutritionForm" class="space-y-6">
+            
+            <!-- Dieta -->
+            <div class="p-6 md:p-8 bg-surface border border-border rounded-xl shadow-sm">
+                <h4 class="font-bold text-text mb-4 text-lg">Dieta por Periodo</h4>
+                <div class="flex flex-col gap-1.5">
+                    <textarea formControlName="dietPlan" rows="6" placeholder="Ej. Fase Volumen (Sep-Dic): 3200 kcal. 45% CH, 30% P, 25% G. Comidas distribuidas en 4 ingestas al día..."
+                        class="w-full px-5 py-4 bg-background border border-border rounded-xl focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors text-text placeholder-text-muted resize-y min-h-[150px]"></textarea>
+                </div>
+            </div>
+
+            <!-- Suplementos -->
+            <div class="p-6 md:p-8 bg-surface border border-border rounded-xl shadow-sm">
+                <h4 class="font-bold text-text mb-4 text-lg">Suplementación Regular</h4>
+                <div class="flex flex-col gap-1.5">
+                    <textarea formControlName="supplements" rows="5" placeholder="Ej. Creatina Monohidrato 5g/día. Whey Protein 1 scoop post-entreno en agua..."
+                        class="w-full px-5 py-4 bg-background border border-border rounded-xl focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors text-text placeholder-text-muted resize-y min-h-[120px]"></textarea>
+                </div>
+            </div>
+
+            <!-- Coadyuvantes -->
+            <div class="p-6 md:p-8 bg-surface border border-red-500/20 rounded-xl shadow-sm">
+                <h4 class="font-bold text-red-500 mb-4 text-lg">Coadyuvantes Extras (PEDs / Avanzado)</h4>
+                <div class="flex flex-col gap-1.5">
+                    <textarea formControlName="adjuncts" rows="5" placeholder="Ej. Vitamina C 1g. Ácido Alfa Lipoico 300mg. Cafeína 200mg pre-entreno. N/A."
+                        class="w-full px-5 py-4 bg-background border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors text-text placeholder-text-muted resize-y min-h-[120px]"></textarea>
+                </div>
+            </div>
+            
+            <!-- Mobile Submit Button -->
+            <button type="button" (click)="saveNutrition()" [disabled]="isSaving"
+                class="w-full md:hidden bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-green-500/30 transition-all cursor-pointer flex items-center justify-center gap-2 mt-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                {{ isSaving ? 'Guardando...' : 'Guardar Plan' }}
+            </button>
+
+        </form>
+    </div>
+</div>

@@ -324,6 +324,14 @@
                 [class.hover:text-text]="activeTab() !== 'profile'">
                 Ficha Técnica Integral
             </button>
+            <button (click)="activeTab.set('nutrition')"
+                class="pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap"
+                [class.text-primary]="activeTab() === 'nutrition'" [class.border-primary]="activeTab() === 'nutrition'"
+                [class.text-text-muted]="activeTab() !== 'nutrition'"
+                [class.border-transparent]="activeTab() !== 'nutrition'"
+                [class.hover:text-text]="activeTab() !== 'nutrition'">
+                Dieta y Suplementos
+            </button>
             <button (click)="activeTab.set('gallery')"
                 class="pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap"
                 [class.text-primary]="activeTab() === 'gallery'" [class.border-primary]="activeTab() === 'gallery'"
@@ -346,6 +354,11 @@
             <div class="absolute inset-0 overflow-y-auto pb-4">
                 <!-- The new full width technical layout -->
                 <app-student-profile-tab [studentEmail]="selectedStudent()!.email"></app-student-profile-tab>
+            </div>
+            }
+            @if (activeTab() === 'nutrition') {
+            <div class="absolute inset-0 overflow-y-auto w-full max-w-5xl mx-auto p-4 md:p-8">
+                <app-nutrition-tab [studentEmail]="selectedStudent()!.email"></app-nutrition-tab>
             </div>
             }
             @if (activeTab() === 'gallery') {

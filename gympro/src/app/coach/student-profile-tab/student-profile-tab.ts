@@ -28,7 +28,11 @@ export class StudentProfileTab {
 
     // --- Caliper Calculator ---
     caliperProtocol = signal<'JP3' | 'JP7'>('JP3');
-    caliperGender = signal<'M' | 'F'>('M');
+
+    caliperGender = computed<'M' | 'F'>(() => {
+        const student = this.data.allStudents().find(s => s.email === this.studentEmail());
+        return student?.sex === 'female' ? 'F' : 'M';
+    });
 
     // JP3 pliegues
     p_chest   = signal<number | null>(null); // Pecho (M)
@@ -112,10 +116,7 @@ export class StudentProfileTab {
         rightLegCircumference: new FormControl<number | null>(null),
         anthropometry: new FormControl(''),
 
-        mobilityAnalysis: new FormControl(''),
-        dietPlan: new FormControl(''),
-        supplements: new FormControl(''),
-        adjuncts: new FormControl('')
+        mobilityAnalysis: new FormControl('')
     });
 
     showChartModal = signal<boolean>(false);
@@ -161,7 +162,6 @@ export class StudentProfileTab {
                 this.quickDate.set(new Date().toISOString().split('T')[0]);
                 // Reset caliper calculator
                 this.caliperProtocol.set('JP3');
-                this.caliperGender.set('M');
                 this.p_chest.set(null);   this.p_abd.set(null);
                 this.p_thigh.set(null);   this.p_triceps.set(null);
                 this.p_supra.set(null);   this.p_axil.set(null);
@@ -180,6 +180,14 @@ export class StudentProfileTab {
             } else if (profiles && profiles.length === 0) {
                 // No history found, open creation mode automatically
                 this.startNewProfile(null);
+            }
+        }, { allowSignalWrites: true });
+
+        // Auto-update quickIgc from caliper result
+        effect(() => {
+            const igc = this.caliperIgcResult();
+            if (igc !== null) {
+                this.quickIgc.set(igc);
             }
         }, { allowSignalWrites: true });
 
@@ -205,10 +213,7 @@ export class StudentProfileTab {
                     rightLegCircumference: profile.rightLegCircumference ?? null,
                     anthropometry: profile.anthropometry || '',
 
-                    mobilityAnalysis: profile.mobilityAnalysis || '',
-                    dietPlan: profile.dietPlan || '',
-                    supplements: profile.supplements || '',
-                    adjuncts: profile.adjuncts || ''
+                    mobilityAnalysis: profile.mobilityAnalysis || ''
                 });
 
                 if (!this.isCreatingNew()) {
@@ -348,9 +353,11 @@ export class StudentProfileTab {
             anthropometry: formVals.anthropometry || '',
 
             mobilityAnalysis: formVals.mobilityAnalysis || '',
-            dietPlan: formVals.dietPlan || '',
-            supplements: formVals.supplements || '',
-            adjuncts: formVals.adjuncts || ''
+            
+            // Preserve existing nutrition data
+            dietPlan: this.selectedProfile()?.dietPlan || '',
+            supplements: this.selectedProfile()?.supplements || '',
+            adjuncts: this.selectedProfile()?.adjuncts || ''
         };
 
         this.data.saveProfile(this.studentEmail(), payload);
@@ -426,10 +433,12 @@ export class StudentProfileTab {
 
         addSection('Bioimpedancia', bioStr + '\n\n' + (formVals.bioimpedanceData || ''));
 
-        addSection('Análisis Biomecánico', formVals.mobilityAnalysis);
-        addSection('Plan de Nutrición', formVals.dietPlan);
-        addSection('Suplementación Regular', formVals.supplements);
-        addSection('Coadyuvantes Suplementarios', formVals.adjuncts);
+        addSection('Análisis Biomecánico', formVals.mobilityAnalysis || '');
+        
+        const profile = this.selectedProfile();
+        addSection('Plan de Nutrición', profile?.dietPlan || '');
+        addSection('Suplementación Regular', profile?.supplements || '');
+        addSection('Coadyuvantes Suplementarios', profile?.adjuncts || '');
 
         doc.save(`Ficha_Clinica_${studentName.replace(/\s+/g, '_')}.pdf`);
     }

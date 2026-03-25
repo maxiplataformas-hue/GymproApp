@@ -130,18 +130,11 @@
                             [class.text-secondary]="caliperProtocol() !== 'JP7'"
                             class="px-4 py-1.5 transition-colors cursor-pointer border-l border-secondary/30">JP7</button>
                     </div>
-                    <!-- Gender selector -->
-                    <div class="flex rounded-xl overflow-hidden border border-border text-xs font-bold">
-                        <button type="button" (click)="caliperGender.set('M')"
-                            [class.bg-blue-500]="caliperGender() === 'M'"
-                            [class.text-white]="caliperGender() === 'M'"
-                            [class.text-text-muted]="caliperGender() !== 'M'"
-                            class="px-4 py-1.5 transition-colors cursor-pointer">&#9794; Masc.</button>
-                        <button type="button" (click)="caliperGender.set('F')"
-                            [class.bg-pink-500]="caliperGender() === 'F'"
-                            [class.text-white]="caliperGender() === 'F'"
-                            [class.text-text-muted]="caliperGender() !== 'F'"
-                            class="px-4 py-1.5 transition-colors cursor-pointer border-l border-border">&#9792; Fem.</button>
+                    <!-- Gender indicator -->
+                    <div class="flex rounded-xl overflow-hidden border border-border text-xs font-bold px-4 py-1.5 bg-background shadow-inner">
+                        <span [class.text-blue-500]="caliperGender() === 'M'" [class.text-pink-500]="caliperGender() === 'F'">
+                            {{ caliperGender() === 'M' ? '♂ Masc. (Automático)' : '♀ Fem. (Automático)' }}
+                        </span>
                     </div>
                 </div>
 
@@ -210,20 +203,13 @@
                     </label>
                 </div>
 
-                <!-- Result + Transfer button -->
+                <!-- Result -->
                 <div class="flex items-center gap-4 pt-1">
                     @if (caliperIgcResult() !== null) {
                     <div class="flex items-center gap-3 bg-secondary/10 border border-secondary/30 px-4 py-2 rounded-xl">
                         <span class="text-xs text-secondary font-bold uppercase">IGC Calculado</span>
                         <span class="text-2xl font-black text-text">{{ caliperIgcResult() }}%</span>
-                        <button type="button" (click)="quickIgc.set(caliperIgcResult())"
-                            class="ml-2 text-xs bg-secondary text-white font-bold px-3 py-1 rounded-lg hover:bg-secondary/80 transition-colors cursor-pointer flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
-                            </svg>
-                            Usar este %
-                        </button>
+                        <span class="text-xs text-text-muted italic ml-2">(Se aplicó automáticamente arriba👆)</span>
                     </div>
                     } @else {
                     <p class="text-xs text-text-muted italic">Completa los pliegues requeridos para calcular el IGC.</p>
@@ -454,41 +440,6 @@
                 <textarea formControlName="mobilityAnalysis" rows="4"
                     placeholder="Ej: Excelente dorsiflexión en sentadilla, pero restricción en la rotación interna del hombro derecho que afecta el press de pecho. Poca activación de isquio en el peso muerto..."
                     class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-colors text-text placeholder-text-muted resize-none"></textarea>
-            </div>
-        </section>
-
-        <!-- 4. Nutrición -->
-        <section class="space-y-4">
-            <h4 class="font-bold text-text border-b border-border pb-2 flex items-center gap-2">
-                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z">
-                    </path>
-                </svg>
-                Plan Nutricional y Farmacología
-            </h4>
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1.5 md:col-span-2">
-                    <label class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Dieta por
-                        Periodo</label>
-                    <textarea formControlName="dietPlan" rows="3"
-                        placeholder="Fase Volumen (Sep-Dic): 3200 kcal. 45% CH, 30% P, 25% G..."
-                        class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-green-500 transition-colors text-text placeholder-text-muted resize-none"></textarea>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Suplementación
-                        Regular</label>
-                    <textarea formControlName="supplements" rows="3"
-                        placeholder="Creatina Monohidrato 5g/día. Whey Protein post-entreno..."
-                        class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-green-500 transition-colors text-text placeholder-text-muted resize-none"></textarea>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Coadyuvantes
-                        Suplementarios (PEDs, etc)</label>
-                    <textarea formControlName="adjuncts" rows="3"
-                        placeholder="Vitamina C, Ácido Alfa Lipoico, Cafeína 200mg pre-entreno. N/A."
-                        class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-red-500 transition-colors text-text placeholder-text-muted resize-none"></textarea>
-                </div>
             </div>
         </section>
 
