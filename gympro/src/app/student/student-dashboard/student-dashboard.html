@@ -89,6 +89,21 @@
             <p class="text-xs text-text-muted line-clamp-2">Revisa tu IMC, Grasa y Zonas</p>
         </a>
 
+        <!-- Dieta y Suplementos -->
+        <button (click)="showDietModal.set(true)"
+            class="bg-surface border border-border rounded-2xl p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer flex flex-col items-center text-center">
+            <div
+                class="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="font-bold text-text text-sm mb-1">Dieta</h3>
+            <p class="text-[10px] text-text-muted line-clamp-2">Plan nutricional</p>
+        </button>
+
         <!-- Progress Charts -->
         <a routerLink="/app/student/charts"
             class="bg-surface border border-border rounded-2xl p-5 hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer flex flex-col items-center text-center">
@@ -152,3 +167,89 @@
     </section>
 
 </div>
+
+<!-- Diet and Supplements Modal -->
+@if (showDietModal()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-background/80 backdrop-blur-sm" (click)="showDietModal.set(false)"></div>
+
+    <!-- Modal Content -->
+    <div class="relative w-full max-w-lg bg-surface border border-border rounded-3xl shadow-xl flex flex-col max-h-[90vh] animate-fade-in-up">
+        
+        <!-- Modal Header -->
+        <div class="px-6 py-5 border-b border-border flex items-center flex-shrink-0">
+            <div class="w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mr-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-black text-text">Dieta y Suplementación</h3>
+                <p class="text-xs text-text-muted mt-0.5">La última indicación asignada por tu coach.</p>
+            </div>
+            <button (click)="showDietModal.set(false)" class="p-2 text-text-muted hover:text-text bg-background hover:bg-border rounded-full transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="p-6 overflow-y-auto hide-scrollbar space-y-6">
+            
+            @if (latestProfile()?.dietPlan || latestProfile()?.supplements || latestProfile()?.adjuncts) {
+
+                @if (latestProfile()?.dietPlan) {
+                <div>
+                    <h4 class="font-bold text-sm text-text uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        Plan Nutricional
+                    </h4>
+                    <div class="bg-background border border-border rounded-2xl p-4 text-sm text-text/90 whitespace-pre-wrap leading-relaxed shadow-inner">
+                        {{ latestProfile()?.dietPlan }}
+                    </div>
+                </div>
+                }
+
+                @if (latestProfile()?.supplements) {
+                <div>
+                    <h4 class="font-bold text-sm text-text uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Suplementación Regular
+                    </h4>
+                    <div class="bg-background border border-border rounded-2xl p-4 text-sm text-text/90 whitespace-pre-wrap leading-relaxed shadow-inner">
+                        {{ latestProfile()?.supplements }}
+                    </div>
+                </div>
+                }
+
+                @if (latestProfile()?.adjuncts) {
+                <div>
+                    <h4 class="font-bold text-sm text-text uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                        Coadyuvantes Extra
+                    </h4>
+                    <div class="bg-background border border-border rounded-2xl p-4 text-sm text-text/90 whitespace-pre-wrap leading-relaxed shadow-inner">
+                        {{ latestProfile()?.adjuncts }}
+                    </div>
+                </div>
+                }
+
+            } @else {
+                <div class="flex flex-col items-center justify-center text-center py-8">
+                    <div class="w-16 h-16 bg-background rounded-full border-2 border-dashed border-border flex items-center justify-center text-text-muted mb-4">
+                        <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-text font-bold text-lg">Nada registrado aún</p>
+                    <p class="text-sm text-text-muted max-w-[250px] mt-1">Tu coach debe completar tu pauta nutricional en la Ficha Técnica para que aparezca aquí.</p>
+                </div>
+            }
+
+        </div>
+
+    </div>
+</div>
+}

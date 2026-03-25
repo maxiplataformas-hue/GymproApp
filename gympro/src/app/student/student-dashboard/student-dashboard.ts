@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { AuthService } from '../../services/auth';
@@ -51,6 +51,22 @@ export class StudentDashboard {
     if (total === 0) return 0;
     return Math.round((this.completedItemsCount() / total) * 100);
   });
+
+  // Diet & Supplements State
+  showDietModal = signal(false);
+  
+  latestProfile = computed(() => {
+    const profiles = this.data.currentProfiles();
+    return profiles.length > 0 ? profiles[0] : null;
+  });
+
+  constructor() {
+    // Load student profile on init to fetch diet/supplements
+    const email = this.user()?.email;
+    if (email) {
+      this.data.loadProfile(email);
+    }
+  }
 
   alert(msg: string) {
     window.alert(msg);
