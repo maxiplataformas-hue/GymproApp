@@ -41,6 +41,10 @@ export class RoutineAssignment {
   assignmentReps = signal<number | null>(null);
   assignmentWeight = signal<number | null>(null);
 
+  // Multi-day replication state
+  targetDates = signal<string[]>([]);
+
+
   // Existing routines for this student/date
   currentRoutine = computed(() => this.data.getRoutinesForStudent(this.student().email, this.assignmentDate()));
 
@@ -108,4 +112,47 @@ export class RoutineAssignment {
       this.data.deleteRoutineItem(r.id, itemId);
     }
   }
+
+  addTargetDate(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const date = input.value;
+    if (!date) return;
+    
+    // Prevent adding the same date multiple times or the primary date
+    if (!this.targetDates().includes(date) && date !== this.assignmentDate()) {
+      this.targetDates.set([...this.targetDates(), date].sort());
+    }
+    input.value = ''; // Reset input
+  }
+
+  removeTargetDate(date: string) {
+    this.targetDates.set(this.targetDates().filter(d => d !== date));
+  }
+
+  assignToMultipleDays() {
+    const itemsToCopy = this.currentRoutine()?.items;
+    const dates = this.targetDates();
+    
+    if (!itemsToCopy || itemsToCopy.length === 0 || dates.length === 0) return;
+
+    // Simulate sending payloads for each date selected
+    dates.forEach(date => {
+      // Re-generate unique IDs for each item to avoid duplication bugs in JSON
+      const copiedItems = itemsToCopy.map((item, index) => ({
+        ...item,
+        id: Date.now().toString() + index + Math.random().toString().substring(2, 6)
+      }));
+
+      this.data.assignRoutine({
+        studentEmail: this.student().email,
+        date: date,
+        items: copiedItems
+      });
+    });
+
+    // Clear after assign
+    this.targetDates.set([]);
+    alert(`Rutina replicada exitosamente en ${dates.length} días adicionales.`);
+  }
 }
+
