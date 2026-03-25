@@ -112,6 +112,50 @@
                         Confirmar copia a {{ targetDates().length }} días
                     </button>
                 }
+
+                <button (click)="showCalendar.set(!showCalendar())"
+                    class="w-full mt-1 bg-transparent text-primary border border-primary/40 font-bold py-2 px-4 rounded-xl hover:bg-primary/5 transition-all cursor-pointer flex items-center justify-center gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    {{ showCalendar() ? 'Ocultar calendario' : 'Ver fechas asignadas' }}
+                </button>
+
+                <!-- Calendar View -->
+                @if (showCalendar()) {
+                <div class="mt-2 p-4 bg-background border border-border rounded-xl shadow-inner animate-fade-in-up">
+                    <div class="flex justify-between items-center mb-4 text-text">
+                        <button (click)="changeMonth(-1)" class="p-1.5 hover:bg-surface rounded-lg cursor-pointer transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <span class="font-black text-sm capitalize">{{ monthName() }}</span>
+                        <button (click)="changeMonth(1)" class="p-1.5 hover:bg-surface rounded-lg cursor-pointer transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-text-muted uppercase mb-2 tracking-wider">
+                        <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div><div>Do</div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1">
+                        @for (d of calendarDays(); track d.dateStr) {
+                            <div class="aspect-square flex items-center justify-center rounded-lg text-xs transition-colors relative"
+                                [class.opacity-40]="!d.currentMonth"
+                                [class.bg-primary]="highlightedDates().has(d.dateStr)"
+                                [class.text-white]="highlightedDates().has(d.dateStr)"
+                                [class.shadow-md]="highlightedDates().has(d.dateStr)"
+                                [class.font-black]="highlightedDates().has(d.dateStr)"
+                                [class.text-text]="!highlightedDates().has(d.dateStr)"
+                                [class.hover:bg-surface]="!highlightedDates().has(d.dateStr)">
+                                {{ d.date.getDate() }}
+                                
+                                @if (d.dateStr === assignmentDate()) {
+                                    <span class="absolute bottom-1 w-1 h-1 rounded-full" [class.bg-white]="highlightedDates().has(d.dateStr)" [class.bg-primary]="!highlightedDates().has(d.dateStr)"></span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+                }
             </div>
             }
         </section>

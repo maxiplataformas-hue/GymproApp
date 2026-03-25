@@ -43,6 +43,68 @@ export class RoutineAssignment {
 
   // Multi-day replication state
   targetDates = signal<string[]>([]);
+  
+  // Calendar state
+  showCalendar = signal(false);
+  calendarMonth = signal(new Date());
+
+  monthName = computed(() => {
+    const date = this.calendarMonth();
+    return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+  });
+
+  calendarDays = computed(() => {
+    const year = this.calendarMonth().getFullYear();
+    const month = this.calendarMonth().getMonth();
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    const days: { date: Date, currentMonth: boolean, dateStr: string }[] = [];
+    
+    // Fill previous month days to start on Monday
+    let firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+    for (let i = firstDayOfWeek; i > 0; i--) {
+      const d = new Date(year, month, 1 - i);
+      days.push({ date: d, currentMonth: false, dateStr: this.formatDate(d) });
+    }
+    
+    // Loop through current month
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+        const d = new Date(year, month, i);
+        days.push({ date: d, currentMonth: true, dateStr: this.formatDate(d) });
+    }
+    
+    // Fill next month days
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+        const d = new Date(year, month + 1, i);
+        days.push({ date: d, currentMonth: false, dateStr: this.formatDate(d) });
+    }
+    
+    return days;
+  });
+
+  highlightedDates = computed(() => {
+    const current = this.currentRoutine();
+    if (!current || current.items.length === 0) return new Set<string>();
+
+    const currentExIds = [...current.items.map(i => i.exerciseId)].sort().join(',');
+    const matchDates = new Set<string>();
+    
+    this.data.routines().forEach(r => {
+      // Check if this routine belongs to the student and has items
+      if (r.studentEmail === this.student().email && r.items.length > 0) {
+        const rExIds = [...r.items.map(i => i.exerciseId)].sort().join(',');
+        if (rExIds === currentExIds) {
+          matchDates.add(r.date);
+        }
+      }
+    });
+
+    return matchDates;
+  });
+
 
 
   // Existing routines for this student/date
@@ -154,5 +216,19 @@ export class RoutineAssignment {
     this.targetDates.set([]);
     alert(`Rutina replicada exitosamente en ${dates.length} días adicionales.`);
   }
+
+  changeMonth(delta: number) {
+    const d = new Date(this.calendarMonth());
+    d.setMonth(d.getMonth() + delta);
+    this.calendarMonth.set(d);
+  }
+
+  private formatDate(date: Date): string {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
 }
+
 
