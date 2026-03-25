@@ -30,271 +30,273 @@
         </div>
     </header>
 
-    <div class="p-6 space-y-8 overflow-x-hidden">
+    <div class="p-6 grid grid-cols-1 xl:grid-cols-12 gap-8 items-start overflow-x-hidden">
 
-        <!-- Assigned Routines Preview (full-width now that IGC moved to profile tab) -->
-        <section class="bg-surface border border-border border-dashed rounded-3xl p-6 shadow-sm flex flex-col">
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h3 class="font-bold text-text text-lg">Ejercicios Programados</h3>
-                    <p class="text-xs text-text-muted mt-0.5">Rutina asignada para la fecha seleccionada.</p>
+        <!-- LADO IZQUIERDO: Diseñador de Rutina -->
+        <div class="xl:col-span-7 2xl:col-span-8 flex flex-col gap-6">
+            <section>
+                <div class="mb-6">
+                    <h3 class="font-black text-2xl text-text">Diseñador de Rutina</h3>
+                    <p class="text-sm text-text-muted mt-1">Busca ejercicios y configura las series para el día seleccionado.</p>
                 </div>
-                <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">{{
-                    currentRoutineJoined().length }} items</span>
-            </div>
 
-            <div
-                class="flex-1 bg-background rounded-2xl border border-border overflow-y-auto max-h-[160px] p-2 space-y-2">
-                @if (currentRoutineJoined().length === 0) {
-                <p class="text-text-muted text-sm text-center p-4">No hay ejercicios para esta fecha.</p>
-                }
-                @for (item of currentRoutineJoined(); track item.id) {
-                <div class="flex items-center justify-between p-3 bg-surface border border-border rounded-xl">
-                    <div>
-                        <p class="font-bold text-sm text-text">{{ item.name }}</p>
-                        <div class="flex items-center gap-2">
-                            <p class="text-xs text-text-muted">{{ item.sets }}x{{ item.reps }} @ {{ item.weight }}kg
-                            </p>
-                            <a [href]="'https://www.youtube.com/results?search_query=' + item.name + ' tutorial tecnica gimnasio'"
-                                target="_blank" class="text-red-500 hover:text-red-600 transition-colors"
-                                title="Ver en YouTube">
-                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                <!-- Filters -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Categoría / Deporte</span>
+                        <select [(ngModel)]="selectedCategory"
+                            class="px-4 py-3 bg-background border border-primary/40 rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                            <option value="">Todas las categorías</option>
+                            @for (cat of categories; track cat) {
+                            <option [value]="cat">{{ cat }}</option>
+                            }
+                        </select>
+                    </label>
+
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Grupo Muscular</span>
+                        <select [(ngModel)]="selectedMuscle"
+                            class="px-4 py-3 bg-background border border-border rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                            <option value="">Todos</option>
+                            @for (m of muscleGroups; track m) {
+                            <option [value]="m">{{ m }}</option>
+                            }
+                        </select>
+                    </label>
+
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Equipamiento</span>
+                        <select [(ngModel)]="selectedEquipment"
+                            class="px-4 py-3 bg-background border border-border rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                            <option value="">Todos</option>
+                            @for (e of equipmentTypes; track e) {
+                            <option [value]="e">{{ e }}</option>
+                            }
+                        </select>
+                    </label>
+                </div>
+
+                <!-- Exercise Picker & Stats -->
+                <div class="bg-surface border border-border p-6 rounded-3xl shadow-sm">
+                    <div class="flex flex-col 2xl:flex-row gap-6">
+
+                        <!-- Exercise List -->
+                        <div class="flex-1">
+                            <label
+                                class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1 mb-2 block">Selecciona
+                                Ejercicio ({{ filteredExercises().length }})</label>
+                            <div
+                                class="h-[400px] overflow-y-auto bg-background rounded-2xl border border-border p-2 space-y-1 hide-scrollbar">
+                                @if (filteredExercises().length === 0) {
+                                <p class="text-xs text-text-muted text-center p-4">No hay resultados para estos filtros.</p>
+                                }
+                                @for (ex of filteredExercises(); track ex.id) {
+                                <button (click)="selectedExercise.set(ex)"
+                                    class="w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex justify-between items-center"
+                                    [class.bg-primary/10]="selectedExercise()?.id === ex.id"
+                                    [class.border-primary]="selectedExercise()?.id === ex.id"
+                                    [class.border-transparent]="selectedExercise()?.id !== ex.id"
+                                    [class.hover:bg-border/50]="selectedExercise()?.id !== ex.id">
+                                    <span class="font-bold text-sm" [class.text-primary]="selectedExercise()?.id === ex.id"
+                                        [class.text-text]="selectedExercise()?.id !== ex.id">
+                                        {{ ex.name }}
+                                    </span>
+                                    <span
+                                        class="text-[10px] uppercase font-bold text-text-muted border border-border rounded-md px-1.5 py-0.5 mt-0.5">{{
+                                        ex.equipment }}</span>
+                                </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Stats Form -->
+                        <div
+                            class="2xl:w-80 flex flex-col gap-5 border-t 2xl:border-t-0 2xl:border-l border-border pt-6 2xl:pt-0 2xl:pl-6 relative">
+
+                            <!-- Overlay disabled state if no exercise selected -->
+                            @if (!selectedExercise()) {
+                            <div
+                                class="absolute inset-x-0 bottom-0 top-0 2xl:-left-6 2xl:top-0 bg-surface/50 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-4 rounded-3xl 2xl:rounded-r-3xl 2xl:rounded-l-none">
+                                <svg class="w-8 h-8 text-text-muted mb-2 opacity-50" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
+                                    </path>
                                 </svg>
-                            </a>
+                                <p class="text-sm font-bold text-text-muted">Selecciona un ejercicio primero</p>
+                            </div>
+                            }
+
+                            <div>
+                                <h4 class="font-bold text-text text-lg mb-1">{{ selectedExercise()?.name || '---' }}</h4>
+                                <p class="text-[11px] font-bold text-text-muted uppercase tracking-widest">{{
+                                    selectedExercise()?.muscleGroup || '---' }}</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs font-bold text-text-muted">Series</span>
+                                    <input type="number" [(ngModel)]="assignmentSets" min="1"
+                                        class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
+                                </label>
+                                <label class="flex flex-col gap-1">
+                                    <span class="text-xs font-bold text-text-muted">Reps</span>
+                                    <input type="number" [(ngModel)]="assignmentReps" min="1"
+                                        class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
+                                </label>
+                            </div>
+
+                            <label class="flex flex-col gap-1">
+                                <span class="text-xs font-bold text-text-muted">Peso (Kg) - Opcional</span>
+                                <input type="number" [(ngModel)]="assignmentWeight" step="0.5"
+                                    class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
+                            </label>
+
+                            <button (click)="addExercise()"
+                                [disabled]="!selectedExercise() || !assignmentSets() || !assignmentReps()"
+                                class="w-full mt-auto bg-primary text-white font-bold py-3.5 px-4 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-50 disabled:shadow-none cursor-pointer flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Asignar Ejercicio
+                            </button>
                         </div>
                     </div>
-                    <button (click)="deleteItem(item.id)"
-                        class="text-red-500 hover:text-red-700 transition-colors p-2 cursor-pointer"
-                        title="Eliminar ejercicio">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
                 </div>
-                }
-            </div>
+            </section>
+        </div>
 
-            <!-- Multi-Day Replication Tools -->
-            @if (currentRoutineJoined().length > 0) {
-            <div class="mt-4 pt-4 border-t border-border flex flex-col gap-3">
-                <div class="flex justify-between items-center">
+
+        <!-- LADO DERECHO: Ejercicios Programados (Resumen) -->
+        <div class="xl:col-span-5 2xl:col-span-4 flex flex-col xl:sticky xl:top-6">
+            <section class="bg-surface border border-border border-dashed rounded-3xl p-6 shadow-sm flex flex-col">
+                <div class="flex justify-between items-center mb-4">
                     <div>
-                        <h4 class="font-bold text-sm text-text">Replicar en otros días</h4>
-                        <p class="text-[11px] text-text-muted">Añade fechas para copiar estos ejercicios a esos días.</p>
+                        <h3 class="font-bold text-text text-lg">Ejercicios Programados</h3>
+                        <p class="text-xs text-text-muted mt-0.5">Rutina para el día {{ assignmentDate() }}</p>
                     </div>
+                    <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">{{
+                        currentRoutineJoined().length }} items</span>
                 </div>
-                
-                <div class="flex flex-wrap items-center gap-2">
-                    <input type="date" (change)="addTargetDate($event)"
-                        class="px-3 py-1.5 text-sm bg-background border border-border rounded-lg text-text focus:ring-2 focus:ring-primary outline-none transition-all cursor-pointer shadow-sm">
-                    
-                    @for (d of targetDates(); track d) {
-                    <div class="flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold font-mono">
-                        {{ d }}
-                        <button (click)="removeTargetDate(d)" class="hover:text-red-500 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+
+                <div
+                    class="flex-1 bg-background rounded-2xl border border-border overflow-y-auto max-h-[300px] xl:max-h-[400px] p-2 space-y-2">
+                    @if (currentRoutineJoined().length === 0) {
+                    <p class="text-text-muted text-sm text-center p-4">No hay ejercicios para esta fecha.</p>
+                    }
+                    @for (item of currentRoutineJoined(); track item.id) {
+                    <div class="flex items-center justify-between p-3 bg-surface border border-border rounded-xl">
+                        <div>
+                            <p class="font-bold text-sm text-text">{{ item.name }}</p>
+                            <div class="flex items-center gap-2">
+                                <p class="text-xs text-text-muted">{{ item.sets }}x{{ item.reps }} @ {{ item.weight }}kg
+                                </p>
+                                <a [href]="'https://www.youtube.com/results?search_query=' + item.name + ' tutorial tecnica gimnasio'"
+                                    target="_blank" class="text-red-500 hover:text-red-600 transition-colors"
+                                    title="Ver en YouTube">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                        <button (click)="deleteItem(item.id)"
+                            class="text-red-500 hover:text-red-700 transition-colors p-2 cursor-pointer"
+                            title="Eliminar ejercicio">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                         </button>
                     </div>
                     }
                 </div>
 
-                @if (targetDates().length > 0) {
-                    <button (click)="assignToMultipleDays()" 
-                        class="w-full mt-2 bg-primary text-white font-bold py-2 px-4 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all cursor-pointer flex items-center justify-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
-                        </svg>
-                        Confirmar copia a {{ targetDates().length }} días
-                    </button>
-                }
-
-                <button (click)="showCalendar.set(!showCalendar())"
-                    class="w-full mt-1 bg-transparent text-primary border border-primary/40 font-bold py-2 px-4 rounded-xl hover:bg-primary/5 transition-all cursor-pointer flex items-center justify-center gap-2 text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    {{ showCalendar() ? 'Ocultar calendario' : 'Ver fechas asignadas' }}
-                </button>
-
-                <!-- Calendar View -->
-                @if (showCalendar()) {
-                <div class="mt-2 p-4 bg-background border border-border rounded-xl shadow-inner animate-fade-in-up">
-                    <div class="flex justify-between items-center mb-4 text-text">
-                        <button (click)="changeMonth(-1)" class="p-1.5 hover:bg-surface rounded-lg cursor-pointer transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
-                        <span class="font-black text-sm capitalize">{{ monthName() }}</span>
-                        <button (click)="changeMonth(1)" class="p-1.5 hover:bg-surface rounded-lg cursor-pointer transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-text-muted uppercase mb-2 tracking-wider">
-                        <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div><div>Do</div>
-                    </div>
-                    <div class="grid grid-cols-7 gap-1">
-                        @for (d of calendarDays(); track d.dateStr) {
-                            <div class="aspect-square flex items-center justify-center rounded-lg text-xs transition-colors relative"
-                                [class.opacity-40]="!d.currentMonth"
-                                [class.bg-primary]="highlightedDates().has(d.dateStr)"
-                                [class.text-white]="highlightedDates().has(d.dateStr)"
-                                [class.shadow-md]="highlightedDates().has(d.dateStr)"
-                                [class.font-black]="highlightedDates().has(d.dateStr)"
-                                [class.text-text]="!highlightedDates().has(d.dateStr)"
-                                [class.hover:bg-surface]="!highlightedDates().has(d.dateStr)">
-                                {{ d.date.getDate() }}
-                                
-                                @if (d.dateStr === assignmentDate()) {
-                                    <span class="absolute bottom-1 w-1 h-1 rounded-full" [class.bg-white]="highlightedDates().has(d.dateStr)" [class.bg-primary]="!highlightedDates().has(d.dateStr)"></span>
-                                }
-                            </div>
-                        }
-                    </div>
-                </div>
-                }
-            </div>
-            }
-        </section>
-
-
-        <hr class="border-border">
-
-        <!-- Routine Assigner Tool -->
-        <section>
-            <div class="mb-6">
-                <h3 class="font-black text-2xl text-text">Diseñador de Rutina</h3>
-                <p class="text-sm text-text-muted mt-1">Busca ejercicios y configura las series para este día.</p>
-            </div>
-
-            <!-- Filters -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <label class="flex flex-col gap-1.5">
-                    <span class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Categoría / Deporte</span>
-                    <select [(ngModel)]="selectedCategory"
-                        class="px-4 py-3 bg-background border border-primary/40 rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
-                        <option value="">Todas las categorías</option>
-                        @for (cat of categories; track cat) {
-                        <option [value]="cat">{{ cat }}</option>
-                        }
-                    </select>
-                </label>
-
-                <label class="flex flex-col gap-1.5">
-                    <span class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Grupo Muscular</span>
-                    <select [(ngModel)]="selectedMuscle"
-                        class="px-4 py-3 bg-background border border-border rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
-                        <option value="">Todos</option>
-                        @for (m of muscleGroups; track m) {
-                        <option [value]="m">{{ m }}</option>
-                        }
-                    </select>
-                </label>
-
-                <label class="flex flex-col gap-1.5">
-                    <span class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Equipamiento</span>
-                    <select [(ngModel)]="selectedEquipment"
-                        class="px-4 py-3 bg-background border border-border rounded-xl text-text font-medium focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
-                        <option value="">Todos</option>
-                        @for (e of equipmentTypes; track e) {
-                        <option [value]="e">{{ e }}</option>
-                        }
-                    </select>
-                </label>
-            </div>
-
-            <!-- Exercise Picker & Stats -->
-            <div class="bg-surface border border-border p-6 rounded-3xl shadow-sm">
-                <div class="flex flex-col xl:flex-row gap-6">
-
-                    <!-- Exercise List -->
-                    <div class="flex-1">
-                        <label
-                            class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1 mb-2 block">Selecciona
-                            Ejercicio ({{ filteredExercises().length }})</label>
-                        <div
-                            class="h-64 overflow-y-auto bg-background rounded-2xl border border-border p-2 space-y-1 hide-scrollbar">
-                            @if (filteredExercises().length === 0) {
-                            <p class="text-xs text-text-muted text-center p-4">No hay resultados para estos filtros.</p>
-                            }
-                            @for (ex of filteredExercises(); track ex.id) {
-                            <button (click)="selectedExercise.set(ex)"
-                                class="w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex justify-between items-center"
-                                [class.bg-primary/10]="selectedExercise()?.id === ex.id"
-                                [class.border-primary]="selectedExercise()?.id === ex.id"
-                                [class.border-transparent]="selectedExercise()?.id !== ex.id"
-                                [class.hover:bg-border/50]="selectedExercise()?.id !== ex.id">
-                                <span class="font-bold text-sm" [class.text-primary]="selectedExercise()?.id === ex.id"
-                                    [class.text-text]="selectedExercise()?.id !== ex.id">
-                                    {{ ex.name }}
-                                </span>
-                                <span
-                                    class="text-[10px] uppercase font-bold text-text-muted border border-border rounded-md px-1.5 py-0.5 mt-0.5">{{
-                                    ex.equipment }}</span>
-                            </button>
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Stats Form -->
-                    <div
-                        class="xl:w-80 flex flex-col gap-5 border-t xl:border-t-0 xl:border-l border-border pt-6 xl:pt-0 xl:pl-6 relative">
-
-                        <!-- Overlay disabled state if no exercise selected -->
-                        @if (!selectedExercise()) {
-                        <div
-                            class="absolute inset-x-0 bottom-0 top-0 xl:-left-6 xl:top-0 bg-surface/50 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-4 rounded-3xl xl:rounded-r-3xl xl:rounded-l-none">
-                            <svg class="w-8 h-8 text-text-muted mb-2 opacity-50" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
-                                </path>
-                            </svg>
-                            <p class="text-sm font-bold text-text-muted">Selecciona un ejercicio primero</p>
-                        </div>
-                        }
-
+                <!-- Multi-Day Replication Tools -->
+                @if (currentRoutineJoined().length > 0) {
+                <div class="mt-4 pt-4 border-t border-border flex flex-col gap-3">
+                    <div class="flex justify-between items-center">
                         <div>
-                            <h4 class="font-bold text-text text-lg mb-1">{{ selectedExercise()?.name || '---' }}</h4>
-                            <p class="text-[11px] font-bold text-text-muted uppercase tracking-widest">{{
-                                selectedExercise()?.muscleGroup || '---' }}</p>
+                            <h4 class="font-bold text-sm text-text">Replicar en otros días</h4>
+                            <p class="text-[11px] text-text-muted">Añade fechas para copiar esta rutina a esos días.</p>
                         </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="flex flex-col gap-1">
-                                <span class="text-xs font-bold text-text-muted">Series</span>
-                                <input type="number" [(ngModel)]="assignmentSets" min="1"
-                                    class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
-                            </label>
-                            <label class="flex flex-col gap-1">
-                                <span class="text-xs font-bold text-text-muted">Reps</span>
-                                <input type="number" [(ngModel)]="assignmentReps" min="1"
-                                    class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
-                            </label>
-                        </div>
-
-                        <label class="flex flex-col gap-1">
-                            <span class="text-xs font-bold text-text-muted">Peso (Kg) - Opcional</span>
-                            <input type="number" [(ngModel)]="assignmentWeight" step="0.5"
-                                class="px-4 py-2.5 bg-background border border-border rounded-xl text-center font-black focus:ring-2 focus:ring-primary outline-none">
-                        </label>
-
-                        <button (click)="addExercise()"
-                            [disabled]="!selectedExercise() || !assignmentSets() || !assignmentReps()"
-                            class="w-full mt-auto bg-primary text-white font-bold py-3.5 px-4 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-50 disabled:shadow-none cursor-pointer flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            Asignar Ejercicio
-                        </button>
                     </div>
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="date" (change)="addTargetDate($event)"
+                            class="px-3 py-1.5 text-sm bg-background border border-border rounded-lg text-text focus:ring-2 focus:ring-primary outline-none transition-all cursor-pointer shadow-sm">
+                        
+                        @for (d of targetDates(); track d) {
+                        <div class="flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold font-mono">
+                            {{ d }}
+                            <button (click)="removeTargetDate(d)" class="hover:text-red-500 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        }
+                    </div>
+
+                    @if (targetDates().length > 0) {
+                        <button (click)="assignToMultipleDays()" 
+                            class="w-full mt-2 bg-primary text-white font-bold py-2 px-4 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all cursor-pointer flex items-center justify-center gap-2 text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+                            </svg>
+                            Confirmar copia a {{ targetDates().length }} días
+                        </button>
+                    }
+
+                    <button (click)="showCalendar.set(!showCalendar())"
+                        class="w-full mt-1 bg-transparent text-primary border border-primary/40 font-bold py-2 px-4 rounded-xl hover:bg-primary/5 transition-all cursor-pointer flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ showCalendar() ? 'Ocultar calendario' : 'Ver fechas asignadas' }}
+                    </button>
+
+                    <!-- Calendar View -->
+                    @if (showCalendar()) {
+                    <div class="mt-2 p-4 bg-background border border-border rounded-xl shadow-inner animate-fade-in-up">
+                        <div class="flex justify-between items-center mb-4 text-text">
+                            <button (click)="changeMonth(-1)" class="p-1.5 hover:bg-surface rounded-lg cursor-pointer transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <span class="font-black text-sm capitalize">{{ monthName() }}</span>
+                            <button (click)="changeMonth(1)" class="p-1.5 hover:bg-surface rounded-lg cursor-pointer transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-text-muted uppercase mb-2 tracking-wider">
+                            <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div><div>Do</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1">
+                            @for (d of calendarDays(); track d.dateStr) {
+                                <div class="aspect-square flex items-center justify-center rounded-lg text-xs transition-colors relative"
+                                    [class.opacity-40]="!d.currentMonth"
+                                    [class.bg-primary]="highlightedDates().has(d.dateStr)"
+                                    [class.text-white]="highlightedDates().has(d.dateStr)"
+                                    [class.shadow-md]="highlightedDates().has(d.dateStr)"
+                                    [class.font-black]="highlightedDates().has(d.dateStr)"
+                                    [class.text-text]="!highlightedDates().has(d.dateStr)"
+                                    [class.hover:bg-surface]="!highlightedDates().has(d.dateStr)">
+                                    {{ d.date.getDate() }}
+                                    
+                                    @if (d.dateStr === assignmentDate()) {
+                                        <span class="absolute bottom-1 w-1 h-1 rounded-full" [class.bg-white]="highlightedDates().has(d.dateStr)" [class.bg-primary]="!highlightedDates().has(d.dateStr)"></span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    }
                 </div>
-            </div>
-        </section>
+                }
+            </section>
+        </div>
 
     </div>
 </div>
