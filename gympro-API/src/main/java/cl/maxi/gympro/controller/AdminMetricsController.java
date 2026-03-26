@@ -78,13 +78,25 @@ public class AdminMetricsController {
                 })
                 .collect(Collectors.toList());
 
-            // Count exercises
+            // Count exercises by resolved name
+            Map<String, String> idToNameCache = new HashMap<>();
             Map<String, Integer> exerciseCounts = new HashMap<>();
+            
             for (Routine routine : filteredRoutines) {
                 if (routine.getItems() != null) {
                     for (RoutineItem item : routine.getItems()) {
-                        if (item.getExerciseId() != null) {
-                            exerciseCounts.put(item.getExerciseId(), exerciseCounts.getOrDefault(item.getExerciseId(), 0) + 1);
+                        String exId = item.getExerciseId();
+                        if (exId != null && !exId.trim().isEmpty()) {
+                            // Resolve actual name: if findById works, use true name. Else, it must be an AI plain-text name.
+                            String actualName = idToNameCache.computeIfAbsent(exId, key -> {
+                                Optional<Exercise> exOpt = exerciseRepository.findById(key);
+                                return exOpt.isPresent() ? exOpt.get().getName() : key;
+                            });
+                            
+                            // Normalize somewhat (Capitalize first letter to group "sentadilla" and "Sentadilla")
+                            actualName = actualName.substring(0, 1).toUpperCase() + actualName.substring(1);
+                            
+                            exerciseCounts.put(actualName, exerciseCounts.getOrDefault(actualName, 0) + 1);
                         }
                     }
                 }
@@ -96,22 +108,13 @@ public class AdminMetricsController {
                 .limit(10)
                 .collect(Collectors.toList());
 
-            // Fetch names
+            // Build result
             List<Map<String, Object>> result = new ArrayList<>();
             for (Map.Entry<String, Integer> entry : topEntries) {
-                String exId = entry.getKey();
-                int count = entry.getValue();
-                
-                String exerciseName = "Desconocido";
-                Optional<Exercise> exOpt = exerciseRepository.findById(exId);
-                if (exOpt.isPresent()) {
-                    exerciseName = exOpt.get().getName();
-                }
-
                 result.add(Map.of(
-                    "id", exId,
-                    "name", exerciseName,
-                    "count", count
+                    "id", entry.getKey(),
+                    "name", entry.getKey(),
+                    "count", entry.getValue()
                 ));
             }
 
