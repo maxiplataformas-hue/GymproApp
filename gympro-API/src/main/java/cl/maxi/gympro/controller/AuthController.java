@@ -3,6 +3,8 @@ package cl.maxi.gympro.controller;
 import cl.maxi.gympro.model.OtpEntry;
 import cl.maxi.gympro.repository.OtpRepository;
 import cl.maxi.gympro.repository.UserRepository;
+import cl.maxi.gympro.model.AccessLog;
+import cl.maxi.gympro.repository.AccessLogRepository;
 import cl.maxi.gympro.service.EmailService;
 import cl.maxi.gympro.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,9 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AccessLogRepository accessLogRepository;
+
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
         try {
@@ -53,6 +58,10 @@ public class AuthController {
                 User user = users.get(0);
                 if (deviceId != null && user.getTrustedDeviceIds() != null && user.getTrustedDeviceIds().contains(deviceId)) {
                     System.out.println("OTP skipped for trusted device: " + deviceId + " user: " + normalizedEmail);
+                    
+                    // Log the access
+                    accessLogRepository.save(new AccessLog(null, normalizedEmail, user.getRole(), LocalDateTime.now()));
+
                     return ResponseEntity.ok(Map.of(
                         "otpSkipped", true,
                         "message", "Known device, OTP skipped",
@@ -114,15 +123,19 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Código incorrecto. Verifica el correo e intenta de nuevo.");
         }
 
-        // Success - Mark device as trusted if deviceId provided
-        if (deviceId != null) {
-            String normalizedEmail = email.trim().toLowerCase();
-            List<User> users = userRepository.findAll().stream()
-                    .filter(u -> u.getEmail() != null && normalizedEmail.equalsIgnoreCase(u.getEmail()))
-                    .collect(Collectors.toList());
+        // Success
+        String normalizedEmail = email.trim().toLowerCase();
+        List<User> users = userRepository.findAll().stream()
+                .filter(u -> u.getEmail() != null && normalizedEmail.equalsIgnoreCase(u.getEmail()))
+                .collect(Collectors.toList());
 
-            if (!users.isEmpty()) {
-                User user = users.get(0);
+        if (!users.isEmpty()) {
+            User user = users.get(0);
+            
+            // Log the access
+            accessLogRepository.save(new AccessLog(null, normalizedEmail, user.getRole(), LocalDateTime.now()));
+
+            if (deviceId != null) {
                 if (user.getTrustedDeviceIds() == null) {
                     user.setTrustedDeviceIds(new ArrayList<>());
                 }

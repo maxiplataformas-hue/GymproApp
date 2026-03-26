@@ -1,11 +1,13 @@
-import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, inject, computed, signal, ChangeDetectionStrategy, effect } from '@angular/core';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { DataService } from '../../services/data';
 import { AuthService, User } from '../../services/auth';
 
 @Component({
     selector: 'app-admin-dashboard',
-    imports: [ReactiveFormsModule],
+    imports: [ReactiveFormsModule, FormsModule, BaseChartDirective],
     templateUrl: './admin-dashboard.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -14,7 +16,7 @@ export class AdminDashboard {
     auth = inject(AuthService);
 
     coaches = this.data.allCoaches as any;
-    activeTab = signal<'coaches' | 'exercises'>('coaches');
+    activeTab = signal<'coaches' | 'exercises' | 'metrics'>('coaches');
     isCreating = signal(false);
     saveError = signal<string | null>(null);
 
@@ -45,9 +47,62 @@ export class AdminDashboard {
         return this.data.allStudents().filter((s: User) => s.coachEmail === coach.email);
     });
 
+    // --- Metrics Signals ---
+    metricsFrom = signal(this.formatForInput(new Date(Date.now() - 24 * 60 * 60 * 1000)));
+    metricsTo = signal(this.formatForInput(new Date()));
+    accessStats = signal({ coachCount: 0, studentCount: 0 });
+    topExercises = signal<Array<{id: string, name: string, count: number}>>([]);
+
+    public pieChartOptions: ChartOptions<'pie'> = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 12 } } }
+        }
+    };
+
+    public pieChartData = computed<ChartConfiguration<'pie'>['data']>(() => {
+        const top = this.topExercises();
+        return {
+            labels: top.map(t => t.name),
+            datasets: [{
+                data: top.map(t => t.count),
+                backgroundColor: [
+                    '#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6',
+                    '#06b6d4', '#ef4444', '#84cc16', '#f97316', '#6366f1'
+                ],
+                borderWidth: 1,
+                borderColor: '#1e293b'
+            }]
+        };
+    });
+
     constructor() {
         this.data.loadCoachMetrics();
         this.data.loadAllStudents();
+
+        effect(() => {
+            // Un-track just inside internal conditions but respond to tab or dates changing
+            if (this.activeTab() === 'metrics' || this.metricsFrom() || this.metricsTo()) {
+                if (this.activeTab() === 'metrics') {
+                    this.loadMetrics();
+                }
+            }
+        });
+    }
+
+    private formatForInput(d: Date): string {
+        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    }
+
+    loadMetrics() {
+        try {
+            const fromIso = new Date(this.metricsFrom() + ':00').toISOString();
+            const toIso = new Date(this.metricsTo() + ':00').toISOString();
+            
+            this.data.getAccessMetrics(fromIso, toIso).subscribe(res => this.accessStats.set(res));
+            this.data.getTopExercises(fromIso, toIso).subscribe(res => this.topExercises.set(res));
+        } catch(e) { /* Invalid date format yet */ }
     }
 
     startCreating() {

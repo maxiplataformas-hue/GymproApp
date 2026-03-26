@@ -229,9 +229,19 @@ export class DataService {
   }
 
   toggleCoachStatus(email: string, isActive: boolean) {
-    const normalizedEmail = email.trim().toLowerCase();
-    return this.http.put<User>(`${this.apiBase}/users/${normalizedEmail}`, { isActive }).pipe(
-      tap(() => this.loadCoaches())
+    return this.http.put(`${this.apiBase}/admin/coaches/${email}/status`, { isActive });
+  }
+
+  // --- Metrics ---
+  getAccessMetrics(fromIso: string, toIso: string) {
+    return this.http.get<{coachCount: number, studentCount: number}>(
+      `${this.apiBase}/admin/metrics/access?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`
+    );
+  }
+
+  getTopExercises(fromIso: string, toIso: string) {
+    return this.http.get<Array<{id: string, name: string, count: number}>>(
+      `${this.apiBase}/admin/metrics/top-exercises?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`
     );
   }
 
