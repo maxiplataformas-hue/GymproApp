@@ -37,9 +37,17 @@ export class AdminDashboard {
     isEditing = signal(false);
     editingEmail = signal<string | null>(null);
     editingExerciseId = signal<string | null>(null);
+    
+    viewingStudentsForCoach = signal<User | null>(null);
+    coachStudents = computed(() => {
+        const coach = this.viewingStudentsForCoach();
+        if (!coach) return [];
+        return this.data.allStudents().filter((s: User) => s.coachEmail === coach.email);
+    });
 
     constructor() {
         this.data.loadCoachMetrics();
+        this.data.loadAllStudents();
     }
 
     startCreating() {
@@ -149,5 +157,9 @@ export class AdminDashboard {
         if (confirm('¿Eliminar este ejercicio?')) {
             this.data.deleteExercise(id).subscribe();
         }
+    }
+
+    closeStudentsModal() {
+        this.viewingStudentsForCoach.set(null);
     }
 }

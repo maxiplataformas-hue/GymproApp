@@ -130,7 +130,14 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end gap-2">
+                    <div class="flex justify-end gap-2 mt-2">
+                        <button (click)="viewingStudentsForCoach.set(coach)"
+                            class="text-xs font-bold px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 mr-auto">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                            Ver Alumnos
+                        </button>
                         <button (click)="editCoach(coach)"
                             class="text-xs font-bold px-3 py-1.5 rounded-lg border border-border bg-background text-text hover:bg-border transition-colors cursor-pointer flex items-center gap-1.5">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,4 +248,74 @@
             </table>
         </div>
     }
-</div>
+</div>
+
+<!-- Modal: Alumnos del Coach -->
+@if (viewingStudentsForCoach()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity" (click)="closeStudentsModal()"></div>
+    
+    <div class="relative w-full max-w-lg bg-surface border border-border rounded-3xl shadow-2xl p-6 md:p-8 animate-fade-in-up flex flex-col max-h-[90vh]">
+        <!-- Cabecera -->
+        <div class="flex items-center justify-between mb-6 shrink-0">
+            <div>
+                <h3 class="text-xl font-bold text-text flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </div>
+                    Alumnos de {{ viewingStudentsForCoach()?.name || 'Coach' }}
+                </h3>
+                <p class="text-xs text-text-muted mt-1 ml-10">{{ coachStudents().length }} estudiante(s) total(es)</p>
+            </div>
+            <button (click)="closeStudentsModal()" class="p-2 text-text-muted hover:bg-border rounded-full transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Lista de Alumnos (Scrollable) -->
+        <div class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+            @if (coachStudents().length === 0) {
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 rounded-full bg-border/30 flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <p class="text-text font-bold">Sin alumnos</p>
+                    <p class="text-text-muted text-xs mt-1">Este coach aún no tiene estudiantes asignados.</p>
+                </div>
+            } @else {
+                <div class="divide-y divide-border/50">
+                    @for (student of coachStudents(); track student.email) {
+                    <div class="py-3 flex items-center gap-3">
+                        @if (student.avatarUrl) {
+                        <img [src]="student.avatarUrl" alt="Avatar" class="w-10 h-10 rounded-full object-cover bg-border">
+                        } @else {
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm">
+                            {{ (student.name || 'A')[0].toUpperCase() }}
+                        </div>
+                        }
+                        
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-sm text-text truncate">{{ student.name || 'Sin Nombre' }}</p>
+                            <p class="text-xs text-text-muted truncate">{{ student.email }}</p>
+                        </div>
+                        
+                        <div class="shrink-0 flex gap-2">
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-green-500/30 text-green-500 bg-green-500/10">Activo</span>
+                        </div>
+                    </div>
+                    }
+                </div>
+            }
+        </div>
+        
+        <!-- Pie del Modal -->
+        <div class="mt-6 pt-4 border-t border-border flex justify-end shrink-0">
+            <button (click)="closeStudentsModal()" class="px-6 py-2 bg-border hover:bg-text-muted/20 text-text font-bold rounded-xl transition-colors cursor-pointer text-sm">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+}
