@@ -1,0 +1,151 @@
+<div class="h-full flex flex-col bg-surface shadow-sm rounded-3xl animate-fade-in-up overflow-hidden">
+    <!-- Header -->
+    <div class="px-6 md:px-8 py-5 border-b border-border bg-gradient-to-r from-background to-surface rounded-t-3xl flex justify-between items-center flex-shrink-0">
+        <div>
+            <h2 class="text-xl md:text-2xl font-black text-text flex items-center gap-2">
+                <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                Diccionario Deportivo
+            </h2>
+            <p class="text-xs text-text-muted mt-1">{{ filteredConcepts().length }} términos · Gestiona los conceptos visibles para tus alumnos.</p>
+        </div>
+        <button (click)="openCreate()" class="hidden md:flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-5 rounded-xl transition-all cursor-pointer shadow-lg shadow-indigo-500/30">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Nuevo Término
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="px-6 py-3 border-b border-border bg-surface space-y-3 flex-shrink-0">
+        <div class="flex gap-3">
+            <div class="flex-1 relative">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Buscar término..."
+                    class="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-colors text-text placeholder-text-muted">
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" [ngModel]="showOnlyMine()" (ngModelChange)="showOnlyMine.set($event)" class="rounded">
+                <span class="text-xs font-semibold text-text-muted whitespace-nowrap">Solo míos</span>
+            </label>
+        </div>
+        <div class="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+            @for (cat of categories; track cat) {
+            <button (click)="selectedCategory.set(cat)"
+                class="flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition-colors cursor-pointer"
+                [class.bg-indigo-500]="selectedCategory() === cat" [class.text-white]="selectedCategory() === cat"
+                [class.border-indigo-500]="selectedCategory() === cat"
+                [class.bg-background]="selectedCategory() !== cat" [class.text-text-muted]="selectedCategory() !== cat"
+                [class.border-border]="selectedCategory() !== cat">
+                {{ cat }}
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- List -->
+    <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-3">
+        @if (filteredConcepts().length === 0) {
+        <div class="text-center py-16 text-text-muted text-sm">
+            <svg class="w-12 h-12 mx-auto mb-3 text-border" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+            No hay términos con ese filtro.
+        </div>
+        }
+        @for (concept of filteredConcepts(); track concept.id) {
+        <div class="bg-background border border-border rounded-2xl p-4 hover:border-indigo-500/40 transition-all">
+            <div class="flex items-start gap-3">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 class="font-bold text-text text-sm">{{ concept.term }}</h3>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border {{ getBadgeClass(concept.category) }}">{{ concept.category }}</span>
+                        @if (concept.coachEmail === 'sistema') {
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Sistema</span>
+                        }
+                    </div>
+                    <p class="text-xs text-text-muted leading-relaxed">{{ concept.definition }}</p>
+                    <p class="text-[10px] text-text-muted/50 mt-1 italic">Agregado por: {{ concept.coachEmail }}</p>
+                </div>
+                <!-- Actions -->
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                    @if (canEdit(concept)) {
+                    <button (click)="openEdit(concept)" class="p-1.5 text-text-muted hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </button>
+                    }
+                    @if (canDelete(concept)) {
+                    <button (click)="deleteConcept(concept)" class="p-1.5 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Mobile Add Button -->
+    <div class="md:hidden p-4 border-t border-border flex-shrink-0">
+        <button (click)="openCreate()" class="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl transition-all cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Nuevo Término
+        </button>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+@if (isFormOpen()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-background/80 backdrop-blur-sm" (click)="cancelForm()"></div>
+    <div class="relative w-full max-w-lg bg-surface border border-border rounded-3xl shadow-xl p-6 animate-fade-in-up space-y-4">
+        <h3 class="text-xl font-black text-text">{{ editingId() ? 'Editar Término' : 'Nuevo Término' }}</h3>
+        
+        <div>
+            <label class="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Término</label>
+            <input type="text" [ngModel]="formTerm()" (ngModelChange)="formTerm.set($event)" placeholder="Ej: Glucógeno Muscular"
+                class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-colors text-text">
+        </div>
+
+        <div>
+            <label class="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Categoría</label>
+            <select [ngModel]="formCategory()" (ngModelChange)="formCategory.set($event)"
+                class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-colors text-text">
+                @for (cat of categories.slice(1); track cat) {
+                <option [value]="cat">{{ cat }}</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label class="text-xs font-bold text-text-muted uppercase tracking-wider block mb-1">Definición</label>
+            <textarea [ngModel]="formDefinition()" (ngModelChange)="formDefinition.set($event)" rows="4"
+                placeholder="Escribe la definición del término..."
+                class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-colors text-text resize-none"></textarea>
+        </div>
+
+        @if (formError()) {
+        <p class="text-sm text-red-500 font-semibold">{{ formError() }}</p>
+        }
+
+        <div class="flex gap-3 pt-2">
+            <button (click)="cancelForm()" class="flex-1 py-3 bg-background border border-border rounded-xl font-bold text-text hover:bg-border transition-colors cursor-pointer">
+                Cancelar
+            </button>
+            <button (click)="saveForm()" class="flex-1 py-3 bg-indigo-500 hover:bg-indigo-600 rounded-xl font-bold text-white transition-colors cursor-pointer shadow-lg shadow-indigo-500/30">
+                Guardar
+            </button>
+        </div>
+    </div>
+</div>
+}

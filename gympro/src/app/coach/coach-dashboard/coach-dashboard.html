@@ -340,6 +340,14 @@
                 [class.hover:text-text]="activeTab() !== 'gallery'">
                 Galería de Progreso
             </button>
+            <button (click)="activeTab.set('dictionary')"
+                class="pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap"
+                [class.text-indigo-500]="activeTab() === 'dictionary'" [class.border-indigo-500]="activeTab() === 'dictionary'"
+                [class.text-text-muted]="activeTab() !== 'dictionary'"
+                [class.border-transparent]="activeTab() !== 'dictionary'"
+                [class.hover:text-text]="activeTab() !== 'dictionary'">
+                Diccionario
+            </button>
         </div>
 
         <!-- Tab Content Display -->
@@ -364,6 +372,11 @@
             @if (activeTab() === 'gallery') {
             <div class="absolute inset-0 overflow-y-auto w-full max-w-5xl mx-auto p-6 md:p-8">
                 <app-progress-gallery [studentEmail]="selectedStudent()!.email" [isCoach]="true"></app-progress-gallery>
+            </div>
+            }
+            @if (activeTab() === 'dictionary') {
+            <div class="absolute inset-0 overflow-y-auto w-full max-w-5xl mx-auto p-4 md:p-8">
+                <app-dictionary-manager></app-dictionary-manager>
             </div>
             }
         </div>

@@ -95,6 +95,15 @@ export interface Notification {
   isRead: boolean;
 }
 
+export interface DictionaryConcept {
+  id?: string;
+  term: string;
+  definition: string;
+  category: string; // Entrenamiento | Nutrición | Fisiología | Suplementación | Recuperación | Métricas
+  coachEmail: string;
+  createdAt?: string;
+}
+
 // Exercises loaded from backend
 
 @Injectable({
@@ -109,6 +118,7 @@ export class DataService {
   studentPhotos = signal<Map<string, StudentPhoto[]>>(new Map());
   currentProfiles = signal<StudentProfile[]>([]);
   notifications = signal<Notification[]>([]);
+  dictionaryConcepts = signal<DictionaryConcept[]>([]);
   unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
 
   uniqueCategories = computed(() => {
@@ -384,5 +394,31 @@ export class DataService {
 
   askCoachIA(message: string, email?: string) {
     return this.http.post<{ response: string }>(`${this.apiBase}/chat`, { message, email });
+  }
+
+  // --- Dictionary ---
+  loadDictionary() {
+    this.http.get<DictionaryConcept[]>(`${this.apiBase}/dictionary`).subscribe(data => {
+      this.dictionaryConcepts.set(data.sort((a, b) => a.term.localeCompare(b.term)));
+    });
+  }
+
+  saveConcept(concept: Omit<DictionaryConcept, 'id'>) {
+    return this.http.post<DictionaryConcept>(`${this.apiBase}/dictionary`, concept).pipe(
+      tap(() => this.loadDictionary())
+    );
+  }
+
+  updateConcept(id: string, concept: Partial<DictionaryConcept>, requesterEmail: string) {
+    return this.http.put<DictionaryConcept>(
+      `${this.apiBase}/dictionary/${id}?requesterEmail=${encodeURIComponent(requesterEmail)}`,
+      concept
+    ).pipe(tap(() => this.loadDictionary()));
+  }
+
+  deleteConcept(id: string, requesterEmail: string) {
+    return this.http.delete(
+      `${this.apiBase}/dictionary/${id}?requesterEmail=${encodeURIComponent(requesterEmail)}`
+    ).pipe(tap(() => this.loadDictionary()));
   }
 }
