@@ -1,5 +1,6 @@
 package cl.maxi.gympro.controller;
 
+import cl.maxi.gympro.model.AccessLog;
 import cl.maxi.gympro.model.Exercise;
 import cl.maxi.gympro.model.Routine;
 import cl.maxi.gympro.model.RoutineItem;
@@ -48,6 +49,25 @@ public class AdminMetricsController {
                     "coachCount", coachCount,
                     "studentCount", studentCount
             ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error parsing dates: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/access-details")
+    public ResponseEntity<?> getAccessDetails(
+            @RequestParam("from") String fromStr,
+            @RequestParam("to") String toStr) {
+        
+        try {
+            LocalDateTime from = LocalDateTime.parse(fromStr, formatter);
+            LocalDateTime to = LocalDateTime.parse(toStr, formatter);
+
+            List<AccessLog> logs = accessLogRepository.findByTimestampBetween(from, to);
+            // Sort logs descending by timestamp
+            logs.sort((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
+
+            return ResponseEntity.ok(logs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error parsing dates: " + e.getMessage());
         }

@@ -280,7 +280,8 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- KPI Cards -->
                 <div class="lg:col-span-1 space-y-4">
-                    <div class="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col pt-8 relative overflow-hidden group">
+                    <div (click)="viewingAccessLogsFor.set('student')" 
+                        class="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col pt-8 relative overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors">
                         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
                             <svg class="w-16 h-16 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                         </div>
@@ -291,7 +292,8 @@
                         </div>
                     </div>
 
-                    <div class="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col pt-8 relative overflow-hidden group">
+                    <div (click)="viewingAccessLogsFor.set('coach')" 
+                        class="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col pt-8 relative overflow-hidden group cursor-pointer hover:border-secondary/50 transition-colors">
                         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
                             <svg class="w-16 h-16 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         </div>
@@ -386,6 +388,80 @@
         <!-- Pie del Modal -->
         <div class="mt-6 pt-4 border-t border-border flex justify-end shrink-0">
             <button (click)="closeStudentsModal()" class="px-6 py-2 bg-border hover:bg-text-muted/20 text-text font-bold rounded-xl transition-colors cursor-pointer text-sm">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal: Detalle de Accesos -->
+@if (viewingAccessLogsFor()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity" (click)="closeAccessLogsModal()"></div>
+    
+    <div class="relative w-full max-w-lg bg-surface border border-border rounded-3xl shadow-2xl p-6 md:p-8 animate-fade-in-up flex flex-col max-h-[90vh]">
+        <!-- Cabecera -->
+        <div class="flex items-center justify-between mb-6 shrink-0">
+            <div>
+                <h3 class="text-xl font-bold text-text flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </div>
+                    Accesos de {{ viewingAccessLogsFor() === 'student' ? 'Estudiantes' : 'Profesionales' }}
+                </h3>
+                <p class="text-xs text-text-muted mt-1 ml-10">
+                    {{ viewingAccessLogsFor() === 'student' ? studentAccessLogs().length : coachAccessLogs().length }} registros en el periodo
+                </p>
+            </div>
+            <button (click)="closeAccessLogsModal()" class="p-2 text-text-muted hover:bg-border rounded-full transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Lista de Accesos (Scrollable) -->
+        <div class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+            @if ((viewingAccessLogsFor() === 'student' ? studentAccessLogs() : coachAccessLogs()).length === 0) {
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 rounded-full bg-border/30 flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <p class="text-text font-bold">Sin registros</p>
+                    <p class="text-text-muted text-xs mt-1">No se encontraron accesos en el rango de fechas seleccionado.</p>
+                </div>
+            } @else {
+                <div class="divide-y divide-border/50">
+                    @for (log of (viewingAccessLogsFor() === 'student' ? studentAccessLogs() : coachAccessLogs()); track log.id) {
+                    <div class="py-4 flex items-center gap-4">
+                        @if (log.avatarUrl) {
+                        <img [src]="log.avatarUrl" alt="Avatar" class="w-11 h-11 rounded-full object-cover bg-border">
+                        } @else {
+                        <div [class]="viewingAccessLogsFor() === 'student' ? 'bg-indigo-500' : 'bg-emerald-500'" 
+                             class="w-11 h-11 rounded-full text-white flex items-center justify-center font-bold text-sm">
+                            {{ (log.name || 'U')[0].toUpperCase() }}
+                        </div>
+                        }
+                        
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-sm text-text truncate">{{ log.name }}</p>
+                            <p class="text-xs text-text-muted truncate">{{ log.email }}</p>
+                        </div>
+                        
+                        <div class="shrink-0 text-right">
+                            <p class="text-[11px] font-bold text-text">{{ log.timestamp | date:'dd/MM/yyyy' }}</p>
+                            <p class="text-[10px] font-medium text-primary">{{ log.timestamp | date:'HH:mm:ss' }}</p>
+                        </div>
+                    </div>
+                    }
+                </div>
+            }
+        </div>
+        
+        <!-- Pie del Modal -->
+        <div class="mt-6 pt-4 border-t border-border flex justify-end shrink-0">
+            <button (click)="closeAccessLogsModal()" class="px-6 py-2 bg-border hover:bg-text-muted/20 text-text font-bold rounded-xl transition-colors cursor-pointer text-sm">
                 Cerrar
             </button>
         </div>

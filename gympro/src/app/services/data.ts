@@ -9,6 +9,13 @@ export interface CoachMetric extends User {
   activityLevel: number;
 }
 
+export interface AccessLog {
+  id?: string;
+  email: string;
+  role: string;
+  timestamp: string;
+}
+
 export type MuscleGroup = 'Pecho' | 'Espalda' | 'Pierna' | 'Hombro' | 'Brazo' | 'Core' | 'Glúteo' | 'Todos';
 export type Equipment = 'Barra' | 'Mancuerna' | 'Máquina' | 'Libre' | 'Kettlebell' | 'Polea' | 'Ninguno' | 'Barra fija' | 'Paralelas' | 'Banco' | 'Cajón' | 'Cuerda' | 'Cuerdas' | 'Trineo' | 'Ballón medicinal' | 'Cinta' | 'Silla' | 'Escalera' | 'Escalera' | 'Mesa / Barra baja' | 'Escalera' | 'Escalera' | 'Silla' | 'Escalera';
 
@@ -236,6 +243,12 @@ export class DataService {
   getAccessMetrics(fromIso: string, toIso: string) {
     return this.http.get<{coachCount: number, studentCount: number}>(
       `${this.apiBase}/admin/metrics/access?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`
+    );
+  }
+
+  getAccessDetails(fromIso: string, toIso: string) {
+    return this.http.get<AccessLog[]>(
+      `${this.apiBase}/admin/metrics/access-details?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`
     );
   }
 

@@ -1,5 +1,6 @@
 import { Component, inject, computed, signal, ChangeDetectionStrategy, effect } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { DataService } from '../../services/data';
@@ -7,7 +8,7 @@ import { AuthService, User } from '../../services/auth';
 
 @Component({
     selector: 'app-admin-dashboard',
-    imports: [ReactiveFormsModule, FormsModule, BaseChartDirective],
+    imports: [ReactiveFormsModule, FormsModule, BaseChartDirective, CommonModule],
     templateUrl: './admin-dashboard.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -52,6 +53,34 @@ export class AdminDashboard {
     metricsTo = signal(this.formatForInput(new Date()));
     accessStats = signal({ coachCount: 0, studentCount: 0 });
     topExercises = signal<Array<{id: string, name: string, count: number}>>([]);
+    rawAccessLogs = signal<any[]>([]);
+    viewingAccessLogsFor = signal<'student' | 'coach' | null>(null);
+
+    studentAccessLogs = computed(() => {
+        const logs = this.rawAccessLogs().filter(l => l.role === 'student');
+        const students = this.data.allStudents();
+        return logs.map(l => {
+            const user = students.find(s => s.email === l.email);
+            return {
+                ...l,
+                name: user?.name || 'Sin Nombre',
+                avatarUrl: user?.avatarUrl
+            };
+        });
+    });
+
+    coachAccessLogs = computed(() => {
+        const logs = this.rawAccessLogs().filter(l => l.role === 'coach');
+        const coaches = this.data.allCoaches();
+        return logs.map(l => {
+            const user = coaches.find(c => c.email === l.email);
+            return {
+                ...l,
+                name: user?.name || 'Sin Nombre',
+                avatarUrl: user?.avatarUrl
+            };
+        });
+    });
 
     public pieChartOptions: ChartOptions<'pie'> = {
         responsive: true,
@@ -102,6 +131,7 @@ export class AdminDashboard {
             
             this.data.getAccessMetrics(fromIso, toIso).subscribe(res => this.accessStats.set(res));
             this.data.getTopExercises(fromIso, toIso).subscribe(res => this.topExercises.set(res));
+            this.data.getAccessDetails(fromIso, toIso).subscribe(res => this.rawAccessLogs.set(res));
         } catch(e) { /* Invalid date format yet */ }
     }
 
@@ -216,5 +246,9 @@ export class AdminDashboard {
 
     closeStudentsModal() {
         this.viewingStudentsForCoach.set(null);
+    }
+
+    closeAccessLogsModal() {
+        this.viewingAccessLogsFor.set(null);
     }
 }
