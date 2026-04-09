@@ -150,10 +150,14 @@ export class StudentProfileTab {
     showChartModal = signal<boolean>(false);
 
     // --- Derived Calculations ---
-    latestWeight = computed(() => {
-        const history = this.data.physioEntries()
+    studentPhysioHistory = computed(() => {
+        return this.data.physioEntries()
             .filter(p => p.studentEmail === this.studentEmail())
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    });
+
+    latestWeight = computed(() => {
+        const history = this.studentPhysioHistory();
         return history.length > 0 ? history[0].weight : null;
     });
 
