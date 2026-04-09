@@ -1,51 +1,14 @@
 <div class="bg-surface md:border md:border-border md:rounded-3xl p-4 md:p-8 shadow-sm flex flex-col">
 
-    <div class="mb-6">
-        <h3 class="font-black text-2xl text-text">Ficha Técnica & Clínica</h3>
-        <p class="text-sm text-text-muted mt-1">Registra y actualiza la anatomía, capacidades y nutrición del alumno.
-        </p>
-    </div>
-
-    <!-- Timeline Selector -->
-    <div class="mb-6 flex gap-2 overflow-x-auto pb-4 scrollbar-hide items-center">
-        @for (profile of data.currentProfiles(); track profile.id; let i = $index) {
-        <button type="button" (click)="selectProfile(profile)"
-            class="px-5 py-2 whitespace-nowrap rounded-full font-semibold transition-all border-2 text-sm" [ngClass]="selectedProfile() === profile 
-                    ? 'border-primary bg-primary/10 text-primary' 
-                    : 'border-border bg-surface text-secondary hover:border-primary/50'">
-            <span class="flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                    </path>
-                </svg>
-                {{ profile.recordName || 'Evaluación' }}
-            </span>
-            <span class="block text-xs font-normal opacity-70 mt-0.5">
-                {{ profile.recordDate | date:'mediumDate' }}
-            </span>
-        </button>
-        }
-
-        <!-- Add New Button -->
-        <button type="button" (click)="startNewProfile(selectedProfile())"
-            class="px-5 py-3 whitespace-nowrap rounded-full font-bold transition-all border-2 border-dashed border-primary text-primary hover:bg-primary hover:text-white flex items-center gap-2 text-sm ml-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Nueva Evaluación
-        </button>
-
-        <!-- View Chart Button -->
-        @if(hypertrophyRadarData()) {
-        <button type="button" (click)="showChartModal.set(true)"
-            class="px-5 py-3 whitespace-nowrap rounded-full font-bold transition-all border-2 border-indigo-500 bg-indigo-500 text-white hover:bg-indigo-600 flex items-center gap-2 text-sm ml-2 shadow-md shadow-indigo-500/30">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                </path>
-            </svg>
-            Ver Gráficos
+    <div class="mb-6 flex justify-between items-start">
+        <div>
+            <h3 class="font-black text-2xl text-text">Ficha Técnica & Clínica</h3>
+            <p class="text-sm text-text-muted mt-1">Registra y actualiza la anatomía, capacidades y nutrición del alumno.</p>
+        </div>
+        @if(!isCreatingNew()) {
+        <button type="button" (click)="startNewProfile(selectedProfile())" class="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 px-4 py-2 font-bold rounded-full text-sm transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Nueva Ficha
         </button>
         }
     </div>
@@ -60,9 +23,7 @@
         </svg>
         <div class="text-sm">
             <p class="font-bold">Modo de Sólo Lectura (Histórico)</p>
-            <p class="opacity-80">Estás visualizando una ficha antigua que no puede ser modificada. Para registrar una
-                nueva lectura, presiona <strong>+ Nueva Evaluación</strong> arriba. Automáticamente copiaremos todos los
-                parámetros clínicos de esta ficha a tu nueva evaluación para ahorrarte tiempo.</p>
+            <p class="opacity-80">Estás visualizando una ficha antigua que no puede ser modificada. Para registrar una nueva lectura, presiona <strong>Nueva Ficha</strong> arriba. Automáticamente copiaremos los parámetros clínicos a tu nueva evaluación para ahorrarte tiempo.</p>
         </div>
     </div>
     }
@@ -300,12 +261,25 @@
 
             <!-- Historial de Mediciones Rápidas -->
             <div class="mt-4 border-t border-secondary/20 pt-5">
-                <h5 class="font-bold text-text mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Historial de Peso e IGC
-                </h5>
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <h5 class="font-bold text-text flex items-center gap-2">
+                            <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Historial de Peso e IGC
+                        </h5>
+                        @if(hypertrophyRadarData()) {
+                        <button type="button" (click)="showChartModal.set(true)"
+                            class="px-3 py-1.5 rounded-full font-bold transition-all bg-indigo-500 text-white hover:bg-indigo-600 flex items-center gap-1.5 text-xs shadow-sm shadow-indigo-500/30">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Ver Gráficos
+                        </button>
+                        }
+                    </div>
+                </div>
                 <div class="overflow-x-auto rounded-xl border border-secondary/20 bg-background/50">
                     <table class="w-full text-sm text-left">
                         <thead class="bg-secondary/10 text-text-muted text-xs uppercase font-bold">
@@ -319,13 +293,15 @@
                         <tbody class="divide-y divide-secondary/20">
                             @if (studentPhysioHistory().length === 0) {
                                 <tr>
-                                    <td colspan="4" class="px-4 py-4 text-center text-text-muted italic">No hay mediciones registradas.</td>
+                                    <td colspan="4" class="px-4 py-4 text-center text-text-muted italic">No hay mediciones ni fichas registradas.</td>
                                 </tr>
                             }
                             @for (entry of studentPhysioHistory(); track entry.id) {
-                            <tr class="hover:bg-secondary/5 transition-colors">
+                            <tr class="hover:bg-secondary/5 transition-colors" [class.bg-primary/5]="getProfileForDate(entry.date) && selectedProfile()?.id === getProfileForDate(entry.date)?.id">
                                 <td class="px-4 py-3 font-medium text-text">{{ entry.date | date:'dd/MM/yyyy' }}</td>
-                                <td class="px-4 py-3 text-text font-bold">{{ entry.weight }} kg</td>
+                                <td class="px-4 py-3 text-text font-bold">
+                                    @if(entry.weight) { {{ entry.weight }} kg } @else { <span class="text-text-muted">-</span> }
+                                </td>
                                 <td class="px-4 py-3 text-text">
                                     @if(entry.igc) {
                                         <span class="bg-secondary/20 text-secondary px-2 py-1 rounded-md text-xs font-black">{{ entry.igc }}%</span>
@@ -333,12 +309,19 @@
                                         <span class="text-text-muted opacity-50">-</span>
                                     }
                                 </td>
-                                <td class="px-4 py-3 text-right">
-                                    <button type="button" (click)="deletePhysioEntry(entry.id)" class="text-red-500 hover:text-red-700 transition-colors p-1" title="Eliminar Medición">
+                                <td class="px-4 py-3 text-right flex items-center justify-end gap-2">
+                                    @if(getProfileForDate(entry.date)) {
+                                    <button type="button" (click)="selectProfile(getProfileForDate(entry.date)!); activeTab.set('base')" class="text-xs bg-primary text-white border border-primary/20 px-3 py-1.5 rounded-full hover:bg-primary-dark font-bold transition-all shadow-sm">
+                                        Ver Ficha
+                                    </button>
+                                    }
+                                    @if(entry.physioId) {
+                                    <button type="button" (click)="deletePhysioEntry(entry.physioId)" class="text-red-500 hover:text-red-700 transition-colors p-1.5 rounded hover:bg-red-500/10" title="Eliminar Medición Rápida">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
+                                    }
                                 </td>
                             </tr>
                             }

@@ -151,10 +151,33 @@ export class StudentProfileTab {
 
     // --- Derived Calculations ---
     studentPhysioHistory = computed(() => {
-        return this.data.physioEntries()
-            .filter(p => p.studentEmail === this.studentEmail())
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        const physio = this.data.physioEntries().filter(p => p.studentEmail === this.studentEmail());
+        const profiles = this.data.currentProfiles();
+        
+        const map = new Map<string, { id: string, date: string, weight?: number, igc?: number, profileId?: string, physioId?: string }>();
+        
+        physio.forEach(p => {
+            map.set(p.date, { id: p.id || p.date, date: p.date, weight: p.weight, igc: p.igc, physioId: p.id });
+        });
+        
+        profiles.forEach(p => {
+            const date = p.recordDate;
+            if (map.has(date)) {
+                map.get(date)!.profileId = p.id;
+                if (!map.get(date)!.igc && p.bodyFatPercentage) {
+                    map.get(date)!.igc = p.bodyFatPercentage;
+                }
+            } else {
+                map.set(date, { id: p.id || date, date: date, igc: p.bodyFatPercentage ?? undefined, profileId: p.id });
+            }
+        });
+        
+        return Array.from(map.values()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     });
+
+    getProfileForDate(date: string) {
+        return this.data.currentProfiles().find(p => p.recordDate === date);
+    }
 
     latestWeight = computed(() => {
         const history = this.studentPhysioHistory();
