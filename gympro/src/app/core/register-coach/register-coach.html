@@ -1,0 +1,203 @@
+<div class="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-background">
+    <div
+        class="w-full max-w-md bg-surface border border-border rounded-2xl shadow-xl overflow-hidden p-8 animate-fade-in-up transition-colors duration-300">
+
+        <!-- Header -->
+        <div class="text-center mb-8 flex flex-col items-center">
+            <div class="logo-container mb-4 shadow-xl shadow-primary/10 border border-primary/10">
+                <img src="logo.png" alt="Logo CoachPro" class="w-24 h-24 drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+            </div>
+            <h1 class="text-4xl font-extrabold mb-1 text-text">COACH<span class="text-primary">PRO</span></h1>
+
+            @switch (step()) {
+                @case ('form') {
+                    <p class="text-text-muted text-sm">Crea tu cuenta de entrenador</p>
+                }
+                @case ('otp') {
+                    <p class="text-text-muted text-sm">Verifica tu correo electrónico</p>
+                }
+                @case ('success') {
+                    <p class="text-text-muted text-sm">¡Registro completado!</p>
+                }
+            }
+        </div>
+
+        <!-- Step indicator -->
+        @if (step() !== 'success') {
+        <div class="flex items-center justify-center gap-2 mb-8">
+            <div class="flex flex-col items-center gap-1">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-black transition-all"
+                    [class]="step() === 'form' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-primary/20 text-primary'">
+                    1
+                </div>
+                <span class="text-xs text-text-muted font-semibold">Datos</span>
+            </div>
+            <div class="w-12 h-0.5 mb-4"
+                [class]="step() === 'otp' ? 'bg-primary' : 'bg-border'"></div>
+            <div class="flex flex-col items-center gap-1">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-black transition-all"
+                    [class]="step() === 'otp' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-border text-text-muted'">
+                    2
+                </div>
+                <span class="text-xs text-text-muted font-semibold">Verificar</span>
+            </div>
+        </div>
+        }
+
+        <!-- ===== STEP 1: REGISTRATION FORM ===== -->
+        @if (step() === 'form') {
+        <form [formGroup]="registrationForm" (submit)="$event.preventDefault()" class="flex flex-col gap-4">
+
+            <!-- Name -->
+            <div class="flex flex-col gap-1.5">
+                <label for="reg-name" class="text-sm font-semibold text-text">Nombre completo</label>
+                <input id="reg-name" type="text" formControlName="name" placeholder="Ej: Carlos Rodríguez"
+                    class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-text-muted">
+                @if (registrationForm.get('name')?.touched && registrationForm.get('name')?.invalid) {
+                <span class="text-secondary text-xs animate-pulse">Ingresa tu nombre completo (mínimo 3 caracteres).</span>
+                }
+            </div>
+
+            <!-- Email -->
+            <div class="flex flex-col gap-1.5">
+                <label for="reg-email" class="text-sm font-semibold text-text">Correo electrónico</label>
+                <input id="reg-email" type="email" formControlName="email" placeholder="coach@ejemplo.com"
+                    class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-text-muted">
+                @if (registrationForm.get('email')?.touched && registrationForm.get('email')?.invalid) {
+                <span class="text-secondary text-xs animate-pulse">Ingresa un correo electrónico válido.</span>
+                }
+            </div>
+
+            <!-- Specialty -->
+            <div class="flex flex-col gap-1.5">
+                <label for="reg-specialty" class="text-sm font-semibold text-text">Especialidad</label>
+                <select id="reg-specialty" formControlName="specialty"
+                    class="w-full px-4 py-3 rounded-xl border border-border bg-background text-text focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                    <option value="" disabled selected>Selecciona tu especialidad</option>
+                    <option value="Musculación e Hipertrofia">Musculación e Hipertrofia</option>
+                    <option value="Pérdida de Grasa">Pérdida de Grasa</option>
+                    <option value="Rendimiento Deportivo">Rendimiento Deportivo</option>
+                    <option value="Rehabilitación Física">Rehabilitación Física</option>
+                    <option value="Yoga y Flexibilidad">Yoga y Flexibilidad</option>
+                    <option value="Crossfit y Funcional">Crossfit y Funcional</option>
+                    <option value="Nutrición Deportiva">Nutrición Deportiva</option>
+                    <option value="Entrenamiento Personal General">Entrenamiento Personal General</option>
+                    <option value="Otra">Otra</option>
+                </select>
+                @if (registrationForm.get('specialty')?.touched && registrationForm.get('specialty')?.invalid) {
+                <span class="text-secondary text-xs animate-pulse">Selecciona tu especialidad.</span>
+                }
+            </div>
+
+            <!-- Error -->
+            @if (errorMsg()) {
+            <div class="p-3 bg-secondary/10 border border-secondary/20 rounded-xl text-secondary text-sm font-medium animate-fade-in-up flex items-start gap-2">
+                <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {{ errorMsg() }}
+            </div>
+            }
+
+            <!-- Submit -->
+            <button type="button" (click)="onSubmitForm()" [disabled]="isLoading()"
+                class="w-full mt-2 bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all text-lg cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed">
+                @if (isLoading()) {
+                <span class="flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Verificando...
+                </span>
+                } @else {
+                Continuar →
+                }
+            </button>
+
+            <!-- Login link -->
+            <p class="text-center text-sm text-text-muted mt-2">
+                ¿Ya tienes cuenta?
+                <a routerLink="/login" class="text-primary font-bold hover:underline cursor-pointer">Inicia sesión aquí</a>
+            </p>
+        </form>
+        }
+
+        <!-- ===== STEP 2: OTP VERIFICATION ===== -->
+        @if (step() === 'otp') {
+        <div class="flex flex-col gap-5 animate-fade-in-up">
+            <div class="flex flex-col items-center gap-4">
+                <div class="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-text-muted">Enviamos un código de 6 dígitos a</p>
+                    <p class="font-bold text-text text-base mt-1">{{ successEmail() }}</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-2">
+                <label class="text-sm font-semibold text-text">Código de verificación</label>
+                <input type="text" [formControl]="otpControl" placeholder="000000" maxlength="6"
+                    class="w-full max-w-[240px] px-4 py-4 rounded-2xl border-2 border-primary bg-background text-text text-center text-3xl font-black tracking-[0.2em] focus:ring-4 focus:ring-primary/10 outline-none transition-all">
+            </div>
+
+            @if (errorMsg()) {
+            <div class="p-3 bg-secondary/10 border border-secondary/20 rounded-xl text-secondary text-sm font-medium flex items-start gap-2">
+                <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {{ errorMsg() }}
+            </div>
+            }
+
+            <button type="button" (click)="onVerifyOtp()" [disabled]="isLoading() || otpControl.invalid"
+                class="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all text-lg cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed">
+                @if (isLoading()) {
+                <span class="flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Completando registro...
+                </span>
+                } @else {
+                Verificar y Crear Cuenta
+                }
+            </button>
+
+            <button type="button" (click)="resendOtp()" class="text-primary text-sm font-bold hover:underline text-center">
+                No recibí el código, reenviar
+            </button>
+            <button type="button" (click)="step.set('form')" class="text-text-muted text-sm hover:text-text text-center transition-colors">
+                ← Volver atrás
+            </button>
+        </div>
+        }
+
+        <!-- ===== STEP 3: SUCCESS ===== -->
+        @if (step() === 'success') {
+        <div class="flex flex-col items-center gap-6 animate-fade-in-up text-center">
+            <div class="w-20 h-20 rounded-full bg-green-500/10 border-2 border-green-500/30 flex items-center justify-center">
+                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-text mb-2">¡Cuenta creada!</h2>
+                <p class="text-text-muted text-sm leading-relaxed">
+                    Tu cuenta de coach ha sido registrada exitosamente.<br>
+                    Ahora puedes ingresar con tu correo <span class="font-bold text-text">{{ successEmail() }}</span>.
+                </p>
+            </div>
+            <button type="button" (click)="goToLogin()"
+                class="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all text-lg cursor-pointer">
+                Ir al inicio de sesión →
+            </button>
+        </div>
+        }
+
+    </div>
+</div>

@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { SplashScreen } from './core/splash-screen/splash-screen';
 import { Login } from './core/login/login';
 import { ModeSelection } from './core/mode-selection/mode-selection';
+import { RegisterCoach } from './core/register-coach/register-coach';
 
 import { Layout } from './core/layout/layout';
 import { StudentDashboard } from './student/student-dashboard/student-dashboard';
@@ -22,6 +23,7 @@ export const routes: Routes = [
     { path: '', component: SplashScreen },
     { path: 'select-mode', component: ModeSelection },
     { path: 'login', component: Login },
+    { path: 'registercoach', component: RegisterCoach },
 
     {
         path: 'app',
