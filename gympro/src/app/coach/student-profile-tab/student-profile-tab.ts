@@ -325,65 +325,74 @@ export class StudentProfileTab {
         setTimeout(() => this.quickSaved.set(false), 3000);
     }
 
-    public radarChartOptions: ChartOptions<'radar'> = {
+    public lineChartOptions: ChartOptions<'line'> = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: { position: 'bottom', labels: { color: localStorage.getItem('theme') === 'dark' ? '#94a3b8' : '#475569' } }
         },
         scales: {
-            r: {
-                angleLines: { color: 'rgba(100, 116, 139, 0.2)' },
-                grid: { color: 'rgba(100, 116, 139, 0.2)' },
-                pointLabels: { color: localStorage.getItem('theme') === 'dark' ? '#f8fafc' : '#0f172a', font: { size: 12 } },
-                ticks: { display: false } // Hide inner numbers to make it cleaner
+            x: {
+                ticks: { color: localStorage.getItem('theme') === 'dark' ? '#94a3b8' : '#475569' },
+                grid: { color: localStorage.getItem('theme') === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
+            },
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                ticks: { color: '#3b82f6' }, // azul como el peso
+                grid: { color: localStorage.getItem('theme') === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                ticks: { color: '#ef4444' }, // rojo como el igc
+                grid: { drawOnChartArea: false }
             }
         }
     };
 
-    public hypertrophyRadarData = computed<ChartConfiguration<'radar'>['data'] | null>(() => {
-        const clinica = this.data.currentProfiles();
-        if (!clinica || clinica.length === 0) return null;
+    public historyChartData = computed<ChartConfiguration<'line'>['data'] | null>(() => {
+        const history = this.studentPhysioHistory();
+        if (!history || history.length === 0) return null;
 
-        const latest = clinica[0]; // First is newest
-        const oldest = clinica[clinica.length - 1]; // Last is oldest
+        // we need left-to-right chronological order
+        const chronological = [...history].reverse();
 
-        // If there's only 1 record, we only show 1 polygon
-        const datasets = [{
-            label: 'Métricas Actuales',
-            data: [
-                latest.chestCircumference || 0,
-                latest.rightArmCircumference || 0,
-                latest.waistCircumference || 0,
-                latest.rightLegCircumference || 0,
-                latest.leftLegCircumference || 0,
-                latest.leftArmCircumference || 0
-            ],
-            backgroundColor: 'rgba(59, 130, 246, 0.5)',
-            borderColor: '#3b82f6',
-            pointBackgroundColor: '#2563eb',
-        }];
+        const labels = chronological.map(entry => {
+            const dateStr = entry.date.substring(0, 10);
+            const parts = dateStr.split('-');
+            return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
+        });
 
-        if (clinica.length > 1) {
-            datasets.unshift({
-                label: 'Métricas Iniciales',
-                data: [
-                    oldest.chestCircumference || 0,
-                    oldest.rightArmCircumference || 0,
-                    oldest.waistCircumference || 0,
-                    oldest.rightLegCircumference || 0,
-                    oldest.leftLegCircumference || 0,
-                    oldest.leftArmCircumference || 0
-                ],
-                backgroundColor: 'rgba(239, 68, 68, 0.3)',
-                borderColor: '#ef4444',
-                pointBackgroundColor: '#dc2626',
-            });
-        }
+        const weights = chronological.map(e => e.weight || null);
+        const igcs = chronological.map(e => e.igc || null);
 
         return {
-            labels: ['Pecho', 'Brazo Der.', 'Cintura', 'Pierna Der.', 'Pierna Izq.', 'Brazo Izq.'],
-            datasets: datasets
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Peso (kg)',
+                    data: weights as any,
+                    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                    borderColor: '#3b82f6',
+                    pointBackgroundColor: '#2563eb',
+                    yAxisID: 'y',
+                    fill: true,
+                    tension: 0.3
+                },
+                {
+                    label: 'IGC (%)',
+                    data: igcs as any,
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    borderColor: '#ef4444',
+                    pointBackgroundColor: '#dc2626',
+                    yAxisID: 'y1',
+                    fill: true,
+                    tension: 0.3
+                }
+            ]
         };
     });
 

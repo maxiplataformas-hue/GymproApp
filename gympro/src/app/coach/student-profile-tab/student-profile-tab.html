@@ -269,7 +269,7 @@
                             </svg>
                             Historial de Peso e IGC
                         </h5>
-                        @if(hypertrophyRadarData()) {
+                        @if(historyChartData()) {
                         <button type="button" (click)="showChartModal.set(true)"
                             class="px-3 py-1.5 rounded-full font-bold transition-all bg-indigo-500 text-white hover:bg-indigo-600 flex items-center gap-1.5 text-xs shadow-sm shadow-indigo-500/30">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -601,7 +601,7 @@
     </form>
 </div>
 
-<!-- Radar Chart Modal -->
+<!-- Progress Chart Modal -->
 @if(showChartModal()) {
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <!-- Backdrop -->
@@ -620,17 +620,16 @@
         <h3 class="text-2xl font-black text-text mb-2 flex items-center gap-3">
             <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
                 </path>
             </svg>
-            Radar de Hipertrofia
+            Gráfico de Progreso
         </h3>
-        <p class="text-text-muted text-sm mb-6">Comparativa antropométrica entre la primera lectura histórica y los
-            datos actuales del alumno.</p>
+        <p class="text-text-muted text-sm mb-6">Historial de evolución de Peso e Índice de Grasa Corporal (IGC).</p>
 
         <div class="w-full h-80 lg:h-96 bg-background rounded-2xl border border-border p-4">
-            <canvas baseChart class="w-full h-full" [data]="hypertrophyRadarData()!" [options]="radarChartOptions"
-                [type]="'radar'"></canvas>
+            <canvas baseChart class="w-full h-full" [data]="historyChartData()!" [options]="lineChartOptions"
+                [type]="'line'"></canvas>
         </div>
     </div>
 </div>
