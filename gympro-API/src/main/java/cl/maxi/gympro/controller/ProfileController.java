@@ -40,4 +40,10 @@ public class ProfileController {
 
         return ResponseEntity.ok(repository.save(dto));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProfile(@PathVariable String id) {
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

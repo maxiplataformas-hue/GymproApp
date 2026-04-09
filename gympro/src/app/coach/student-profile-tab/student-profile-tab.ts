@@ -396,6 +396,19 @@ export class StudentProfileTab {
         // Turn off creation mode so it falls back to the newly added profile as readonly
         this.isCreatingNew.set(false);
     }
+    deleteCurrentProfile() {
+        const profile = this.selectedProfile();
+        if (profile?.id && confirm('¿Estás seguro de que deseas eliminar esta ficha técnica antigua? Esta acción no se puede deshacer.')) {
+            this.data.deleteProfile(profile.id, this.studentEmail());
+            // It will auto switch to creation or latest via effect
+        }
+    }
+
+    deletePhysioEntry(id: string | undefined) {
+        if (id && confirm('¿Deseas eliminar este registro rápido de Peso e IGC?')) {
+            this.data.deletePhysioEntry(id, this.studentEmail());
+        }
+    }
 
     generatePDF() {
         const email = this.studentEmail();

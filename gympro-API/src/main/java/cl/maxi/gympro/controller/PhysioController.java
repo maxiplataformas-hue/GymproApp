@@ -27,4 +27,9 @@ public class PhysioController {
         }
         return physioRepository.save(entry);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteEntry(@PathVariable String id) {
+        physioRepository.deleteById(id);
+    }
 }

@@ -325,6 +325,12 @@ export class DataService {
     });
   }
 
+  deletePhysioEntry(id: string, studentEmail: string) {
+    this.http.delete(`${this.apiBase}/physio/${id}`).subscribe(() => {
+      this.loadPhysio(studentEmail);
+    });
+  }
+
   getStudentHistory(email: string) {
     return computed(() => {
       return this.physioEntries()
@@ -378,6 +384,15 @@ export class DataService {
         alert('Nueva Evaluación guardada exitosamente en el historial.');
       },
       error: () => alert('Error al guardar Evaluación Clínica.')
+    });
+  }
+
+  deleteProfile(id: string, studentEmail: string) {
+    this.http.delete(`${this.apiBase}/profiles/${id}`).subscribe({
+      next: () => {
+        this.loadProfile(studentEmail);
+      },
+      error: () => alert('Error al eliminar la Evaluación Clínica.')
     });
   }
 
