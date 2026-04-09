@@ -19,6 +19,7 @@ export class StudentProfileTab {
     // UI State for Timeline
     selectedProfile = signal<StudentProfile | null>(null);
     isCreatingNew = signal<boolean>(false);
+    activeTab = signal<'rapida' | 'base' | 'antropometria' | 'bioimpedancia' | 'calculados' | 'biomecanica'>('rapida');
 
     // --- Quick Measurement (IGC + Peso) ---
     quickWeight = signal<number | null>(null);

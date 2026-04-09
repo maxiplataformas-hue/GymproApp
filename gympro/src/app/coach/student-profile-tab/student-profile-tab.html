@@ -67,9 +67,44 @@
     </div>
     }
 
-    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-8">
+    <!-- Tabs Nav -->
+    <div class="flex overflow-x-auto gap-2 pb-3 mb-6 scrollbar-hide border-b border-border">
+        <button type="button" (click)="activeTab.set('rapida')"
+            class="px-5 py-2.5 whitespace-nowrap rounded-xl font-bold transition-all text-sm"
+            [ngClass]="activeTab() === 'rapida' ? 'bg-secondary text-white shadow-md shadow-secondary/30' : 'bg-surface border border-border text-text-muted hover:border-secondary/50 hover:text-text'">
+            Medición Rápida
+        </button>
+        <button type="button" (click)="activeTab.set('base')"
+            class="px-5 py-2.5 whitespace-nowrap rounded-xl font-bold transition-all text-sm"
+            [ngClass]="activeTab() === 'base' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-surface border border-border text-text-muted hover:border-primary/50 hover:text-text'">
+            Perfil Base
+        </button>
+        <button type="button" (click)="activeTab.set('antropometria')"
+            class="px-5 py-2.5 whitespace-nowrap rounded-xl font-bold transition-all text-sm"
+            [ngClass]="activeTab() === 'antropometria' ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/30' : 'bg-surface border border-border text-text-muted hover:border-indigo-500/50 hover:text-text'">
+            Antropometría
+        </button>
+        <button type="button" (click)="activeTab.set('bioimpedancia')"
+            class="px-5 py-2.5 whitespace-nowrap rounded-xl font-bold transition-all text-sm"
+            [ngClass]="activeTab() === 'bioimpedancia' ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 'bg-surface border border-border text-text-muted hover:border-orange-500/50 hover:text-text'">
+            Bioimpedancia
+        </button>
+        <button type="button" (click)="activeTab.set('calculados')"
+            class="px-5 py-2.5 whitespace-nowrap rounded-xl font-bold transition-all text-sm"
+            [ngClass]="activeTab() === 'calculados' ? 'bg-green-500 text-white shadow-md shadow-green-500/30' : 'bg-surface border border-border text-text-muted hover:border-green-500/50 hover:text-text'">
+            Resultados Calc.
+        </button>
+        <button type="button" (click)="activeTab.set('biomecanica')"
+            class="px-5 py-2.5 whitespace-nowrap rounded-xl font-bold transition-all text-sm"
+            [ngClass]="activeTab() === 'biomecanica' ? 'bg-purple-500 text-white shadow-md shadow-purple-500/30' : 'bg-surface border border-border text-text-muted hover:border-purple-500/50 hover:text-text'">
+            Biomecánica
+        </button>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-6">
 
         <!-- 0. Medición Rápida del Coach -->
+        @if (activeTab() === 'rapida') {
         <section class="bg-secondary/5 border border-secondary/20 rounded-2xl p-5 flex flex-col gap-5">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-secondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,8 +271,9 @@
                 }
             </div>
         </section>
+        }
 
-
+        @if (activeTab() === 'base') {
         <section class="space-y-4">
             <h4 class="font-bold text-text border-b border-border pb-2 flex items-center gap-2">
                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,8 +314,10 @@
                 </div>
             </div>
         </section>
+        }
 
-        <!-- 2. Antropometría y Bioimpedancia -->
+        <!-- 2. Antropometría -->
+        @if (activeTab() === 'antropometria') {
         <section class="space-y-4">
             <h4 class="font-bold text-text border-b border-border pb-2 flex items-center gap-2">
                 <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,10 +325,10 @@
                         d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
                     </path>
                 </svg>
-                Composición Corporal
+                Antropometría (Perímetros)
             </h4>
 
-            <div class="grid md:grid-cols-2 gap-6">
+            <div>
 
                 <!-- Columna Izquierda: Antropometría (Perímetros) -->
                 <div class="space-y-3">
@@ -349,7 +387,22 @@
                             class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-secondary transition-colors text-text placeholder-text-muted resize-none"></textarea>
                     </div>
                 </div>
+            </div>
+        </section>
+        }
 
+        <!-- Bioimpedancia -->
+        @if (activeTab() === 'bioimpedancia') {
+        <section class="space-y-4">
+            <h4 class="font-bold text-text border-b border-border pb-2 flex items-center gap-2">
+                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Bioimpedancia %
+            </h4>
+
+            <div>
                 <!-- Columna Derecha: Bioimpedancia -->
                 <div class="space-y-3">
                     <label class="text-xs font-bold text-text-muted uppercase tracking-wider pl-1">Bioimpedancia
@@ -386,8 +439,10 @@
 
             </div>
         </section>
+        }
 
         <!-- Calculated Values Cards -->
+        @if (activeTab() === 'calculados') {
         @if(fatMassKg() !== null || waistHipRatio() !== null) {
         <section class="space-y-3">
             <h4 class="font-bold text-text border-b border-border pb-2 flex items-center gap-2">
@@ -424,8 +479,15 @@
             </div>
         </section>
         }
+        @else {
+        <section class="space-y-4 text-center py-8">
+            <p class="text-text-muted">No hay suficientes datos para calcular resultados estadísticos.</p>
+        </section>
+        }
+        }
 
         <!-- 3. Biomecánica -->
+        @if (activeTab() === 'biomecanica') {
         <section class="space-y-4">
             <h4 class="font-bold text-text border-b border-border pb-2 flex items-center gap-2">
                 <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -442,6 +504,7 @@
                     class="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-colors text-text placeholder-text-muted resize-none"></textarea>
             </div>
         </section>
+        }
 
         <!-- Submit Button -->
         <div class="pt-6 sticky bottom-0 bg-gradient-to-t from-surface pb-2">
