@@ -95,6 +95,78 @@ public class AuthController {
         }
     }
 
+    /**
+     * POST /api/auth/send-otp-registration
+     * Sends an OTP for coach self-registration WITHOUT requiring an existing account.
+     */
+    @PostMapping("/send-otp-registration")
+    public ResponseEntity<?> sendOtpRegistration(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest().body("Email is required");
+            }
+            String normalizedEmail = email.trim().toLowerCase();
+
+            // Generate 6-digit code
+            String code = String.format("%06d", new Random().nextInt(1000000));
+
+            // Save / overwrite any existing OTP for this email
+            otpRepository.deleteByEmail(normalizedEmail);
+            OtpEntry otp = new OtpEntry();
+            otp.setEmail(normalizedEmail);
+            otp.setCode(code);
+            otp.setExpiryTime(LocalDateTime.now().plusMinutes(20));
+            otpRepository.save(otp);
+
+            // Send email
+            try {
+                emailService.sendOtpEmail(normalizedEmail, code, "Código de Verificación - CoachPro Registro");
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("SMTP Error: " + e.getMessage());
+            }
+
+            System.out.println("Registration OTP sent to " + normalizedEmail + ": " + code);
+            return ResponseEntity.ok(Map.of("message", "OTP enviado exitosamente"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * POST /api/auth/verify-otp-registration
+     * Verifies an OTP for registration (does NOT require an existing user account).
+     */
+    @PostMapping("/verify-otp-registration")
+    public ResponseEntity<?> verifyOtpRegistration(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+
+        if (email == null || code == null) {
+            return ResponseEntity.badRequest().body("Email and code are required");
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+        Optional<OtpEntry> otpOpt = otpRepository.findByEmail(normalizedEmail);
+
+        if (otpOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("No se encontró un código para este correo. Solicita uno nuevo.");
+        }
+
+        OtpEntry otp = otpOpt.get();
+        if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
+            otpRepository.deleteByEmail(normalizedEmail);
+            return ResponseEntity.badRequest().body("Código expirado. Solicita uno nuevo.");
+        }
+
+        if (!otp.getCode().equals(code)) {
+            return ResponseEntity.badRequest().body("Código incorrecto. Verifica el correo e intenta de nuevo.");
+        }
+
+        otpRepository.deleteByEmail(normalizedEmail);
+        return ResponseEntity.ok(Map.of("message", "OTP verificado correctamente"));
+    }
+
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
