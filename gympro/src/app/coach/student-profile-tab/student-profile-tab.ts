@@ -241,13 +241,18 @@ export class StudentProfileTab {
         effect(() => {
             const profiles = this.data.currentProfiles();
             if (profiles && profiles.length > 0 && profiles[0].studentEmail === this.studentEmail()) {
-                // Ignore if we are already in creation mode manually OR if user selected a profile
-                if (!this.isCreatingNew() && !this.userSelectedProfile()) {
-                    this.selectProfile(profiles[0]); // Zero is newest due to DESC sort
-                }
+                // If user manually picked a profile, don't override
+                if (this.userSelectedProfile()) return;
+                
+                // Auto-select the latest (even if we were in 'creating new' mode due to the
+                // temporary empty state during load)
+                this.isCreatingNew.set(false);
+                this.selectProfile(profiles[0]);
             } else if (profiles && profiles.length === 0) {
-                // No history found, open creation mode automatically
-                this.startNewProfile(null);
+                // Only go to creation mode if user hasn't manually selected something
+                if (!this.userSelectedProfile()) {
+                    this.startNewProfile(null);
+                }
             }
         }, { allowSignalWrites: true });
 
