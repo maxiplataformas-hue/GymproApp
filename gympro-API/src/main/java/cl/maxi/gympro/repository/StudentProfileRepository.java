@@ -8,4 +8,5 @@ import java.util.List;
 public interface StudentProfileRepository extends MongoRepository<StudentProfile, String> {
     List<StudentProfile> findByStudentEmailIgnoreCase(String studentEmail, Sort sort);
     List<StudentProfile> findByStudentEmail(String studentEmail, Sort sort);
+    List<StudentProfile> findByStudentEmailIgnoreCaseAndRecordDate(String studentEmail, String recordDate);
 }

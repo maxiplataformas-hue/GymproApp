@@ -38,6 +38,14 @@ public class ProfileController {
             dto.setRecordName("Evaluación " + LocalDate.now().toString());
         }
 
+        String today = dto.getRecordDate();
+        // Upsert: if a profile already exists for this email+date, update instead of inserting
+        List<StudentProfile> existing = repository.findByStudentEmailIgnoreCaseAndRecordDate(normalizedEmail, today);
+        if (!existing.isEmpty()) {
+            StudentProfile toUpdate = existing.get(0);
+            dto.setId(toUpdate.getId()); // reuse the existing ID so MongoDB does an update
+        }
+
         return ResponseEntity.ok(repository.save(dto));
     }
 
