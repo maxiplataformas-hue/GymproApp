@@ -19,6 +19,7 @@ export class StudentProfileTab {
     // UI State for Timeline
     selectedProfile = signal<StudentProfile | null>(null);
     isCreatingNew = signal<boolean>(false);
+    userSelectedProfile = signal<boolean>(false); // true = user manually selected, don't auto-override
     activeTab = signal<'rapida' | 'base' | 'antropometria' | 'bioimpedancia' | 'calculados' | 'biomecanica'>('rapida');
 
     // --- Quick Measurement (IGC + Peso) ---
@@ -149,7 +150,11 @@ export class StudentProfileTab {
 
     showChartModal = signal<boolean>(false);
 
-    // --- Derived Calculations ---
+    // Helper to normalize any date string to 'yyyy-MM-dd'
+    private toDateOnly(dateStr: string): string {
+        return dateStr ? dateStr.substring(0, 10) : dateStr;
+    }
+
     studentPhysioHistory = computed(() => {
         const physio = this.data.physioEntries().filter(p => p.studentEmail === this.studentEmail());
         const profiles = this.data.currentProfiles();
@@ -157,20 +162,22 @@ export class StudentProfileTab {
         const map = new Map<string, { id: string, date: string, weight?: number, igc?: number, profileId?: string, physioId?: string }>();
         
         physio.forEach(p => {
-            map.set(p.date, { id: p.id || p.date, date: p.date, weight: p.weight, igc: p.igc, physioId: p.id });
+            const day = this.toDateOnly(p.date);
+            map.set(day, { id: p.id || day, date: day, weight: p.weight, igc: p.igc, physioId: p.id });
         });
         
         profiles.forEach(p => {
             const date = p.recordDate;
             if (!date) return;
+            const day = this.toDateOnly(date);
             
-            if (map.has(date)) {
-                map.get(date)!.profileId = p.id;
-                if (!map.get(date)!.igc && p.bodyFatPercentage) {
-                    map.get(date)!.igc = p.bodyFatPercentage;
+            if (map.has(day)) {
+                map.get(day)!.profileId = p.id;
+                if (!map.get(day)!.igc && p.bodyFatPercentage) {
+                    map.get(day)!.igc = p.bodyFatPercentage;
                 }
             } else {
-                map.set(date, { id: p.id || date, date: date, igc: p.bodyFatPercentage ?? undefined, profileId: p.id });
+                map.set(day, { id: p.id || day, date: day, igc: p.bodyFatPercentage ?? undefined, profileId: p.id });
             }
         });
         
@@ -178,7 +185,8 @@ export class StudentProfileTab {
     });
 
     getProfileForDate(date: string) {
-        return this.data.currentProfiles().find(p => p.recordDate === date);
+        const day = this.toDateOnly(date);
+        return this.data.currentProfiles().find(p => p.recordDate && this.toDateOnly(p.recordDate) === day);
     }
 
     latestWeight = computed(() => {
@@ -211,6 +219,8 @@ export class StudentProfileTab {
         effect(() => {
             const email = this.studentEmail();
             if (email) {
+                // Reset user selection tracking when student changes
+                this.userSelectedProfile.set(false);
                 this.data.loadProfile(email);
                 this.data.loadPhysio(email);
                 this.profileForm.reset();
@@ -227,11 +237,12 @@ export class StudentProfileTab {
         }, { allowSignalWrites: true });
 
         // Whenever the profiles finish loading from API, auto-select the latest one
+        // BUT only if the user hasn't manually selected one via 'Ver Ficha'
         effect(() => {
             const profiles = this.data.currentProfiles();
             if (profiles && profiles.length > 0 && profiles[0].studentEmail === this.studentEmail()) {
-                // Ignore if we are already in creation mode manually
-                if (!this.isCreatingNew()) {
+                // Ignore if we are already in creation mode manually OR if user selected a profile
+                if (!this.isCreatingNew() && !this.userSelectedProfile()) {
                     this.selectProfile(profiles[0]); // Zero is newest due to DESC sort
                 }
             } else if (profiles && profiles.length === 0) {
@@ -287,6 +298,7 @@ export class StudentProfileTab {
 
     selectProfile(profile: StudentProfile) {
         this.isCreatingNew.set(false);
+        this.userSelectedProfile.set(true);
         this.selectedProfile.set(profile);
     }
 
