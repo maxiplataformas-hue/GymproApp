@@ -28,7 +28,7 @@ export class StudentProfileTab {
     quickSaved = signal<boolean>(false);
 
     // --- Caliper Calculator ---
-    caliperProtocol = signal<'JP3' | 'JP7'>('JP3');
+    caliperProtocol = signal<'JP3' | 'JP7' | 'Faulkner4' | 'Yuhasz6'>('JP3');
 
     caliperGender = computed<'M' | 'F'>(() => {
         const student = this.data.allStudents().find(s => s.email === this.studentEmail());
@@ -37,15 +37,16 @@ export class StudentProfileTab {
 
     // JP3 pliegues
     p_chest   = signal<number | null>(null); // Pecho (M)
-    p_abd     = signal<number | null>(null); // Abdomen (M)
-    p_thigh   = signal<number | null>(null); // Muslo (M y F)
-    p_triceps = signal<number | null>(null); // Tríceps (F)
-    p_supra   = signal<number | null>(null); // Suprailíaco (F, JP3) y (JP7 M y F)
+    p_abd     = signal<number | null>(null); // Abdomen (M, Yuhasz)
+    p_thigh   = signal<number | null>(null); // Muslo (M/F, Yuhasz)
+    p_triceps = signal<number | null>(null); // Tríceps (F, Yuhasz, Faulkner)
+    p_supra   = signal<number | null>(null); // Suprailíaco (JP F, JP7, Yuhasz, Faulkner)
 
     // JP7 pliegues adicionales
     p_axil    = signal<number | null>(null); // Axilar
-    p_subscp  = signal<number | null>(null); // Subescapular
+    p_subscp  = signal<number | null>(null); // Subescapular (Yuhasz, Faulkner)
     p_biceps  = signal<number | null>(null); // Bíceps (no en JP standard pero útil)
+    p_calf    = signal<number | null>(null); // Pantorrilla (Yuhasz 6)
 
     studentAge = computed(() => {
         const student = this.data.allStudents().find(s => s.email === this.studentEmail());
@@ -73,7 +74,7 @@ export class StudentProfileTab {
                 S = tricep + supra + thigh;
                 density = 1.0994921 - (0.0009929 * S) + (0.0000023 * S * S) - (0.0001392 * age);
             }
-        } else { // JP7
+        } else if (protocol === 'JP7') { // JP7
             const chest  = this.p_chest();
             const axil   = this.p_axil();
             const tricep = this.p_triceps();
@@ -88,11 +89,37 @@ export class StudentProfileTab {
             } else {
                 density = 1.097 - (0.00046971 * S) + (0.00000056 * S * S) - (0.00012828 * age);
             }
+        } else if (protocol === 'Faulkner4') {
+            const tricep = this.p_triceps();
+            const subscp = this.p_subscp();
+            const supra = this.p_supra();
+            const abd = this.p_abd();
+            if (!tricep || !subscp || !supra || !abd) return null;
+            S = tricep + subscp + supra + abd;
+            return Math.max(0, +((S * 0.153) + 5.783).toFixed(1));
+        } else if (protocol === 'Yuhasz6') {
+            const tricep = this.p_triceps();
+            const subscp = this.p_subscp();
+            const supra = this.p_supra();
+            const abd = this.p_abd();
+            const thigh = this.p_thigh();
+            const calf = this.p_calf();
+            if (!tricep || !subscp || !supra || !abd || !thigh || !calf) return null;
+            S = tricep + subscp + supra + abd + thigh + calf;
+            if (gender === 'M') {
+                return Math.max(0, +((S * 0.1051) + 2.585).toFixed(1));
+            } else {
+                return Math.max(0, +((S * 0.1548) + 3.580).toFixed(1));
+            }
         }
 
-        if (density <= 0) return null;
-        const pct = (495 / density) - 450;
-        return Math.max(0, +pct.toFixed(1));
+        if (protocol === 'JP3' || protocol === 'JP7') {
+            if (density <= 0) return null;
+            const pct = (495 / density) - 450;
+            return Math.max(0, +pct.toFixed(1));
+        }
+
+        return null;
     });
 
 
@@ -166,7 +193,7 @@ export class StudentProfileTab {
                 this.p_chest.set(null);   this.p_abd.set(null);
                 this.p_thigh.set(null);   this.p_triceps.set(null);
                 this.p_supra.set(null);   this.p_axil.set(null);
-                this.p_subscp.set(null);
+                this.p_subscp.set(null);  this.p_calf.set(null);
             }
         }, { allowSignalWrites: true });
 

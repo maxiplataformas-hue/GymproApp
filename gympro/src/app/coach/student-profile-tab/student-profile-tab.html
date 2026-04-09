@@ -158,12 +158,24 @@
                             [class.bg-secondary]="caliperProtocol() === 'JP3'"
                             [class.text-white]="caliperProtocol() === 'JP3'"
                             [class.text-secondary]="caliperProtocol() !== 'JP3'"
-                            class="px-4 py-1.5 transition-colors cursor-pointer">JP3</button>
+                            class="px-3 py-1.5 transition-colors cursor-pointer">JP3</button>
                         <button type="button" (click)="caliperProtocol.set('JP7')"
                             [class.bg-secondary]="caliperProtocol() === 'JP7'"
                             [class.text-white]="caliperProtocol() === 'JP7'"
                             [class.text-secondary]="caliperProtocol() !== 'JP7'"
-                            class="px-4 py-1.5 transition-colors cursor-pointer border-l border-secondary/30">JP7</button>
+                            class="px-3 py-1.5 transition-colors cursor-pointer border-l border-secondary/30">JP7</button>
+                        <button type="button" (click)="caliperProtocol.set('Faulkner4')"
+                            title="Yuhasz Modificada / Faulkner (4 pliegues)"
+                            [class.bg-secondary]="caliperProtocol() === 'Faulkner4'"
+                            [class.text-white]="caliperProtocol() === 'Faulkner4'"
+                            [class.text-secondary]="caliperProtocol() !== 'Faulkner4'"
+                            class="px-3 py-1.5 transition-colors cursor-pointer border-l border-secondary/30">Faulkner (4)</button>
+                        <button type="button" (click)="caliperProtocol.set('Yuhasz6')"
+                            title="Yuhasz Original (6 pliegues)"
+                            [class.bg-secondary]="caliperProtocol() === 'Yuhasz6'"
+                            [class.text-white]="caliperProtocol() === 'Yuhasz6'"
+                            [class.text-secondary]="caliperProtocol() !== 'Yuhasz6'"
+                            class="px-3 py-1.5 transition-colors cursor-pointer border-l border-secondary/30">Yuhasz (6)</button>
                     </div>
                     <!-- Gender indicator -->
                     <div class="flex rounded-xl overflow-hidden border border-border text-xs font-bold px-4 py-1.5 bg-background shadow-inner">
@@ -193,8 +205,8 @@
                             class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
                     </label>
                     }
-                    <!-- Tríceps: JP7 ambos + JP3 Fem -->
-                    @if (caliperProtocol() === 'JP7' || (caliperProtocol() === 'JP3' && caliperGender() === 'F')) {
+                    <!-- Tríceps: JP7, Faulkner4, Yuhasz6, JP3 Fem -->
+                    @if (caliperProtocol() === 'JP7' || caliperProtocol() === 'Faulkner4' || caliperProtocol() === 'Yuhasz6' || (caliperProtocol() === 'JP3' && caliperGender() === 'F')) {
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-semibold text-text-muted">Tríceps (mm)</span>
                         <input type="number" step="0.5" [(ngModel)]="p_triceps" [ngModelOptions]="{standalone: true}"
@@ -202,8 +214,8 @@
                             class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
                     </label>
                     }
-                    <!-- Subescapular: solo JP7 -->
-                    @if (caliperProtocol() === 'JP7') {
+                    <!-- Subescapular: JP7, Faulkner4, Yuhasz6 -->
+                    @if (caliperProtocol() === 'JP7' || caliperProtocol() === 'Faulkner4' || caliperProtocol() === 'Yuhasz6') {
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-semibold text-text-muted">Subescapular (mm)</span>
                         <input type="number" step="0.5" [(ngModel)]="p_subscp" [ngModelOptions]="{standalone: true}"
@@ -211,8 +223,8 @@
                             class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
                     </label>
                     }
-                    <!-- Abdomen: JP7 ambos + JP3 Masc -->
-                    @if (caliperProtocol() === 'JP7' || (caliperProtocol() === 'JP3' && caliperGender() === 'M')) {
+                    <!-- Abdomen: JP7, Faulkner4, Yuhasz6, JP3 Masc -->
+                    @if (caliperProtocol() === 'JP7' || caliperProtocol() === 'Faulkner4' || caliperProtocol() === 'Yuhasz6' || (caliperProtocol() === 'JP3' && caliperGender() === 'M')) {
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-semibold text-text-muted">Abdomen (mm)</span>
                         <input type="number" step="0.5" [(ngModel)]="p_abd" [ngModelOptions]="{standalone: true}"
@@ -220,8 +232,8 @@
                             class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
                     </label>
                     }
-                    <!-- Suprailíaco: JP7 y JP3 Fem -->
-                    @if (caliperProtocol() === 'JP7' || (caliperProtocol() === 'JP3' && caliperGender() === 'F')) {
+                    <!-- Suprailíaco: JP7, Faulkner4, Yuhasz6, JP3 Fem -->
+                    @if (caliperProtocol() === 'JP7' || caliperProtocol() === 'Faulkner4' || caliperProtocol() === 'Yuhasz6' || (caliperProtocol() === 'JP3' && caliperGender() === 'F')) {
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-semibold text-text-muted">Suprailíaco (mm)</span>
                         <input type="number" step="0.5" [(ngModel)]="p_supra" [ngModelOptions]="{standalone: true}"
@@ -229,13 +241,24 @@
                             class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
                     </label>
                     }
-                    <!-- Muslo: siempre -->
+                    <!-- Muslo: JP3, JP7, Yuhasz6 -->
+                    @if (caliperProtocol() !== 'Faulkner4') {
                     <label class="flex flex-col gap-1">
                         <span class="text-xs font-semibold text-text-muted">Muslo (mm)</span>
                         <input type="number" step="0.5" [(ngModel)]="p_thigh" [ngModelOptions]="{standalone: true}"
                             placeholder="0"
                             class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
                     </label>
+                    }
+                    <!-- Pantorrilla: Yuhasz6 -->
+                    @if (caliperProtocol() === 'Yuhasz6') {
+                    <label class="flex flex-col gap-1">
+                        <span class="text-xs font-semibold text-text-muted">Pantorrilla (mm)</span>
+                        <input type="number" step="0.5" [(ngModel)]="p_calf" [ngModelOptions]="{standalone: true}"
+                            placeholder="0"
+                            class="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:border-secondary">
+                    </label>
+                    }
                 </div>
 
                 <!-- Result -->
