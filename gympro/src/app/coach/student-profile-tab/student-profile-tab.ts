@@ -162,6 +162,8 @@ export class StudentProfileTab {
         
         profiles.forEach(p => {
             const date = p.recordDate;
+            if (!date) return;
+            
             if (map.has(date)) {
                 map.get(date)!.profileId = p.id;
                 if (!map.get(date)!.igc && p.bodyFatPercentage) {
